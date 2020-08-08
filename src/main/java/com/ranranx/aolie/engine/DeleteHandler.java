@@ -16,7 +16,7 @@ import java.util.Map;
  * @Date 2020/8/4 14:35
  * @Version V0.0.1
  **/
-public class DataDeleteEngine {
+public class DeleteHandler {
     private List<DeleteInterceptor> lstInterceptor;
 
     /**
@@ -40,6 +40,7 @@ public class DataDeleteEngine {
     }
 
     private int doDelete(DeleteParam deleteParam) {
+
         return 0;
     }
 

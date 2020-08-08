@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 /**
  * For xxl the 40Th
  * @date 2020-08-04 11:10
+ * @version V0.0.1
  */
 @SpringBootApplication
 public class AolieApplication {

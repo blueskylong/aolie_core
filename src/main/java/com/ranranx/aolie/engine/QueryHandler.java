@@ -14,7 +14,7 @@ import java.util.Map;
  * @Date 2020/8/4 14:33
  * @Version V0.0.1
  **/
-public class DataQueryEngine {
+public class QueryHandler {
     private List<QueryInterceptor> lstQueryInterceptor;
 
     /**

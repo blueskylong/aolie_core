@@ -7,19 +7,11 @@ import java.util.Map;
 
 /**
  * @Author xxl
- * @Description 更新和插入的参数载体
- * @Date 2020/8/6 14:29
+ * @Description
+ * @Date 2020/8/8 14:00
  * @Version V0.0.1
  **/
-public class UpdateParam {
-    /**
-     * 复杂条件
-     */
-    private Criteria criteria;
-    /**
-     * 字段条件
-     */
-    private Map<String, Object> mapFilter;
+public class InsertParam {
     /**
      * 表信息
      */
@@ -29,22 +21,6 @@ public class UpdateParam {
      * 更新的列信息
      */
     private List<Map<String, Object>> lstRows;
-
-    public Criteria getCriteria() {
-        return criteria;
-    }
-
-    public void setCriteria(Criteria criteria) {
-        this.criteria = criteria;
-    }
-
-    public Map<String, Object> getMapFilter() {
-        return mapFilter;
-    }
-
-    public void setMapFilter(Map<String, Object> mapFilter) {
-        this.mapFilter = mapFilter;
-    }
 
     public Table getTable() {
         return table;

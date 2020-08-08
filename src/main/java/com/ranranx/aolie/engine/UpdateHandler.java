@@ -14,7 +14,7 @@ import java.util.Map;
  * @Date 2020/8/4 14:32
  * @Version V0.0.1
  **/
-public class DataUpdateService {
+public class UpdateHandler {
     private List<UpdateInterceptor> lstInterceptor;
 
     /**
@@ -31,7 +31,7 @@ public class DataUpdateService {
         if (num > 0) {
             return num;
         }
-        num = doSaveOrUpdate(updateParam);
+        num = doUpdate(updateParam);
         doAfterUpdate(updateParam, num);
         return num;
     }
@@ -43,19 +43,8 @@ public class DataUpdateService {
         }
     }
 
-    private int doSaveOrUpdate(UpdateParam updateParam) {
-        if (updateParam.isUpdate()) {
-            return doUpdate(updateParam);
-        }
-        return doSave(updateParam);
-    }
-
-    private int doSave(UpdateParam updateParam) {
-        return 0;
-    }
-
+    //TODO
     private int doUpdate(UpdateParam updateParam) {
-
         return 0;
     }
 
