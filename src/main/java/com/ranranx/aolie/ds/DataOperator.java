@@ -1,4 +1,4 @@
-package com.ranranx.aolie.interfaces;
+package com.ranranx.aolie.ds;
 
 import com.ranranx.aolie.ds.definition.DeleteSqlDefinition;
 import com.ranranx.aolie.ds.definition.InsertSqlDefinition;

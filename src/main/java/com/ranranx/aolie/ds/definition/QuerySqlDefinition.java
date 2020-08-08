@@ -8,7 +8,7 @@ import java.util.Map;
 
 /**
  * @Author xxl
- * @Description
+ * @Description 支持多表的查询定义
  * @Date 2020/8/7 15:20
  * @Version V0.0.1
  **/
