@@ -28,4 +28,26 @@ public class Constants {
          */
         public static final Integer TYPE_MULTI_MULTI = 4;
     }
+
+    /**
+     * 请求处理类型
+     */
+    public static class HandleType {
+        /**
+         * 查询
+         */
+        public static final String TYPE_QUERY = "query";
+        /**
+         * 删除
+         */
+        public static final String TYPE_DELETE = "delete";
+        /**
+         * 插入
+         */
+        public static final String TYPE_INSERT = "insert";
+        /**
+         * 更新
+         */
+        public static final String TYPE_UPDATE = "update";
+    }
 }

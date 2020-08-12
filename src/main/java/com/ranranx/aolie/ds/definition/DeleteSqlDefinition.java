@@ -1,9 +1,8 @@
 package com.ranranx.aolie.ds.definition;
 
 import com.ranranx.aolie.datameta.datamodal.Table;
-import com.ranranx.aolie.engine.param.Criteria;
+import com.ranranx.aolie.handler.param.Criteria;
 
-import java.util.List;
 import java.util.Map;
 
 /**

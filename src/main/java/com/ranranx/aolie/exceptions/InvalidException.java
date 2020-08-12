@@ -8,7 +8,7 @@ package com.ranranx.aolie.exceptions;
  **/
 public class InvalidException extends BaseException {
     public InvalidException(String errorInfo) {
-        super("Invalid excption," + errorInfo);
+        super("Invalid exception," + errorInfo);
     }
 
 }

@@ -1,6 +1,8 @@
 package com.ranranx.aolie.datameta.datamodal;
 
+import com.ranranx.aolie.common.CommonUtils;
 import com.ranranx.aolie.datameta.dto.TableDto;
+import com.ranranx.aolie.ds.dataoperator.DataSourceUtils;
 
 import java.util.List;
 
@@ -17,6 +19,12 @@ public class Table {
      * 表内列表
      */
     private List<Column> lstColumn;
+
+    public String getDsKey() {
+        DataOperatorInfo dataOperatorInfo = SchemaHolder.getDataOperatorInfo(tableDto.getDataOperId(), tableDto.getVersionCode());
+        return dataOperatorInfo.getDsKey();
+    }
+
     /**
      * 表内约束
      */

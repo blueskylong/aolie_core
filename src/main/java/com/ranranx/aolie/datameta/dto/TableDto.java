@@ -31,6 +31,10 @@ public class TableDto extends BaseDto {
      */
     private Integer readOnly;
 
+    /**
+     * 数据源名
+     */
+    private Long dataOperId;
 
 
     public Double getTableId() {
@@ -71,6 +75,14 @@ public class TableDto extends BaseDto {
 
     public void setReadOnly(Integer readOnly) {
         this.readOnly = readOnly;
+    }
+
+    public Long getDataOperId() {
+        return dataOperId;
+    }
+
+    public void setDataOperId(Long dataOperId) {
+        this.dataOperId = dataOperId;
     }
 }
 

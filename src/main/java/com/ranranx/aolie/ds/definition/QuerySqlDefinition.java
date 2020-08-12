@@ -1,10 +1,9 @@
 package com.ranranx.aolie.ds.definition;
 
 import com.ranranx.aolie.datameta.datamodal.Table;
-import com.ranranx.aolie.engine.param.Criteria;
+import com.ranranx.aolie.handler.param.Criteria;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @Author xxl
@@ -13,48 +12,45 @@ import java.util.Map;
  * @Version V0.0.1
  **/
 public class QuerySqlDefinition {
-    private Table table;
+    private Table[] table;
     /**
      * 需要查询的表列表
      */
-    private String[] fields;
+    private long[] fields;
+
     /**
      * 排序信息
      */
     private List<FieldOrder> lstOrder;
     /**
-     * 一般过滤条件
-     */
-    private Map<String, Object> mapFilter;
-
-    /**
      * 复杂过滤条件
      */
-    private Criteria criteria;
+    private Criteria[] criteria;
 
-    public Criteria getCriteria() {
-        return criteria;
-    }
-
-    public void setCriteria(Criteria criteria) {
-        this.criteria = criteria;
-    }
-
-    public Table getTable() {
+    public Table[] getTable() {
         return table;
     }
 
-    public void setTable(Table table) {
+    public void setTable(Table[] table) {
         this.table = table;
     }
 
-    public String[] getFields() {
+    public long[] getFields() {
         return fields;
     }
 
-    public void setFields(String[] fields) {
+    public void setFields(long[] fields) {
         this.fields = fields;
     }
+
+    public Criteria[] getCriteria() {
+        return criteria;
+    }
+
+    public void setCriteria(Criteria[] criteria) {
+        this.criteria = criteria;
+    }
+
 
     public List<FieldOrder> getLstOrder() {
         return lstOrder;
@@ -64,12 +60,5 @@ public class QuerySqlDefinition {
         this.lstOrder = lstOrder;
     }
 
-    public Map<String, Object> getMapFilter() {
-        return mapFilter;
-    }
-
-    public void setMapFilter(Map<String, Object> mapFilter) {
-        this.mapFilter = mapFilter;
-    }
 }
 
