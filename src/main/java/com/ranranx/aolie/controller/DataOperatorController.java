@@ -37,8 +37,6 @@ public class DataOperatorController {
      */
     @PostMapping("/findData")
     public HandleResult findData(Map<String, Object> mapParam) {
-        String[] key = new String[]{"mysql__1", "mysql2__1"};
-        DynamicDataSource.setDataSource(key[new Random().nextInt(1)]);
         return factory.getHandler(Constants.HandleType.TYPE_QUERY, mapParam)
                 .doHandle(mapParam);
     }

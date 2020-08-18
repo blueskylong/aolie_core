@@ -2,9 +2,12 @@ package com.ranranx.aolie.ds.dataoperator.mybatis;
 
 import com.ranranx.aolie.common.CommonUtils;
 import com.ranranx.aolie.datameta.dto.DataOperatorDto;
+import com.ranranx.aolie.ds.dataoperator.DataOperatorFactory;
 import com.ranranx.aolie.ds.dataoperator.DataSourceUtils;
+import com.ranranx.aolie.ds.dataoperator.IDataOperator;
 import com.ranranx.aolie.ds.dataoperator.multids.DataSourceWrapper;
 import com.ranranx.aolie.ds.dataoperator.multids.DynamicDataSource;
+import com.ranranx.aolie.exceptions.InvalidException;
 import org.mybatis.spring.boot.autoconfigure.MybatisAutoConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,11 +17,14 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.sql.DataSource;
+import java.io.InputStream;
+import java.util.*;
 
 /**
  * @Author xxl
@@ -39,22 +45,68 @@ public class MybatisDbOperatorConfig implements BeanPostProcessor, BeanDefinitio
 
     public MybatisDbOperatorConfig() {
         lstOperSet = new ArrayList<>();
-        DataOperatorDto dto = new DataOperatorDto();
-//        dto.setDriverClassName("com.mysql.cj.jdbc.Driver");
-        dto.setUrl("jdbc:mysql://localhost:3306/world?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC");
-        dto.setUserName("root");
-        dto.setPassword("root");
-        dto.setName("mysql");
-        dto.setVersionCode("1");
-        lstOperSet.add(dto);
-        dto = new DataOperatorDto();
-//        dto.setDriverClassName("com.mysql.cj.jdbc.Driver");
-        dto.setUrl("jdbc:mysql://localhost:3306/world?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC");
-        dto.setUserName("root");
-        dto.setPassword("root");
-        dto.setName("mysql2");
-        dto.setVersionCode("1");
-        lstOperSet.add(dto);
+        lstOperSet.add(loadDefaultDs());
+//        lstOperSet = new ArrayList<>();
+//        DataOperatorDto dto = new DataOperatorDto();
+////        dto.setDriverClassName("com.mysql.cj.jdbc.Driver");
+//        dto.setUrl("jdbc:mysql://localhost:3306/world?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC");
+//        dto.setUserName("root");
+//        dto.setPassword("root");
+//        dto.setName("mysql");
+//        dto.setVersionCode("1");
+//        lstOperSet.add(dto);
+//        dto = new DataOperatorDto();
+////        dto.setDriverClassName("com.mysql.cj.jdbc.Driver");
+//        dto.setUrl("jdbc:mysql://localhost:3306/earth?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC");
+//        dto.setUserName("root");
+//        dto.setPassword("root");
+//        dto.setName("mysql2");
+//        dto.setVersionCode("1");
+//        lstOperSet.add(dto);
+    }
+
+    /**
+     * 加载默认数据源
+     *
+     * @return
+     */
+    private DataOperatorDto loadDefaultDs() {
+        try {
+            Properties properties = new Properties();
+            // 使用ClassLoader加载properties配置文件生成对应的输入流
+            InputStream in = MybatisDbOperatorConfig.class.getClassLoader().getResourceAsStream("aolie.properties");
+            // 使用properties对象加载输入流
+            properties.load(in);
+
+            Map<String, Object> map = convertToMap(properties);
+            DataOperatorDto dto = CommonUtils.populateBean(DataOperatorDto.class, map);
+            setDefaultDsInfo(dto);
+            return dto;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new InvalidException("默认数据库参数初始化失败,请确定aolie.properties文件存在,并正确设置了数据库连接参数");
+        }
+    }
+
+    /**
+     * 默认数据源的默认配置
+     */
+    private void setDefaultDsInfo(DataOperatorDto dto) {
+        dto.setId(0L);
+        dto.setName("default");
+        dto.setIsDefault((short) 1);
+        dto.setVersionCode("0");
+    }
+
+
+    private Map<String, Object> convertToMap(Properties properties) {
+        Iterator<Map.Entry<Object, Object>> iterator = properties.entrySet().iterator();
+        Map<String, Object> map = new HashMap<>();
+        while (iterator.hasNext()) {
+            Map.Entry<Object, Object> next = iterator.next();
+            map.put(next.getKey().toString(), next.getValue());
+        }
+        return map;
     }
 
     /**
@@ -74,7 +126,14 @@ public class MybatisDbOperatorConfig implements BeanPostProcessor, BeanDefinitio
                 String key = CommonUtils.makeKey(dto.getName(), dto.getVersionCode());
                 registry.registerBeanDefinition(key,
                         new RootBeanDefinition(DataSourceWrapper.class));
-                registry.registerBeanDefinition(DataSourceUtils.makeDsKey(key), new RootBeanDefinition(MyBatisDataOperator.class));
+                //如果没有指定操作器的类,则默认使用多数据MyBatis类来创建
+                if (CommonUtils.isEmpty(dto.getOperatorClass())) {
+                    registry.registerBeanDefinition(DataSourceUtils.makeDsKey(key),
+                            new RootBeanDefinition(MyBatisDataOperator.class));
+                } else {
+                    registry.registerBeanDefinition(DataSourceUtils.makeDsKey(key),
+                            new RootBeanDefinition(dto.getOperatorClass()));
+                }
             }
 
         } catch (Exception e) {
@@ -84,7 +143,7 @@ public class MybatisDbOperatorConfig implements BeanPostProcessor, BeanDefinitio
     }
 
 
-    private DataOperatorDto findDto(String key) {
+    private DataOperatorDto findDataOperatorDto(String key) {
         for (DataOperatorDto dto : lstOperSet) {
             if (CommonUtils.makeKey(dto.getName(), dto.getVersionCode()).equals(key)) {
                 return dto;
@@ -97,9 +156,9 @@ public class MybatisDbOperatorConfig implements BeanPostProcessor, BeanDefinitio
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
         if (bean instanceof DataSourceWrapper) {
-            ((DataSourceWrapper) bean).setDto(findDto(beanName));
+            ((DataSourceWrapper) bean).setDto(findDataOperatorDto(beanName));
         } else if (bean instanceof MyBatisDataOperator) {
-            ((MyBatisDataOperator) bean).setDto(findDto(DataSourceUtils.getKeyByDsKey(beanName)));
+            ((MyBatisDataOperator) bean).setDto(findDataOperatorDto(DataSourceUtils.getKeyByDsKey(beanName)));
         }
         return bean;
     }
@@ -115,10 +174,15 @@ public class MybatisDbOperatorConfig implements BeanPostProcessor, BeanDefinitio
      */
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+        //这里开始注册
+
 
     }
 
+
     @Bean
+    @ConditionalOnMissingBean(value = {DataSource.class})
+    @ConditionalOnBean(value = {DataOperatorDto.class})
     public static DynamicDataSource getDds() {
         return new DynamicDataSource();
     }

@@ -51,6 +51,27 @@ public class DataOperatorDto extends BaseDto {
      */
     private String driverClassName;
 
+    /**
+     * 直接指定操作类名
+     */
+    private String operatorClass;
+
+    public String getOperatorClass() {
+        return operatorClass;
+    }
+
+    public void setOperatorClass(String operatorClass) {
+        this.operatorClass = operatorClass;
+    }
+
+    public Short getIsDefault() {
+        return isDefault;
+    }
+
+    public void setIsDefault(Short isDefault) {
+        this.isDefault = isDefault;
+    }
+
     public String getDriverClassName() {
         return driverClassName;
     }
@@ -75,13 +96,6 @@ public class DataOperatorDto extends BaseDto {
         this.id = id;
     }
 
-    public Short getIsDefault() {
-        return isDefault;
-    }
-
-    public void setIsDefault(Short isDefault) {
-        this.isDefault = isDefault;
-    }
 
     public String getUrl() {
         return url;

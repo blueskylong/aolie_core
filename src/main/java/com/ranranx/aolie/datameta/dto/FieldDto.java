@@ -10,15 +10,15 @@ import com.ranranx.aolie.common.BaseDto;
  **/
 public class FieldDto extends BaseDto {
 
-    private Double fieldId;
+    private Long fieldId;
     /**
      * 主表ID
      */
-    private Double viewerId;
+    private Long viewerId;
     /**
      * 引用的列ID
      */
-    private Double columnId;
+    private Long columnId;
     /**
      * 级次编码,本系统都采用的3位一级的编码格式
      */
@@ -34,11 +34,11 @@ public class FieldDto extends BaseDto {
     /**
      * 横向占比例,类似于bootstrap的12列,占多少列的意思
      */
-    private Integer hSpan;
+    private Integer horSpan;
     /**
      * 纵向行数,如textArea这类的,会占用多行.
      */
-    private Integer vSpan;
+    private Integer verSpan;
     /**
      * 如果为列表显示,则显示的宽度,0表示列表中不显示
      */
@@ -71,29 +71,37 @@ public class FieldDto extends BaseDto {
      * 扩展样式
      */
     private String extStyle;
+    /**
+     * 分组类型
+     */
+    private Short groupType;
 
+    /**
+     * 默认排序类型
+     */
+    private Short orderByType;
 
-    public Double getFieldId() {
+    public Long getFieldId() {
         return fieldId;
     }
 
-    public void setFieldId(Double fieldId) {
+    public void setFieldId(Long fieldId) {
         this.fieldId = fieldId;
     }
 
-    public Double getViewerId() {
+    public Long getViewerId() {
         return viewerId;
     }
 
-    public void setViewerId(Double viewerId) {
+    public void setViewerId(Long viewerId) {
         this.viewerId = viewerId;
     }
 
-    public Double getColumnId() {
+    public Long getColumnId() {
         return columnId;
     }
 
-    public void setColumnId(Double columnId) {
+    public void setColumnId(Long columnId) {
         this.columnId = columnId;
     }
 
@@ -121,21 +129,6 @@ public class FieldDto extends BaseDto {
         this.dispType = dispType;
     }
 
-    public Integer gethSpan() {
-        return hSpan;
-    }
-
-    public void sethSpan(Integer hSpan) {
-        this.hSpan = hSpan;
-    }
-
-    public Integer getvSpan() {
-        return vSpan;
-    }
-
-    public void setvSpan(Integer vSpan) {
-        this.vSpan = vSpan;
-    }
 
     public Integer getWidth() {
         return width;
@@ -199,5 +192,37 @@ public class FieldDto extends BaseDto {
 
     public void setExtStyle(String extStyle) {
         this.extStyle = extStyle;
+    }
+
+    public Short getGroupType() {
+        return groupType;
+    }
+
+    public void setGroupType(Short groupType) {
+        this.groupType = groupType;
+    }
+
+    public Short getOrderByType() {
+        return orderByType;
+    }
+
+    public void setOrderByType(Short orderByType) {
+        this.orderByType = orderByType;
+    }
+
+    public Integer getHorSpan() {
+        return horSpan;
+    }
+
+    public void setHorSpan(Integer horSpan) {
+        this.horSpan = horSpan;
+    }
+
+    public Integer getVerSpan() {
+        return verSpan;
+    }
+
+    public void setVerSpan(Integer verSpan) {
+        this.verSpan = verSpan;
     }
 }

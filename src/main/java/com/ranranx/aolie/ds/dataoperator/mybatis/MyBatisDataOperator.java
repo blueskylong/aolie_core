@@ -1,15 +1,17 @@
 package com.ranranx.aolie.ds.dataoperator.mybatis;
 
 import com.ranranx.aolie.common.CommonUtils;
+import com.ranranx.aolie.datameta.datamodal.Field;
+import com.ranranx.aolie.datameta.datamodal.SchemaHolder;
 import com.ranranx.aolie.datameta.dto.DataOperatorDto;
+import com.ranranx.aolie.ds.dataoperator.DataSourceUtils;
 import com.ranranx.aolie.ds.dataoperator.IDataOperator;
 import com.ranranx.aolie.ds.dataoperator.multids.DynamicDataSource;
-import com.ranranx.aolie.ds.definition.DeleteSqlDefinition;
-import com.ranranx.aolie.ds.definition.InsertSqlDefinition;
-import com.ranranx.aolie.ds.definition.QuerySqlDefinition;
-import com.ranranx.aolie.ds.definition.UpdateSqlDefinition;
+import com.ranranx.aolie.ds.definition.*;
+import com.ranranx.aolie.exceptions.InvalidParamException;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.persistence.Table;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +22,7 @@ import java.util.Map;
  * @Date 2020/8/11 10:12
  * @Version V0.0.1
  **/
+
 
 public class MyBatisDataOperator implements IDataOperator {
 
@@ -39,48 +42,141 @@ public class MyBatisDataOperator implements IDataOperator {
     /**
      * 查询
      *
-     * @param querySqlDefinition
+     * @param queryParamDefinition
      * @RETURN
      */
     @Override
-    public List<Map<String, Object>> select(QuerySqlDefinition querySqlDefinition) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("sql", "select * from city where countrycode = #{countrycode}");
-        map.put("countrycode", "AFG");
+    public List<Map<String, Object>> select(QueryParamDefinition queryParamDefinition) {
+        //分析是单表查询还是多表查询
+        if (isSingleTable(queryParamDefinition)) {
+            return singleTableSelect(queryParamDefinition);
+        }
+        return multiTableSelect(queryParamDefinition);
+
+    }
+
+    private List<Map<String, Object>> select(Map<String, Object> map) {
         DynamicDataSource.setDataSource(dsKey);
         return mapper.select(map);
     }
 
     /**
+     * 多表查询
+     *
+     * @param queryParamDefinition
+     * @return
+     */
+    private List<Map<String, Object>> multiTableSelect(QueryParamDefinition queryParamDefinition) {
+        return null;
+    }
+
+    /**
+     * 单表查询
+     *
+     * @param queryParamDefinition
+     * @return
+     */
+    private List<Map<String, Object>> singleTableSelect(QueryParamDefinition queryParamDefinition) {
+        String tableName = getSingleSelectTableName(queryParamDefinition);
+        String field = getFieldsExp(queryParamDefinition.getFields(), queryParamDefinition.getVersion());
+        Map<String, Object> mapParam = new HashMap<>();
+        String where = "";
+        if (queryParamDefinition.getCriteria() != null) {
+            where = queryParamDefinition.getCriteria()[0].getSqlWhere(mapParam, null, 1, false);
+            if (!CommonUtils.isEmpty(where)) {
+                where = " where " + where;
+            }
+        }
+        String orderExp = "";
+        if (queryParamDefinition.getLstOrder() != null && !queryParamDefinition.getLstOrder().isEmpty()) {
+            List<FieldOrder> orders = queryParamDefinition.getLstOrder();
+            for (FieldOrder order : orders) {
+                orderExp += order.getOrderExp() + ",";
+            }
+            orderExp = " order by " + orderExp.substring(0, orderExp.length() - 1);
+        }
+        StringBuilder sbSql = new StringBuilder();
+        sbSql.append("select ").append(field).append(" from ").append(tableName).append(where).append(orderExp);
+        mapParam.put("sql", sbSql.toString());
+        return mapper.select(mapParam);
+    }
+
+    /**
+     * 取得单表选择的表名.这里有约定,如果有Table信息,则以其为优先,然后是类名上的注解
+     *
+     * @param queryParamDefinition
+     * @return
+     */
+    private String getSingleSelectTableName(QueryParamDefinition queryParamDefinition) {
+        if (queryParamDefinition.getTable() != null && queryParamDefinition.getTable().length == 1) {
+            return queryParamDefinition.getTable()[0].getTableDto().getTableName();
+        }
+        Class<?> clazz = queryParamDefinition.getClazz();
+        if (clazz == null) {
+            throw new InvalidParamException("查询操作没有找到指定的表信息");
+        }
+        Table annotation = clazz.getAnnotation(Table.class);
+        if (annotation == null || CommonUtils.isEmpty(annotation.name())) {
+            throw new InvalidParamException("查询操作没有找到指定的表信息");
+        }
+        return annotation.name();
+    }
+
+    private String getFieldsExp(Long[] fieldIds, String version) {
+        if (fieldIds == null || fieldIds.length == 0) {
+            return "*";
+        }
+        StringBuilder sb = new StringBuilder();
+        Field field;
+        for (Long id : fieldIds) {
+            field = SchemaHolder.getField(id, version);
+            sb.append(SchemaHolder.getColumn(field.getFieldDto().getColumnId(), version)
+                    .getColumnDto().getFieldName()).append(",");
+        }
+        return sb.substring(0, sb.length() - 1);
+    }
+
+    /**
+     * 是不是单表查询
+     *
+     * @param queryParamDefinition
+     * @return
+     */
+    private boolean isSingleTable(QueryParamDefinition queryParamDefinition) {
+        return queryParamDefinition.getClazz() != null ||
+                (queryParamDefinition.getTable() != null && queryParamDefinition.getTable().length == 1);
+    }
+
+    /**
      * 删除
      *
-     * @param deleteSqlDefinition
+     * @param deleteParamDefinition
      * @return
      */
     @Override
-    public int delete(DeleteSqlDefinition deleteSqlDefinition) {
+    public int delete(DeleteParamDefinition deleteParamDefinition) {
         return 0;
     }
 
     /**
      * 更新
      *
-     * @param updateSqlDefinition
+     * @param updateParamDefinition
      * @return
      */
     @Override
-    public int update(UpdateSqlDefinition updateSqlDefinition) {
+    public int update(UpdateParamDefinition updateParamDefinition) {
         return 0;
     }
 
     /**
      * 插入
      *
-     * @param insertSqlDefinition
+     * @param insertParamDefinition
      * @return
      */
     @Override
-    public int insert(InsertSqlDefinition insertSqlDefinition) {
+    public int insert(InsertParamDefinition insertParamDefinition) {
         return 0;
     }
 
@@ -120,6 +216,10 @@ public class MyBatisDataOperator implements IDataOperator {
 
     public void setDto(DataOperatorDto dto) {
         this.dto = dto;
-        dsKey = CommonUtils.makeKey(dto.getName(), dto.getVersionCode());
+        if (this.dto == null) {
+            dsKey = DataSourceUtils.getDefaultDataSourceKey();
+        } else {
+            dsKey = CommonUtils.makeKey(dto.getName(), dto.getVersionCode());
+        }
     }
 }

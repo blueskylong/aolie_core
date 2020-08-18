@@ -1,7 +1,7 @@
 package com.ranranx.aolie.ds.definition;
 
 import com.ranranx.aolie.datameta.datamodal.Table;
-import com.ranranx.aolie.handler.param.Criteria;
+import com.ranranx.aolie.handler.param.condition.Criteria;
 
 import java.util.List;
 import java.util.Map;
@@ -12,7 +12,7 @@ import java.util.Map;
  * @Date 2020/8/7 15:53
  * @Version V0.0.1
  **/
-public class UpdateSqlDefinition {
+public class UpdateParamDefinition {
     /**
      * 表信息
      */

@@ -50,4 +50,53 @@ public class Constants {
          */
         public static final String TYPE_UPDATE = "update";
     }
+
+    /**
+     * 排序类型
+     */
+    public static class OrderType {
+        /**
+         * 无排序
+         */
+        public static final short NONE = 0;
+        /**
+         * 升序
+         */
+        public static final short ASC = 1;
+        /**
+         * 降序
+         */
+        public static final short DESC = 2;
+    }
+
+    /**
+     * 分组类型
+     */
+    public static class GroupType {
+        /**
+         * 不参与分组
+         */
+        public static final short NONE = 0;
+        /**
+         * 加和
+         */
+        public static final short SUM = 1;
+        /**
+         * 平均
+         */
+        public static final short AVG = 2;
+        /**
+         * 计数
+         */
+        public static final short COUNT = 3;
+        /**
+         * 最大
+         */
+        public static final short MAX = 4;
+        /**
+         * 最小
+         */
+        public static final short MIN = 5;
+
+    }
 }

@@ -7,10 +7,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 动态数据源
@@ -47,6 +44,15 @@ public class DynamicDataSource extends AbstractRoutingDataSource {
         contextHolder.remove();
     }
 
+
+    public void addDataSourceWrappers(List<DataSourceWrapper> lstWraper) {
+        if (this.lstWraper == null) {
+            this.lstWraper = new ArrayList<>();
+        }
+        lstWraper.addAll(lstWraper);
+        afterPropertiesSet();
+    }
+
     @Override
     public void afterPropertiesSet() throws BeansException {
 
@@ -61,8 +67,13 @@ public class DynamicDataSource extends AbstractRoutingDataSource {
             key = CommonUtils.makeKey(next.getDto().getName(), next.getDto().getVersionCode());
             logger.info("--> Add DataSource " + next.getDto().getName());
             targetDataSources.put(key, next.getDataSource());
+            //如果是默认的数据源,则设置为默认
+            if (next.isDefault()) {
+                this.setDefaultTargetDataSource(next.getDataSource());
+            }
         }
         this.setTargetDataSources(targetDataSources);
+
         super.afterPropertiesSet();
 
     }

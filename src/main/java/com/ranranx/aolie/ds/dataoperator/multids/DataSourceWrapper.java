@@ -12,10 +12,19 @@ import javax.sql.DataSource;
  * @Version V0.0.1
  **/
 public class DataSourceWrapper {
+
+
     private DataOperatorDto dto;
 
     private DataSource dataSource;
 
+    public DataSourceWrapper() {
+
+    }
+
+    public DataSourceWrapper(DataOperatorDto dto) {
+        this.setDto(dto);
+    }
 
     private void init() {
         DruidDataSource ds = new DruidDataSource();
@@ -24,6 +33,15 @@ public class DataSourceWrapper {
         ds.setUsername(dto.getUserName());
         ds.setPassword(dto.getPassword());
         this.dataSource = ds;
+    }
+
+    /**
+     * 是不是默认数据源
+     *
+     * @return
+     */
+    public boolean isDefault() {
+        return (this.dto.getIsDefault() != null && this.dto.getIsDefault() == 1);
     }
 
     public DataOperatorDto getDto() {

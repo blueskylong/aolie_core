@@ -2,12 +2,15 @@ package com.ranranx.aolie.datameta.dto;
 
 import com.ranranx.aolie.common.BaseDto;
 
+import javax.persistence.Table;
+
 /**
  * @Author xxl
  * @Description 表信息
  * @Date 2020/8/4 16:33
  * @Version V0.0.1
  **/
+@Table(name = "AOLIE_DM_TABLE")
 public class TableDto extends BaseDto {
     /**
      * 设计ID

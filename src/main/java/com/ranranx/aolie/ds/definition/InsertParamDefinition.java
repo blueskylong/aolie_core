@@ -11,7 +11,7 @@ import java.util.Map;
  * @Date 2020/8/7 15:30
  * @Version V0.0.1
  **/
-public class InsertSqlDefinition {
+public class InsertParamDefinition {
 
     private Table table;
     /**

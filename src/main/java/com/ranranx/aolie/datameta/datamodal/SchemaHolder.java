@@ -20,9 +20,14 @@ public class SchemaHolder {
      */
     private static Map<String, Table> mapTables;
     /**
-     * 所有字段信息
+     * 所有显示字段信息
      */
     private static Map<String, Field> mapFields;
+
+    /**
+     * 所有字段信息
+     */
+    private static Map<String, Column> mapColumns;
     /**
      * 表和字段对应信息
      */
@@ -75,6 +80,10 @@ public class SchemaHolder {
     }
 
 
+    public static Column getColumn(Long id, String version) {
+        return mapColumns.get(CommonUtils.makeKey(id.toString(), version));
+    }
+
     /**
      * 初始化数据.
      */
@@ -84,6 +93,7 @@ public class SchemaHolder {
         mapFieldToTable = new HashMap<>(200);
         mapSchema = new HashMap<>(200);
         mapOperatorInfo = new HashMap<>(200);
+        mapColumns = new HashMap<>(200);
 
         DataOperatorDto dto = new DataOperatorDto();
         dto.setVersionCode("1");

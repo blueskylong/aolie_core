@@ -1,7 +1,7 @@
 package com.ranranx.aolie.ds.definition;
 
 import com.ranranx.aolie.datameta.datamodal.Table;
-import com.ranranx.aolie.handler.param.Criteria;
+import com.ranranx.aolie.handler.param.condition.Criteria;
 
 import java.util.Map;
 
@@ -11,7 +11,7 @@ import java.util.Map;
  * @Date 2020/8/7 15:20
  * @Version V0.0.1
  **/
-public class DeleteSqlDefinition {
+public class DeleteParamDefinition {
     private Table table;
 
     /**

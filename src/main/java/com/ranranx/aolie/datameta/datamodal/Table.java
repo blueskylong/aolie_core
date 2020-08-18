@@ -3,6 +3,7 @@ package com.ranranx.aolie.datameta.datamodal;
 import com.ranranx.aolie.common.CommonUtils;
 import com.ranranx.aolie.datameta.dto.TableDto;
 import com.ranranx.aolie.ds.dataoperator.DataSourceUtils;
+import com.ranranx.aolie.exceptions.NotExistException;
 
 import java.util.List;
 
@@ -21,7 +22,13 @@ public class Table {
     private List<Column> lstColumn;
 
     public String getDsKey() {
+        if (tableDto.getDataOperId() == null) {
+            return DataSourceUtils.getDefaultDataSourceKey();
+        }
         DataOperatorInfo dataOperatorInfo = SchemaHolder.getDataOperatorInfo(tableDto.getDataOperId(), tableDto.getVersionCode());
+        if (dataOperatorInfo == null) {
+            throw new NotExistException("数据库连接:[" + tableDto.getDataOperId() + "__" + tableDto.getVersionCode() + "]不存在");
+        }
         return dataOperatorInfo.getDsKey();
     }
 

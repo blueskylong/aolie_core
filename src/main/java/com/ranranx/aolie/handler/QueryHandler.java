@@ -1,10 +1,13 @@
 package com.ranranx.aolie.handler;
 
+import com.ranranx.aolie.common.CommonUtils;
 import com.ranranx.aolie.common.Constants;
-import com.ranranx.aolie.datameta.datamodal.Table;
 import com.ranranx.aolie.datameta.dto.TableDto;
 import com.ranranx.aolie.ds.dataoperator.DataOperatorFactory;
+import com.ranranx.aolie.ds.definition.QueryParamDefinition;
 import com.ranranx.aolie.handler.param.QueryParam;
+import com.ranranx.aolie.handler.param.condition.Criteria;
+import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -30,7 +33,13 @@ public class QueryHandler<T extends QueryParam> extends BaseHandler<T> {
      */
     private HandleResult findAllResult(QueryParam param) {
 
-        List<Map<String, Object>> lstData = factory.getDataOperatorByName(param.getTable().getDsKey()).select(null);
+        QueryParamDefinition queryParamDefinition = new QueryParamDefinition();
+        queryParamDefinition.setClazz(TableDto.class);
+        Criteria criteria = new Criteria();
+        criteria.andEqualTo("version", "1");
+        queryParamDefinition.setCriteria(new Criteria[]{criteria});
+        //TODO 这里需要将查询分解,合并
+        List<Map<String, Object>> lstData = factory.getDataOperatorByName(null).select(queryParamDefinition);
         HandleResult result = new HandleResult();
         result.setSuccess(true);
         result.setLstData(lstData);
@@ -76,24 +85,6 @@ public class QueryHandler<T extends QueryParam> extends BaseHandler<T> {
         return findAllResult(param);
     }
 
-    /**
-     * 检查并生成查询参数
-     *
-     * @param mapParams
-     * @return
-     */
-    @Override
-    protected T checkAndMakeParam(Map<String, Object> mapParams) {
-        //TODO
-        QueryParam param = new QueryParam();
-        TableDto dto = new TableDto();
-        dto.setDataOperId(1L);
-        dto.setVersionCode("1");
-        Table table = new Table();
-        table.setTableDto(dto);
-        param.setTable(table);
-        return (T) param;
-    }
 
     /**
      * 是否需要事务

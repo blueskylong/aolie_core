@@ -1,13 +1,10 @@
 package com.ranranx.aolie.ds.dataoperator;
 
 import com.ranranx.aolie.common.CommonUtils;
-import com.ranranx.aolie.ds.dataoperator.multids.DynamicDataSource;
 import com.ranranx.aolie.exceptions.NotExistException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -16,7 +13,7 @@ import java.util.Map;
  * @Date 2020/8/10 17:38
  * @Version V0.0.1
  **/
-@Component
+@Component("DataOperatorFactory")
 public class DataOperatorFactory {
 
     @Autowired
@@ -31,7 +28,14 @@ public class DataOperatorFactory {
         throw new NotExistException("数据源名:" + name + ",版本:" + version + " 的数据源不存在");
     }
 
+    public IDataOperator getDefaultDataOperator() {
+        return mapDataOperator.get(DataSourceUtils.getDefaultDataSourceKey());
+    }
+
     public IDataOperator getDataOperatorByName(String key) {
+        if (key == null) {
+            key = DataSourceUtils.getDefaultDataSourceKey();
+        }
         IDataOperator iDataOperator = mapDataOperator.get(key);
         if (iDataOperator != null) {
             return iDataOperator;

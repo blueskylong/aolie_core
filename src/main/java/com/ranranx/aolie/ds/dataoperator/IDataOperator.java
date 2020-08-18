@@ -1,9 +1,9 @@
 package com.ranranx.aolie.ds.dataoperator;
 
-import com.ranranx.aolie.ds.definition.DeleteSqlDefinition;
-import com.ranranx.aolie.ds.definition.InsertSqlDefinition;
-import com.ranranx.aolie.ds.definition.QuerySqlDefinition;
-import com.ranranx.aolie.ds.definition.UpdateSqlDefinition;
+import com.ranranx.aolie.ds.definition.DeleteParamDefinition;
+import com.ranranx.aolie.ds.definition.InsertParamDefinition;
+import com.ranranx.aolie.ds.definition.QueryParamDefinition;
+import com.ranranx.aolie.ds.definition.UpdateParamDefinition;
 
 import java.util.List;
 import java.util.Map;
@@ -19,34 +19,34 @@ public interface IDataOperator {
     /**
      * 查询
      *
-     * @param querySqlDefinition
+     * @param queryParamDefinition
      * @return
      */
-    List<Map<String, Object>> select(QuerySqlDefinition querySqlDefinition);
+    List<Map<String, Object>> select(QueryParamDefinition queryParamDefinition);
 
     /**
      * 删除
      *
-     * @param deleteSqlDefinition
+     * @param deleteParamDefinition
      * @return
      */
-    int delete(DeleteSqlDefinition deleteSqlDefinition);
+    int delete(DeleteParamDefinition deleteParamDefinition);
 
     /**
      * 更新
      *
-     * @param updateSqlDefinition
+     * @param updateParamDefinition
      * @return
      */
-    int update(UpdateSqlDefinition updateSqlDefinition);
+    int update(UpdateParamDefinition updateParamDefinition);
 
     /**
      * 插入
      *
-     * @param insertSqlDefinition
+     * @param insertParamDefinition
      * @return
      */
-    int insert(InsertSqlDefinition insertSqlDefinition);
+    int insert(InsertParamDefinition insertParamDefinition);
 
     /**
      * 取得连接的唯一标识,用来区分不同的数据源

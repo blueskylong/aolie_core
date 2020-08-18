@@ -28,6 +28,25 @@ public class DataSourceUtils {
         return dsKey.substring(OPERATOR_PREFIX.length() + 1);
     }
 
+
+    /**
+     * 取得默认的数据源key
+     *
+     * @return
+     */
+    public static String getDefaultDataSourceKey() {
+        return (OPERATOR_PREFIX + "_default__0");
+    }
+
+    /**
+     * 默认的操作KEY
+     *
+     * @return
+     */
+    public static String getDefaultDataOperatorKey() {
+        return "default__0";
+    }
+
     /**
      * 生成数据库操作接口的注册Key
      *

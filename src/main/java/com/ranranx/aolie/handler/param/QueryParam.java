@@ -2,6 +2,7 @@ package com.ranranx.aolie.handler.param;
 
 import com.ranranx.aolie.datameta.datamodal.Table;
 import com.ranranx.aolie.ds.definition.FieldOrder;
+import com.ranranx.aolie.handler.param.condition.Criteria;
 
 import java.util.List;
 import java.util.Map;
@@ -14,28 +15,32 @@ import java.util.Map;
  **/
 public class QueryParam {
     /**
-     * 视图ID
+     * 视图ID   视图模式条件
      */
     private Long viewId;
 
     /**
-     * 视图展现的方式
+     * 视图展现的方式    视图模式条件
      */
     private Integer displayType;
     /**
-     * 复杂条件
+     * 复杂条件  表条件
      */
-    private Criteria criteria;
+    private Criteria[] criteria;
     /**
-     * 字段条件
+     * 字段条件    视图模式条件
      */
     private Map<String, Object> mapFilter;
     /**
-     * 表信息
+     * 表信息   表条件
      */
-    private Table table;
+    private Table[] table;
     /**
-     * 排序字段
+     * 分页信息  综合条件
+     */
+    private Page page;
+    /**
+     * 排序字段  综合条件
      */
     private List<FieldOrder> lstOrder;
 
@@ -47,13 +52,6 @@ public class QueryParam {
         this.viewId = viewId;
     }
 
-    public Criteria getCriteria() {
-        return criteria;
-    }
-
-    public void setCriteria(Criteria criteria) {
-        this.criteria = criteria;
-    }
 
     public Map<String, Object> getMapFilter() {
         return mapFilter;
@@ -61,14 +59,6 @@ public class QueryParam {
 
     public void setMapFilter(Map<String, Object> mapFilter) {
         this.mapFilter = mapFilter;
-    }
-
-    public Table getTable() {
-        return table;
-    }
-
-    public void setTable(Table table) {
-        this.table = table;
     }
 
     public List<FieldOrder> getLstOrder() {
@@ -85,5 +75,29 @@ public class QueryParam {
 
     public void setDisplayType(Integer displayType) {
         this.displayType = displayType;
+    }
+
+    public Criteria[] getCriteria() {
+        return criteria;
+    }
+
+    public void setCriteria(Criteria[] criteria) {
+        this.criteria = criteria;
+    }
+
+    public Table[] getTable() {
+        return table;
+    }
+
+    public void setTable(Table[] table) {
+        this.table = table;
+    }
+
+    public Page getPage() {
+        return page;
+    }
+
+    public void setPage(Page page) {
+        this.page = page;
     }
 }

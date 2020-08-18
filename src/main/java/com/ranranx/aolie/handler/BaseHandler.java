@@ -1,9 +1,12 @@
 package com.ranranx.aolie.handler;
 
+import com.ranranx.aolie.common.CommonUtils;
 import com.ranranx.aolie.ds.dataoperator.DataOperatorFactory;
+import com.ranranx.aolie.handler.param.QueryParam;
 import com.ranranx.aolie.interceptor.IOperInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +18,6 @@ import java.util.Map;
  * @Version V0.0.1
  **/
 public abstract class BaseHandler<T> implements IDbHandler {
-
     /**
      * 所有拦截器
      */
@@ -23,6 +25,8 @@ public abstract class BaseHandler<T> implements IDbHandler {
 
     @Autowired
     private DataOperatorFactory operatorFactory;
+
+    private Class<T> entityClass;
 
 
     /**
@@ -78,6 +82,7 @@ public abstract class BaseHandler<T> implements IDbHandler {
             beginTransaction();
         }
         try {
+
             T param = checkAndMakeParam(mapParam);
             //查询前执行
             HandleResult iResult = doBeforeOperator(param);
@@ -120,7 +125,19 @@ public abstract class BaseHandler<T> implements IDbHandler {
      * @return
      */
 
-    protected abstract T checkAndMakeParam(Map<String, Object> mapParam);
+    protected T checkAndMakeParam(Map<String, Object> mapParam) {
+        //TODO
+        T param;
+        try {
+            if (entityClass == null) {
+                entityClass = (Class<T>) ((ParameterizedType) this.getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+            }
+            param = CommonUtils.populateBean(entityClass, mapParam);
+        } catch (Exception e) {
+            return null;
+        }
+        return (T) param;
+    }
 
     /**
      * 是否可以处理指定类型的请求

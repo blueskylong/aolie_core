@@ -1,12 +1,14 @@
 package com.ranranx.aolie.ds.definition;
 
+import com.ranranx.aolie.common.Ordered;
+
 /**
  * @Author xxl
  * @Description
  * @Date 2020/8/7 15:18
  * @Version V0.0.1
  **/
-public class FieldOrder {
+public class FieldOrder implements Ordered {
     /**
      * 字段名
      */
@@ -18,7 +20,7 @@ public class FieldOrder {
     /**
      * 顺序
      */
-    private int index;
+    private int order;
 
     public boolean isAsc() {
         return isAsc;
@@ -39,11 +41,21 @@ public class FieldOrder {
         this.field = field;
     }
 
-    public int getIndex() {
-        return index;
+    @Override
+    public int getOrder() {
+        return order;
     }
 
-    public void setIndex(int index) {
-        this.index = index;
+    public void setOrder(int order) {
+        this.order = order;
+    }
+
+    /**
+     * 取得
+     *
+     * @return
+     */
+    public String getOrderExp() {
+        return field + (isAsc ? " asc " : " desc ");
     }
 }
