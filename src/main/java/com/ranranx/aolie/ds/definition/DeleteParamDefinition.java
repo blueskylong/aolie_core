@@ -3,6 +3,7 @@ package com.ranranx.aolie.ds.definition;
 import com.ranranx.aolie.datameta.datamodal.Table;
 import com.ranranx.aolie.handler.param.condition.Criteria;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -12,29 +13,34 @@ import java.util.Map;
  * @Version V0.0.1
  **/
 public class DeleteParamDefinition {
-    private Table table;
 
     /**
-     * 一般过滤条件
+     * 要操作的表名
      */
-    private Map<String, Object> mapFilter;
+    private String tableName;
     /**
      * 要删除的ID
      */
-    private Long[] ids;
+    private List<Object> ids;
+
+    /**
+     * 主健字段
+     */
+    private String idField;
 
     /**
      * 复杂过滤条件
      */
     private Criteria criteria;
 
-    public Long[] getIds() {
+    public List<Object> getIds() {
         return ids;
     }
 
-    public void setIds(Long[] ids) {
+    public void setIds(List<Object> ids) {
         this.ids = ids;
     }
+
     public Criteria getCriteria() {
         return criteria;
     }
@@ -43,21 +49,21 @@ public class DeleteParamDefinition {
         this.criteria = criteria;
     }
 
-    public Table getTable() {
-        return table;
+
+    public String getTableName() {
+        return tableName;
     }
 
-    public void setTable(Table table) {
-        this.table = table;
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
     }
 
-
-    public Map<String, Object> getMapFilter() {
-        return mapFilter;
+    public String getIdField() {
+        return idField;
     }
 
-    public void setMapFilter(Map<String, Object> mapFilter) {
-        this.mapFilter = mapFilter;
+    public void setIdField(String idField) {
+        this.idField = idField;
     }
 }
 

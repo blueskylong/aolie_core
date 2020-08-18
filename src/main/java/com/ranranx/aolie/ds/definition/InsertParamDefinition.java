@@ -13,19 +13,15 @@ import java.util.Map;
  **/
 public class InsertParamDefinition {
 
-    private Table table;
+    /**
+     * 插入的表名
+     */
+    private String tableName;
+
     /**
      * 需要插入的信息
      */
     private List<Map<String, Object>> lstRows;
-
-    public Table getTable() {
-        return table;
-    }
-
-    public void setTable(Table table) {
-        this.table = table;
-    }
 
     public List<Map<String, Object>> getLstRows() {
         return lstRows;
@@ -33,5 +29,13 @@ public class InsertParamDefinition {
 
     public void setLstRows(List<Map<String, Object>> lstRows) {
         this.lstRows = lstRows;
+    }
+
+    public String getTableName() {
+        return tableName;
+    }
+
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
     }
 }

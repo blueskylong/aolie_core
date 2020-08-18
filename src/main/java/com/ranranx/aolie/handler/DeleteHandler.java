@@ -1,8 +1,12 @@
 package com.ranranx.aolie.handler;
 
 import com.ranranx.aolie.common.Constants;
+import com.ranranx.aolie.common.SqlTools;
+import com.ranranx.aolie.ds.dataoperator.DataOperatorFactory;
+import com.ranranx.aolie.ds.definition.DeleteParamDefinition;
 import com.ranranx.aolie.handler.param.DeleteParam;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -16,6 +20,8 @@ import java.util.Map;
  **/
 @Component
 public class DeleteHandler<T extends DeleteParam> extends BaseHandler<T> {
+    @Autowired
+    private DataOperatorFactory factory;
 
     /**
      * 默认可以处理的类型
@@ -30,8 +36,20 @@ public class DeleteHandler<T extends DeleteParam> extends BaseHandler<T> {
 
     @Override
     protected HandleResult handle(DeleteParam deleteParam) {
-        deleteParam.getTable().getTableDto().getDataOperId();
-        return null;
+        HandleResult result = new HandleResult();
+        try {
+            DeleteParamDefinition deleteParamDefinition = new DeleteParamDefinition();
+            BeanUtils.copyProperties(deleteParam, deleteParamDefinition);
+            int num = factory.getDataOperatorByName(null).delete(
+                    deleteParamDefinition
+            );
+            result.setSuccess(true);
+            result.setChangeNum(num);
+        } catch (Exception e) {
+            result.setErr(e.getMessage());
+
+        }
+        return result;
     }
 
     /**

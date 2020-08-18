@@ -463,4 +463,13 @@ public class Criteria implements ICondition {
         return sb.toString();
 
     }
+
+    /**
+     * 是不是没有设置条件
+     *
+     * @return
+     */
+    public boolean isEmpty() {
+        return this.lstCondition == null || lstCondition.isEmpty();
+    }
 }

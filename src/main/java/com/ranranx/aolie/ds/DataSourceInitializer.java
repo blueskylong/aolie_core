@@ -7,14 +7,19 @@ import com.ranranx.aolie.ds.dataoperator.DataOperatorFactory;
 import com.ranranx.aolie.ds.dataoperator.IDataOperator;
 import com.ranranx.aolie.ds.dataoperator.multids.DataSourceWrapper;
 import com.ranranx.aolie.ds.dataoperator.multids.DynamicDataSource;
+import com.ranranx.aolie.ds.definition.DeleteParamDefinition;
+import com.ranranx.aolie.ds.definition.InsertParamDefinition;
 import com.ranranx.aolie.ds.definition.QueryParamDefinition;
+import com.ranranx.aolie.handler.param.DeleteParam;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author xxl
@@ -36,8 +41,10 @@ public class DataSourceInitializer implements ApplicationContextAware {
         DataOperatorFactory dataOperatorFactory = (DataOperatorFactory) applicationContext.getBean("DataOperatorFactory");
         IDataOperator dataOperator = dataOperatorFactory.getDefaultDataOperator();
         List<DataOperatorDto> lstDop = findAllDataOperatorDto(dataOperator);
+
         dynamicDataSource.addDataSourceWrappers(createDataSourceWrapper(lstDop));
     }
+
 
     private List<DataSourceWrapper> createDataSourceWrapper(List<DataOperatorDto> lstDop) {
         List<DataSourceWrapper> lstResult = new ArrayList<>();
@@ -53,7 +60,7 @@ public class DataSourceInitializer implements ApplicationContextAware {
 
     private List<DataOperatorDto> findAllDataOperatorDto(IDataOperator dataOperator) {
         QueryParamDefinition queryParamDefinition = new QueryParamDefinition();
-        queryParamDefinition.setClazz(DataOperatorDto.class);
+        queryParamDefinition.setTableName(CommonUtils.getTableName(DataOperatorDto.class));
         return CommonUtils.convertCamelAndToObject(dataOperator.select(queryParamDefinition), DataOperatorDto.class);
     }
 }

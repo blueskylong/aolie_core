@@ -34,7 +34,7 @@ public class QueryHandler<T extends QueryParam> extends BaseHandler<T> {
     private HandleResult findAllResult(QueryParam param) {
 
         QueryParamDefinition queryParamDefinition = new QueryParamDefinition();
-        queryParamDefinition.setClazz(TableDto.class);
+        queryParamDefinition.setTableName(CommonUtils.getTableName(TableDto.class));
         Criteria criteria = queryParamDefinition.appendCriteria();
         criteria.andEqualTo("version", "1");
 

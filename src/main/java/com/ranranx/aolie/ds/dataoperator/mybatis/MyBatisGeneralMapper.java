@@ -1,5 +1,6 @@
 package com.ranranx.aolie.ds.dataoperator.mybatis;
 
+import com.ranranx.aolie.ds.dataoperator.IDataOperator;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -19,7 +20,7 @@ public interface MyBatisGeneralMapper {
      *
      * @return
      */
-    @Select("${sql}")
+    @Select("${" + IDataOperator.SQL_PARAM_NAME + "}")
     List<Map<String, Object>> select(Map<String, Object> map);
 
     /**
@@ -27,7 +28,7 @@ public interface MyBatisGeneralMapper {
      *
      * @return
      */
-    @Delete("${sql}")
+    @Delete("${" + IDataOperator.SQL_PARAM_NAME + "}")
     int delete(Map<String, Object> map);
 
     /**
@@ -35,7 +36,7 @@ public interface MyBatisGeneralMapper {
      *
      * @return
      */
-    @Update("${sql}")
+    @Update("${" + IDataOperator.SQL_PARAM_NAME + "}")
     public int update(Map<String, Object> map);
 
     /**
@@ -43,6 +44,6 @@ public interface MyBatisGeneralMapper {
      *
      * @return
      */
-    @Insert("${sql}")
+    @Insert("${" + IDataOperator.SQL_PARAM_NAME + "}")
     public int insert(Map<String, Object> map);
 }

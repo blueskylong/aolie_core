@@ -16,7 +16,7 @@ public class UpdateParamDefinition {
     /**
      * 表信息
      */
-    private Table table;
+    private String tableName;
     /**
      * 行数据信息
      */
@@ -25,17 +25,30 @@ public class UpdateParamDefinition {
      * 是否只更新有值的列
      */
     private boolean isSelective;
+
+    /**
+     * 主健字段
+     */
+    private String idField;
     /**
      * 复杂条件更新
      */
     private Criteria criteria;
 
-    public Table getTable() {
-        return table;
+    public String getTableName() {
+        return tableName;
     }
 
-    public void setTable(Table table) {
-        this.table = table;
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
+    }
+
+    public Criteria getCriteria() {
+        return criteria;
+    }
+
+    public void setCriteria(Criteria criteria) {
+        this.criteria = criteria;
     }
 
     public List<Map<String, Object>> getLstRows() {
@@ -52,5 +65,13 @@ public class UpdateParamDefinition {
 
     public void setSelective(boolean selective) {
         isSelective = selective;
+    }
+
+    public String getIdField() {
+        return idField;
+    }
+
+    public void setIdField(String idField) {
+        this.idField = idField;
     }
 }

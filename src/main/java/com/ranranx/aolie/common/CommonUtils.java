@@ -1,10 +1,13 @@
 package com.ranranx.aolie.common;
 
+import com.ranranx.aolie.ds.definition.QueryParamDefinition;
 import com.ranranx.aolie.exceptions.InvalidException;
+import com.ranranx.aolie.exceptions.InvalidParamException;
 import com.ranranx.aolie.handler.param.condition.Criteria;
 import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.lang.Nullable;
 
+import javax.persistence.Table;
 import javax.servlet.ServletOutputStream;
 import java.io.ObjectInputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -149,20 +152,41 @@ public class CommonUtils {
     }
 
     public static void main(String[] args) {
-        Criteria criteria = new Criteria();
-        criteria.andEqualTo("eqField", "value1")
-                .andBetween("beField", "value2_1", "value2_2");
-        ArrayList list = new ArrayList();
-        list.add("inValue1");
-        list.add("inValue2");
-        criteria.andIn("inField", list);
-        criteria.andCondition("1=1");
-        Criteria subAndCriteria = criteria.createSubAndCriteria();
-        subAndCriteria.andEqualTo("bizYear", "2019");
-        subAndCriteria.orEqualTo("regCode", "22020");
-        Map<String, Object> paramValue = new HashMap<>();
-        criteria.andEqualTo("name", "xxl");
-        System.out.println(criteria.getSqlWhere(paramValue, "a", 1, false));
+//        Criteria criteria = new Criteria();
+//        criteria.andEqualTo("eqField", "value1")
+//                .andBetween("beField", "value2_1", "value2_2");
+//        ArrayList list = new ArrayList();
+//        list.add("inValue1");
+//        list.add("inValue2");
+//        criteria.andIn("inField", list);
+//        criteria.andCondition("1=1");
+//        Criteria subAndCriteria = criteria.createSubAndCriteria();
+//        subAndCriteria.andEqualTo("bizYear", "2019");
+//        subAndCriteria.orEqualTo("regCode", "22020");
+//        Map<String, Object> paramValue = new HashMap<>();
+//        criteria.andEqualTo("name", "xxl");
+//        System.out.println(criteria.getSqlWhere(paramValue, "a", 1, false));
 
+        Map<String, Object> mapResult = new HashMap<>();
+        List<Object> lstValue = new ArrayList<>();
+        for (int i = 0; i < 1001; i++) {
+            lstValue.add(i);
+        }
+        String sql = SqlTools.genInClause("field1", lstValue, 1, mapResult);
+        System.out.println(sql);
+    }
+
+    /**
+     * 取得类注解上的表名
+     *
+     * @param clazz
+     * @return
+     */
+    public static String getTableName(Class<?> clazz) {
+        Table table = clazz.getAnnotation(Table.class);
+        if (table == null || CommonUtils.isEmpty(table.name())) {
+            throw new InvalidParamException("查询操作没有找到指定的表信息");
+        }
+        return table.name();
     }
 }

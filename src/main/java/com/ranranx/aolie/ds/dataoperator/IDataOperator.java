@@ -15,6 +15,14 @@ import java.util.Map;
  * @Version V1.0
  **/
 public interface IDataOperator {
+    /**
+     * 默认的语句参数的KEY(键名)
+     */
+    final String SQL_PARAM_NAME = "sql__";
+    /**
+     * 默认所有表都需要有ID字段
+     */
+    final String FIELD_ID = "id";
 
     /**
      * 查询
