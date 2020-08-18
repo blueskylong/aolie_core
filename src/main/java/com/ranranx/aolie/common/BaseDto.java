@@ -11,8 +11,8 @@ import java.util.Date;
 public class BaseDto {
     protected Date createDate;
     protected Date lastUpdateDate;
-    protected Double createUser;
-    protected Double lastUpdateUser;
+    protected Long createUser;
+    protected Long lastUpdateUser;
     /**
      * 这里的version是为了做一个区分用的,可能是年度,可能是区划,也可以是租户
      */
@@ -34,19 +34,19 @@ public class BaseDto {
         this.lastUpdateDate = lastUpdateDate;
     }
 
-    public Double getCreateUser() {
+    public Long getCreateUser() {
         return createUser;
     }
 
-    public void setCreateUser(Double createUser) {
+    public void setCreateUser(Long createUser) {
         this.createUser = createUser;
     }
 
-    public Double getLastUpdateUser() {
+    public Long getLastUpdateUser() {
         return lastUpdateUser;
     }
 
-    public void setLastUpdateUser(Double lastUpdateUser) {
+    public void setLastUpdateUser(Long lastUpdateUser) {
         this.lastUpdateUser = lastUpdateUser;
     }
 

@@ -2,12 +2,15 @@ package com.ranranx.aolie.datameta.dto;
 
 import com.ranranx.aolie.common.BaseDto;
 
+import javax.persistence.Table;
+
 /**
  * @Author xxl
  * @Description 类似于数据源的配置, TODO 这里可以扩展成分布式,读写分离等
  * @Date 2020/8/10 18:49
  * @Version V0.0.1
  **/
+@Table(name = "AOLIE_DM_DATAOPERATOR")
 public class DataOperatorDto extends BaseDto {
 
     /**
@@ -41,7 +44,7 @@ public class DataOperatorDto extends BaseDto {
     /**
      * 是否只读
      */
-    private Short isReadOnly;
+    private Short isReadonly;
     /**
      * 由Spring 管理的数据源名称
      */
@@ -129,12 +132,12 @@ public class DataOperatorDto extends BaseDto {
         this.memo = memo;
     }
 
-    public Short getIsReadOnly() {
-        return isReadOnly;
+    public Short getIsReadonly() {
+        return isReadonly;
     }
 
-    public void setIsReadOnly(Short isReadOnly) {
-        this.isReadOnly = isReadOnly;
+    public void setIsReadonly(Short isReadonly) {
+        this.isReadonly = isReadonly;
     }
 
     public String getDsName() {

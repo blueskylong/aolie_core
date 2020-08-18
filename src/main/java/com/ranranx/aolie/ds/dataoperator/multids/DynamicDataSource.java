@@ -49,7 +49,7 @@ public class DynamicDataSource extends AbstractRoutingDataSource {
         if (this.lstWraper == null) {
             this.lstWraper = new ArrayList<>();
         }
-        lstWraper.addAll(lstWraper);
+        this.lstWraper.addAll(lstWraper);
         afterPropertiesSet();
     }
 
@@ -65,7 +65,7 @@ public class DynamicDataSource extends AbstractRoutingDataSource {
         while (iterator.hasNext()) {
             DataSourceWrapper next = iterator.next();
             key = CommonUtils.makeKey(next.getDto().getName(), next.getDto().getVersionCode());
-            logger.info("--> Add DataSource " + next.getDto().getName());
+            logger.info("--> Refresh DataSource " + next.getDto().getName());
             targetDataSources.put(key, next.getDataSource());
             //如果是默认的数据源,则设置为默认
             if (next.isDefault()) {

@@ -35,9 +35,9 @@ public class QueryHandler<T extends QueryParam> extends BaseHandler<T> {
 
         QueryParamDefinition queryParamDefinition = new QueryParamDefinition();
         queryParamDefinition.setClazz(TableDto.class);
-        Criteria criteria = new Criteria();
+        Criteria criteria = queryParamDefinition.appendCriteria();
         criteria.andEqualTo("version", "1");
-        queryParamDefinition.setCriteria(new Criteria[]{criteria});
+
         //TODO 这里需要将查询分解,合并
         List<Map<String, Object>> lstData = factory.getDataOperatorByName(null).select(queryParamDefinition);
         HandleResult result = new HandleResult();

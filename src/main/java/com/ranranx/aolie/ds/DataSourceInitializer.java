@@ -53,8 +53,7 @@ public class DataSourceInitializer implements ApplicationContextAware {
 
     private List<DataOperatorDto> findAllDataOperatorDto(IDataOperator dataOperator) {
         QueryParamDefinition queryParamDefinition = new QueryParamDefinition();
-        queryParamDefinition.setClazz(TableDto.class);
-
-        return CommonUtils.convertToObject(dataOperator.select(null), DataOperatorDto.class);
+        queryParamDefinition.setClazz(DataOperatorDto.class);
+        return CommonUtils.convertCamelAndToObject(dataOperator.select(queryParamDefinition), DataOperatorDto.class);
     }
 }

@@ -82,9 +82,11 @@ public class MyBatisDataOperator implements IDataOperator {
         Map<String, Object> mapParam = new HashMap<>();
         String where = "";
         if (queryParamDefinition.getCriteria() != null) {
-            where = queryParamDefinition.getCriteria()[0].getSqlWhere(mapParam, null, 1, false);
-            if (!CommonUtils.isEmpty(where)) {
-                where = " where " + where;
+            if (queryParamDefinition.hasCriteria()) {
+                where = queryParamDefinition.getCriteria().get(0).getSqlWhere(mapParam, null, 1, false);
+                if (!CommonUtils.isEmpty(where)) {
+                    where = " where " + where;
+                }
             }
         }
         String orderExp = "";

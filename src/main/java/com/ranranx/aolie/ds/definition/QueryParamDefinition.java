@@ -3,6 +3,7 @@ package com.ranranx.aolie.ds.definition;
 import com.ranranx.aolie.datameta.datamodal.Table;
 import com.ranranx.aolie.handler.param.condition.Criteria;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -40,10 +41,12 @@ public class QueryParamDefinition {
      * 表间关系,多表时传入
      */
     private List<TableRelation> lstRelation;
+
+
     /**
      * 复杂过滤条件,针对每张表
      */
-    private Criteria[] criteria;
+    private List<Criteria> lstCriteria = new ArrayList<>();
 
     public Table[] getTable() {
         return table;
@@ -59,14 +62,6 @@ public class QueryParamDefinition {
 
     public void setFields(Long[] fields) {
         this.fields = fields;
-    }
-
-    public Criteria[] getCriteria() {
-        return criteria;
-    }
-
-    public void setCriteria(Criteria[] criteria) {
-        this.criteria = criteria;
     }
 
 
@@ -100,6 +95,36 @@ public class QueryParamDefinition {
 
     public void setVersion(String version) {
         this.version = version;
+    }
+
+    public List<Criteria> getCriteria() {
+        return lstCriteria;
+    }
+
+    public Criteria getSingleCriteria() {
+        if (lstCriteria.size() > 0) {
+            return lstCriteria.get(0);
+        }
+        return new Criteria();
+    }
+
+    public void setCriteria(List<Criteria> criteria) {
+        this.lstCriteria = criteria;
+    }
+
+    /**
+     * 增加过滤条件
+     *
+     * @return
+     */
+    public Criteria appendCriteria() {
+        Criteria criteria = new Criteria();
+        lstCriteria.add(criteria);
+        return criteria;
+    }
+
+    public boolean hasCriteria() {
+        return !lstCriteria.isEmpty();
     }
 }
 

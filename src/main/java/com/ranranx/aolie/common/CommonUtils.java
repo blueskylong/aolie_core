@@ -9,6 +9,8 @@ import javax.servlet.ServletOutputStream;
 import java.io.ObjectInputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @Author xxl
@@ -17,6 +19,8 @@ import java.util.*;
  * @Version V0.0.1
  **/
 public class CommonUtils {
+    private static Pattern UNDERLINE_PATTEN = Pattern.compile("_[a-z]");
+
     /**
      * 字符串
      *
@@ -73,6 +77,56 @@ public class CommonUtils {
             throw new InvalidException("生成对象失败:" + e.getMessage());
         }
         return lstResult;
+    }
+
+    public static <T> List<T> convertCamelAndToObject(List<Map<String, Object>> lst, Class<T> clazz) {
+        List<T> lstResult = new ArrayList<>();
+        try {
+            if (lst != null && !lst.isEmpty()) {
+                for (Map<String, Object> map : lst) {
+                    map = convertToCamel(map);
+                    lstResult.add(populateBean(clazz, map));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new InvalidException("生成对象失败:" + e.getMessage());
+        }
+        return lstResult;
+    }
+
+    /**
+     * Map的KEY由下划线转成驼峰
+     *
+     * @param map
+     * @return
+     */
+    public static Map<String, Object> convertToCamel(Map<String, Object> map) {
+        if (map == null || map.isEmpty()) {
+            return map;
+        }
+        Map<String, Object> mapResult = new HashMap<>();
+        Iterator<Map.Entry<String, Object>> it = map.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<String, Object> next = it.next();
+            mapResult.put(toCamelStr(next.getKey()), next.getValue());
+        }
+        return mapResult;
+    }
+
+    /**
+     * 将下划线风格替换为驼峰风格
+     */
+    public static String toCamelStr(String str) {
+        Matcher matcher = UNDERLINE_PATTEN.matcher(str);
+        StringBuilder builder = new StringBuilder(str);
+        for (int i = 0; matcher.find(); i++) {
+            builder.replace(matcher.start() - i, matcher.end() - i, matcher.group().substring(1).toUpperCase());
+        }
+        if (Character.isUpperCase(builder.charAt(0))) {
+            builder.replace(0, 1, String.valueOf(Character.toLowerCase(builder.charAt(0))));
+        }
+        return builder.toString();
     }
 
     /**
