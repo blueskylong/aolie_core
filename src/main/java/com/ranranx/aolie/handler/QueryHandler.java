@@ -2,15 +2,16 @@ package com.ranranx.aolie.handler;
 
 import com.ranranx.aolie.common.CommonUtils;
 import com.ranranx.aolie.common.Constants;
+import com.ranranx.aolie.datameta.dto.DataOperatorDto;
 import com.ranranx.aolie.datameta.dto.TableDto;
 import com.ranranx.aolie.ds.dataoperator.DataOperatorFactory;
 import com.ranranx.aolie.ds.definition.QueryParamDefinition;
 import com.ranranx.aolie.handler.param.QueryParam;
 import com.ranranx.aolie.handler.param.condition.Criteria;
-import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -34,7 +35,9 @@ public class QueryHandler<T extends QueryParam> extends BaseHandler<T> {
     private HandleResult findAllResult(QueryParam param) {
 
         QueryParamDefinition queryParamDefinition = new QueryParamDefinition();
-        queryParamDefinition.setTableName(CommonUtils.getTableName(TableDto.class));
+        List<String> lst = new ArrayList<>();
+        lst.add(CommonUtils.getTableName(TableDto.class));
+        queryParamDefinition.setTableNames(lst);
         Criteria criteria = queryParamDefinition.appendCriteria();
         criteria.andEqualTo("version", "1");
 

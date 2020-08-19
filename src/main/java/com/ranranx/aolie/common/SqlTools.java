@@ -49,4 +49,14 @@ public class SqlTools {
     public static String getParamKey(int index) {
         return "P" + index;
     }
+
+    /**
+     * 字符串二边加上空格
+     *
+     * @param str
+     * @return
+     */
+    public static String roundSpace(String str) {
+        return " " + str + " ";
+    }
 }

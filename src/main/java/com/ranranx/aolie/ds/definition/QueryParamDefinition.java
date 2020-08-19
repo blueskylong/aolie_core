@@ -1,6 +1,6 @@
 package com.ranranx.aolie.ds.definition;
 
-import com.ranranx.aolie.datameta.datamodal.Table;
+import com.ranranx.aolie.common.CommonUtils;
 import com.ranranx.aolie.handler.param.condition.Criteria;
 
 import java.util.ArrayList;
@@ -13,19 +13,14 @@ import java.util.List;
  * @Version V0.0.1
  **/
 public class QueryParamDefinition {
-
-    /**
-     * 需要有带有注解@Table的类.使用此类,则只可以单个表格查询,只可以使用criteria[0],lstOrder[0]作为参数
-     */
-   private String tableName;
     /**
      * 查询的表
      */
-    private Table[] table;
+    private List<String> tableNames;
     /**
-     * 需要查询的表列表
+     * 需要查询的表列表,如果只是用于分组,则也要放入其中,
      */
-    private Long[] fields;
+    private List<Field> fields;
 
     /**
      * 排序信息
@@ -43,22 +38,6 @@ public class QueryParamDefinition {
      */
     private List<Criteria> lstCriteria = new ArrayList<>();
 
-    public Table[] getTable() {
-        return table;
-    }
-
-    public void setTable(Table[] table) {
-        this.table = table;
-    }
-
-    public Long[] getFields() {
-        return fields;
-    }
-
-    public void setFields(Long[] fields) {
-        this.fields = fields;
-    }
-
 
     public List<FieldOrder> getLstOrder() {
         return lstOrder;
@@ -68,13 +47,6 @@ public class QueryParamDefinition {
         this.lstOrder = lstOrder;
     }
 
-    public String getTableName() {
-        return tableName;
-    }
-
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
-    }
 
     public List<TableRelation> getLstRelation() {
         return lstRelation;
@@ -113,6 +85,96 @@ public class QueryParamDefinition {
 
     public boolean hasCriteria() {
         return !lstCriteria.isEmpty();
+    }
+
+
+    public List<Criteria> getLstCriteria() {
+        return lstCriteria;
+    }
+
+    public void setLstCriteria(List<Criteria> lstCriteria) {
+        this.lstCriteria = lstCriteria;
+    }
+
+    public List<String> getTableNames() {
+        return tableNames;
+    }
+
+    public void setTableNames(List<String> tableNames) {
+        this.tableNames = tableNames;
+    }
+
+    public List<Field> getFields() {
+        return fields;
+    }
+
+    public void setFields(List<Field> fields) {
+        this.fields = fields;
+    }
+
+    /**
+     * 是否需要分组
+     *
+     * @return
+     */
+    public boolean isHasGroup() {
+        if (fields != null && !fields.isEmpty()) {
+            for (Field field : fields) {
+                if (field.isGroupType()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 做此简单的检查
+     *
+     * @return
+     */
+    public String check() {
+        if (this.tableNames == null || tableNames.isEmpty()) {
+            return "没有指定查询的表名";
+        }
+        //
+        if (lstCriteria != null && !lstCriteria.isEmpty()) {
+            for (Criteria criteria : lstCriteria) {
+                if (tableNames.indexOf(criteria.getTableName()) == -1) {
+                    return "条件指定的表名不存在";
+                }
+            }
+        }
+        if (fields != null && !fields.isEmpty()) {
+            for (Field field : fields) {
+                if (tableNames.indexOf(field.getTableName()) == -1) {
+                    return "字段对应的表名不合法";
+                }
+                if (CommonUtils.isEmpty(field.getFieldName())) {
+                    return "字段名称没有指定";
+                }
+            }
+        }
+
+        if (lstRelation != null && !lstRelation.isEmpty()) {
+            for (TableRelation relation : lstRelation) {
+                if (tableNames.indexOf(relation.getTableLeft()) == -1 || tableNames.indexOf(relation.getTableRight()) == -1) {
+                    return "关系信息指定的表名不存在";
+                }
+                if (CommonUtils.isEmpty(relation.getFieldLeft()) || CommonUtils.isEmpty(relation.getFieldRight())) {
+                    return "关系信息中的字段没有指定完全";
+                }
+            }
+        }
+        if (lstOrder != null && !lstOrder.isEmpty()) {
+            for (FieldOrder order : lstOrder) {
+                if (tableNames.indexOf(order.getTableName()) == -1) {
+                    return "排序字段指定的表名不存在";
+                }
+            }
+        }
+        return null;
+
     }
 }
 

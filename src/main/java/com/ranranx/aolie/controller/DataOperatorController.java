@@ -1,21 +1,14 @@
 package com.ranranx.aolie.controller;
 
 import com.ranranx.aolie.common.Constants;
-import com.ranranx.aolie.ds.dataoperator.multids.DynamicDataSource;
 import com.ranranx.aolie.handler.HandleResult;
 import com.ranranx.aolie.handler.HandlerFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.sql.DataSource;
 import java.util.Map;
-import java.util.Random;
 
 /**
  * @Author xxl

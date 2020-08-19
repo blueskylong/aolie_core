@@ -3,7 +3,6 @@ package com.ranranx.aolie.datameta.datamodal;
 import com.ranranx.aolie.common.CommonUtils;
 import com.ranranx.aolie.datameta.dto.DataOperatorDto;
 import com.ranranx.aolie.ds.dataoperator.DataSourceUtils;
-import com.ranranx.aolie.ds.dataoperator.IDataOperator;
 
 /**
  * @Author xxl

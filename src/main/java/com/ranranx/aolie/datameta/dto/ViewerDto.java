@@ -9,7 +9,7 @@ import com.ranranx.aolie.common.BaseDto;
  * @Version V0.0.1
  **/
 public class ViewerDto extends BaseDto {
-    private Double viewId;
+    private Long viewId;
 
     private String viewName;
     /**
@@ -23,11 +23,11 @@ public class ViewerDto extends BaseDto {
 
     private String memo;
 
-    public Double getViewId() {
+    public Long getViewId() {
         return viewId;
     }
 
-    public void setViewId(Double viewId) {
+    public void setViewId(Long viewId) {
         this.viewId = viewId;
     }
 

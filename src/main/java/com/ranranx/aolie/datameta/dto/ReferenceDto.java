@@ -9,7 +9,7 @@ import com.ranranx.aolie.common.BaseDto;
  * @Version V0.0.1
  **/
 public class ReferenceDto extends BaseDto {
-    private Double refId;
+    private Long refId;
     private String tableName;
     private String idField;
     private String nameField;
@@ -22,12 +22,20 @@ public class ReferenceDto extends BaseDto {
      */
     private String commonType;
 
-    public Double getRefId() {
+    public Long getRefId() {
         return refId;
     }
 
-    public void setRefId(Double refId) {
+    public void setRefId(Long refId) {
         this.refId = refId;
+    }
+
+    public String getCommonType() {
+        return commonType;
+    }
+
+    public void setCommonType(String commonType) {
+        this.commonType = commonType;
     }
 
     public String getTableName() {

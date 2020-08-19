@@ -70,6 +70,16 @@ public class Constants {
     }
 
     /**
+     * 数据库表连接方式
+     */
+    public static class JoinType {
+        public static final String INNER_JOIN = "inner join";
+        public static final String LEFT_JOIN = "left join";
+        public static final String RIGHT_JOIN = "right join";
+        public static final String FULL_JOIN = "full join";
+    }
+
+    /**
      * 分组类型
      */
     public static class GroupType {

@@ -2,19 +2,15 @@ package com.ranranx.aolie.ds.dataoperator.mybatis;
 
 import com.ranranx.aolie.common.CommonUtils;
 import com.ranranx.aolie.common.SqlTools;
-import com.ranranx.aolie.datameta.datamodal.Field;
-import com.ranranx.aolie.datameta.datamodal.SchemaHolder;
 import com.ranranx.aolie.datameta.dto.DataOperatorDto;
 import com.ranranx.aolie.ds.dataoperator.DataSourceUtils;
 import com.ranranx.aolie.ds.dataoperator.IDataOperator;
 import com.ranranx.aolie.ds.dataoperator.multids.DynamicDataSource;
 import com.ranranx.aolie.ds.definition.*;
 import com.ranranx.aolie.exceptions.InvalidException;
-import com.ranranx.aolie.exceptions.InvalidParamException;
 import com.ranranx.aolie.handler.param.condition.Criteria;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.persistence.Table;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -71,7 +67,45 @@ public class MyBatisDataOperator implements IDataOperator {
      * @return
      */
     private List<Map<String, Object>> multiTableSelect(QueryParamDefinition queryParamDefinition) {
-        return null;
+        Map<String, String> mapAlias = genTableAlias(queryParamDefinition.getTableNames());
+        Map<String, Object> mapParamValue = new HashMap<>();
+        String sField = SqlBuilder.buildFields(queryParamDefinition.getFields(), mapAlias);
+        String sTable = SqlBuilder.buildTables(queryParamDefinition.getLstRelation(),
+                mapAlias, queryParamDefinition.getTableNames());
+        String sWhere = SqlBuilder.getWhere(mapAlias, queryParamDefinition.getLstCriteria(), mapParamValue);
+        String sGroup = "";
+        if (queryParamDefinition.isHasGroup()) {
+            sGroup = SqlBuilder.genGroupBy(mapAlias, queryParamDefinition.getFields());
+        }
+        String sOrder = SqlBuilder.genOrder(mapAlias, queryParamDefinition.getLstOrder());
+        StringBuilder sql = new StringBuilder();
+        sql.append("select ").append(sField).append(" from ").append(sTable);
+        if (CommonUtils.isNotEmpty(sWhere)) {
+            sql.append(" where ").append(sWhere);
+        }
+        sql.append(sGroup);
+        sql.append(" ").append(sOrder);
+        mapParamValue.put(SQL_PARAM_NAME, sql.toString());
+        return mapper.select(mapParamValue);
+    }
+
+
+    /**
+     * 生成多表的别名
+     *
+     * @param tableNames
+     * @return
+     */
+    private Map<String, String> genTableAlias(List<String> tableNames) {
+        Map<String, String> map = new HashMap<>();
+        for (int i = 0; i < tableNames.size(); i++) {
+            map.put(tableNames.get(i), makeTableAliasString(i));
+        }
+        return map;
+    }
+
+    private String makeTableAliasString(int index) {
+        return "table" + index;
     }
 
     /**
@@ -81,9 +115,9 @@ public class MyBatisDataOperator implements IDataOperator {
      * @return
      */
     private List<Map<String, Object>> singleTableSelect(QueryParamDefinition queryParamDefinition) {
-        String tableName = queryParamDefinition.getTableName();
-        String field = getFieldsExp(queryParamDefinition.getFields(),
-                queryParamDefinition.getTable() == null ? null : queryParamDefinition.getTable()[0].getTableDto().getVersionCode());
+        String tableName = queryParamDefinition.getTableNames().get(0);
+        String field = getFieldsExp((queryParamDefinition.getFields() == null || queryParamDefinition.getFields().isEmpty())
+                ? null : queryParamDefinition.getFields());
         Map<String, Object> mapParam = new HashMap<>();
         String where = "";
         if (queryParamDefinition.getCriteria() != null) {
@@ -98,7 +132,7 @@ public class MyBatisDataOperator implements IDataOperator {
         if (queryParamDefinition.getLstOrder() != null && !queryParamDefinition.getLstOrder().isEmpty()) {
             List<FieldOrder> orders = queryParamDefinition.getLstOrder();
             for (FieldOrder order : orders) {
-                orderExp += order.getOrderExp() + ",";
+                orderExp += order.getOrderExp(null) + ",";
             }
             orderExp = " order by " + orderExp.substring(0, orderExp.length() - 1);
         }
@@ -109,16 +143,14 @@ public class MyBatisDataOperator implements IDataOperator {
     }
 
 
-    private String getFieldsExp(Long[] fieldIds, String version) {
-        if (fieldIds == null || fieldIds.length == 0) {
+    private String getFieldsExp(List<Field> fields) {
+        if (fields == null || fields.isEmpty()) {
             return "*";
         }
         StringBuilder sb = new StringBuilder();
-        Field field;
-        for (Long id : fieldIds) {
-            field = SchemaHolder.getField(id, version);
-            sb.append(SchemaHolder.getColumn(field.getFieldDto().getColumnId(), version)
-                    .getColumnDto().getFieldName()).append(",");
+        for (Field field : fields) {
+
+            sb.append(field.getFieldName()).append(",");
         }
         return sb.substring(0, sb.length() - 1);
     }
@@ -130,8 +162,7 @@ public class MyBatisDataOperator implements IDataOperator {
      * @return
      */
     private boolean isSingleTable(QueryParamDefinition queryParamDefinition) {
-        return queryParamDefinition.getTableName() != null ||
-                (queryParamDefinition.getTable() != null && queryParamDefinition.getTable().length == 1);
+        return queryParamDefinition.getTableNames() != null && queryParamDefinition.getTableNames().size() == 1;
     }
 
     /**
@@ -215,7 +246,8 @@ public class MyBatisDataOperator implements IDataOperator {
      * @param isSelective
      * @return
      */
-    private String genSetSql(Map<String, Object> setValues, Map<String, Object> mapParamValues, int index, boolean isSelective) {
+    private String genSetSql(Map<String, Object> setValues, Map<String, Object> mapParamValues, int index,
+                             boolean isSelective) {
         Iterator<Map.Entry<String, Object>> iterator = setValues.entrySet().iterator();
         StringBuilder sb = new StringBuilder();
         int subIndex = 1;

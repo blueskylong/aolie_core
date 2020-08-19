@@ -49,6 +49,8 @@ public class Criteria implements ICondition {
     //连接条件
     protected String andOr;
 
+    protected String tableName;
+
 
     public Criteria(boolean exists, boolean notNull) {
         super();
@@ -471,5 +473,13 @@ public class Criteria implements ICondition {
      */
     public boolean isEmpty() {
         return this.lstCondition == null || lstCondition.isEmpty();
+    }
+
+    public String getTableName() {
+        return tableName;
+    }
+
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
     }
 }

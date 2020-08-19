@@ -1,5 +1,6 @@
 package com.ranranx.aolie.ds.definition;
 
+import com.ranranx.aolie.common.CommonUtils;
 import com.ranranx.aolie.common.Ordered;
 
 /**
@@ -9,6 +10,10 @@ import com.ranranx.aolie.common.Ordered;
  * @Version V0.0.1
  **/
 public class FieldOrder implements Ordered {
+    /**
+     * 对应的表名
+     */
+    private String tableName;
     /**
      * 字段名
      */
@@ -55,7 +60,20 @@ public class FieldOrder implements Ordered {
      *
      * @return
      */
-    public String getOrderExp() {
-        return field + (isAsc ? " asc " : " desc ");
+    public String getOrderExp(String alias) {
+        if (CommonUtils.isNotEmpty(alias)) {
+            alias += ".";
+        } else {
+            alias = "";
+        }
+        return alias + field + (isAsc ? " asc " : " desc ");
+    }
+
+    public String getTableName() {
+        return tableName;
+    }
+
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
     }
 }

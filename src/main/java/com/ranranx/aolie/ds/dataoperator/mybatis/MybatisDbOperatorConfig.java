@@ -2,9 +2,7 @@ package com.ranranx.aolie.ds.dataoperator.mybatis;
 
 import com.ranranx.aolie.common.CommonUtils;
 import com.ranranx.aolie.datameta.dto.DataOperatorDto;
-import com.ranranx.aolie.ds.dataoperator.DataOperatorFactory;
 import com.ranranx.aolie.ds.dataoperator.DataSourceUtils;
-import com.ranranx.aolie.ds.dataoperator.IDataOperator;
 import com.ranranx.aolie.ds.dataoperator.multids.DataSourceWrapper;
 import com.ranranx.aolie.ds.dataoperator.multids.DynamicDataSource;
 import com.ranranx.aolie.exceptions.InvalidException;
@@ -46,23 +44,7 @@ public class MybatisDbOperatorConfig implements BeanPostProcessor, BeanDefinitio
     public MybatisDbOperatorConfig() {
         lstOperSet = new ArrayList<>();
         lstOperSet.add(loadDefaultDs());
-//        lstOperSet = new ArrayList<>();
-//        DataOperatorDto dto = new DataOperatorDto();
-////        dto.setDriverClassName("com.mysql.cj.jdbc.Driver");
-//        dto.setUrl("jdbc:mysql://localhost:3306/world?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC");
-//        dto.setUserName("root");
-//        dto.setPassword("root");
-//        dto.setName("mysql");
-//        dto.setVersionCode("1");
-//        lstOperSet.add(dto);
-//        dto = new DataOperatorDto();
-////        dto.setDriverClassName("com.mysql.cj.jdbc.Driver");
-//        dto.setUrl("jdbc:mysql://localhost:3306/earth?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC");
-//        dto.setUserName("root");
-//        dto.setPassword("root");
-//        dto.setName("mysql2");
-//        dto.setVersionCode("1");
-//        lstOperSet.add(dto);
+
     }
 
     /**

@@ -15,11 +15,11 @@ public class TableDto extends BaseDto {
     /**
      * 设计ID
      */
-    private Double schemaId;
+    private Long schemaId;
     /**
      * 表ID
      */
-    private Double tableId;
+    private Long tableId;
     /**
      * 表英文名
      */
@@ -40,14 +40,6 @@ public class TableDto extends BaseDto {
     private Long dataOperId;
 
 
-    public Double getTableId() {
-        return tableId;
-    }
-
-    public void setTableId(Double tableId) {
-        this.tableId = tableId;
-    }
-
     public String getTableName() {
         return tableName;
     }
@@ -64,12 +56,20 @@ public class TableDto extends BaseDto {
         this.title = title;
     }
 
-    public Double getSchemaId() {
+    public Long getSchemaId() {
         return schemaId;
     }
 
-    public void setSchemaId(Double schemaId) {
+    public void setSchemaId(Long schemaId) {
         this.schemaId = schemaId;
+    }
+
+    public Long getTableId() {
+        return tableId;
+    }
+
+    public void setTableId(Long tableId) {
+        this.tableId = tableId;
     }
 
     public Integer getReadOnly() {

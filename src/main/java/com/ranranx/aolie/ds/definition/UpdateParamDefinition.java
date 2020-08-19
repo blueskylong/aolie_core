@@ -1,6 +1,5 @@
 package com.ranranx.aolie.ds.definition;
 
-import com.ranranx.aolie.datameta.datamodal.Table;
 import com.ranranx.aolie.handler.param.condition.Criteria;
 
 import java.util.List;

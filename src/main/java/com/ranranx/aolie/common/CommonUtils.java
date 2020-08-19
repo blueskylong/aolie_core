@@ -1,15 +1,11 @@
 package com.ranranx.aolie.common;
 
-import com.ranranx.aolie.ds.definition.QueryParamDefinition;
 import com.ranranx.aolie.exceptions.InvalidException;
 import com.ranranx.aolie.exceptions.InvalidParamException;
-import com.ranranx.aolie.handler.param.condition.Criteria;
 import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.lang.Nullable;
 
 import javax.persistence.Table;
-import javax.servlet.ServletOutputStream;
-import java.io.ObjectInputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.regex.Matcher;

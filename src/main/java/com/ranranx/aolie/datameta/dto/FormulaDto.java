@@ -9,28 +9,28 @@ import com.ranranx.aolie.common.BaseDto;
  * @Version V0.0.1
  **/
 public class FormulaDto extends BaseDto {
-    private Double formulaId;
+    private Long formulaId;
     /**
      * 对应表列的ID,一个列可以有多个公式
      */
-    private Double columnId;
+    private Long columnId;
     private String formula;
     private String filter;
     private Integer index;
 
-    public Double getFormulaId() {
+    public Long getFormulaId() {
         return formulaId;
     }
 
-    public void setFormulaId(Double formulaId) {
+    public void setFormulaId(Long formulaId) {
         this.formulaId = formulaId;
     }
 
-    public Double getColumnId() {
+    public Long getColumnId() {
         return columnId;
     }
 
-    public void setColumnId(Double columnId) {
+    public void setColumnId(Long columnId) {
         this.columnId = columnId;
     }
 

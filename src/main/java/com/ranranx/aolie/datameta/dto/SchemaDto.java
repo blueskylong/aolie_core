@@ -9,31 +9,31 @@ import com.ranranx.aolie.common.BaseDto;
  * @Version V0.0.1
  **/
 public class SchemaDto extends BaseDto {
-    private Double schemaId;
-    private Double schemaName;
-    private Double memo;
+    private Long schemaId;
+    private String schemaName;
+    private String memo;
 
-    public Double getSchemaId() {
+    public Long getSchemaId() {
         return schemaId;
     }
 
-    public void setSchemaId(Double schemaId) {
+    public void setSchemaId(Long schemaId) {
         this.schemaId = schemaId;
     }
 
-    public Double getSchemaName() {
+    public String getSchemaName() {
         return schemaName;
     }
 
-    public void setSchemaName(Double schemaName) {
+    public void setSchemaName(String schemaName) {
         this.schemaName = schemaName;
     }
 
-    public Double getMemo() {
+    public String getMemo() {
         return memo;
     }
 
-    public void setMemo(Double memo) {
+    public void setMemo(String memo) {
         this.memo = memo;
     }
 }

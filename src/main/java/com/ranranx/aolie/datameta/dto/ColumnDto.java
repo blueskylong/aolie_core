@@ -12,15 +12,15 @@ public class ColumnDto extends BaseDto {
     /**
      * 表ID
      */
-    private Double schemaId;
-    private Double tableId;
-    private Double columnId;
+    private Long schemaId;
+    private Long tableId;
+    private Long columnId;
     private String fieldName;
     private Byte nullable;
     private Short fieldIndex;
     private String title;
     private String defaultValue;
-    private Double refTableId;
+    private Long refTableId;
     private String memo;
     private String fieldType;
     private Integer length;
@@ -28,29 +28,6 @@ public class ColumnDto extends BaseDto {
     private Double maxValue;
     private Double minValue;
 
-    public Double getSchemaId() {
-        return schemaId;
-    }
-
-    public void setSchemaId(Double schemaId) {
-        this.schemaId = schemaId;
-    }
-
-    public Double getTableId() {
-        return tableId;
-    }
-
-    public void setTableId(Double tableId) {
-        this.tableId = tableId;
-    }
-
-    public Double getColumnId() {
-        return columnId;
-    }
-
-    public void setColumnId(Double columnId) {
-        this.columnId = columnId;
-    }
 
     public String getFieldName() {
         return fieldName;
@@ -141,11 +118,35 @@ public class ColumnDto extends BaseDto {
         this.minValue = minValue;
     }
 
-    public Double getRefTableId() {
+    public Long getSchemaId() {
+        return schemaId;
+    }
+
+    public void setSchemaId(Long schemaId) {
+        this.schemaId = schemaId;
+    }
+
+    public Long getTableId() {
+        return tableId;
+    }
+
+    public void setTableId(Long tableId) {
+        this.tableId = tableId;
+    }
+
+    public Long getColumnId() {
+        return columnId;
+    }
+
+    public void setColumnId(Long columnId) {
+        this.columnId = columnId;
+    }
+
+    public Long getRefTableId() {
         return refTableId;
     }
 
-    public void setRefTableId(Double refTableId) {
+    public void setRefTableId(Long refTableId) {
         this.refTableId = refTableId;
     }
 }

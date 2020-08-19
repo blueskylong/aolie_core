@@ -1,7 +1,5 @@
 package com.ranranx.aolie.ds.definition;
 
-import com.ranranx.aolie.datameta.datamodal.Table;
-
 import java.util.List;
 import java.util.Map;
 

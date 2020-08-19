@@ -1,7 +1,6 @@
 package com.ranranx.aolie.datameta.datamodal;
 
 import com.ranranx.aolie.datameta.dto.TableColumnRelationDto;
-import com.ranranx.aolie.datameta.dto.TableDto;
 
 /**
  * @Author xxl

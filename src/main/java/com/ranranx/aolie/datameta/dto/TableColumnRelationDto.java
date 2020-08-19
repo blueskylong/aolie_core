@@ -11,8 +11,8 @@ public class TableColumnRelationDto {
      * 关系类型,值 参考Constants.TableRelationType.
      */
     private Integer relationType;
-    private long fieldFrom;
-    private long fieldTo;
+    private Long fieldFrom;
+    private Long fieldTo;
 
     public Integer getRelationType() {
         return relationType;
