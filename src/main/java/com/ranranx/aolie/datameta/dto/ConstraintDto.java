@@ -20,7 +20,7 @@ public class ConstraintDto extends BaseDto {
     /**
      * 条件顺序,只作显示用
      */
-    private Integer index;
+    private Integer orderNum;
     /**
      * 约束的说明
      */
@@ -50,12 +50,12 @@ public class ConstraintDto extends BaseDto {
         this.filter = filter;
     }
 
-    public Integer getIndex() {
-        return index;
+    public Integer getOrderNum() {
+        return orderNum;
     }
 
-    public void setIndex(Integer index) {
-        this.index = index;
+    public void setOrderNum(Integer orderNum) {
+        this.orderNum = orderNum;
     }
 
     public String getMemo() {

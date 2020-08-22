@@ -1,6 +1,6 @@
 package com.ranranx.aolie.datameta.datamodal;
 
-import com.ranranx.aolie.datameta.dto.FieldDto;
+import com.ranranx.aolie.datameta.dto.ComponentDto;
 
 /**
  * @Author xxl
@@ -9,7 +9,7 @@ import com.ranranx.aolie.datameta.dto.FieldDto;
  * @Version V0.0.1
  **/
 public class Field {
-    private FieldDto fieldDto;
+    private ComponentDto componentDto;
     /**
      * 对应的列设置
      */
@@ -23,11 +23,11 @@ public class Field {
         this.column = column;
     }
 
-    public FieldDto getFieldDto() {
-        return fieldDto;
+    public ComponentDto getComponentDto() {
+        return componentDto;
     }
 
-    public void setFieldDto(FieldDto fieldDto) {
-        this.fieldDto = fieldDto;
+    public void setComponentDto(ComponentDto componentDto) {
+        this.componentDto = componentDto;
     }
 }

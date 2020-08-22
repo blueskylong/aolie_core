@@ -8,13 +8,13 @@ import com.ranranx.aolie.common.BaseDto;
  * @Date 2020/8/4 17:39
  * @Version V0.0.1
  **/
-public class FieldDto extends BaseDto {
+public class ComponentDto extends BaseDto {
 
-    private Long fieldId;
+    private Long componentId;
     /**
      * 主表ID
      */
-    private Long viewerId;
+    private Long blockId;
     /**
      * 引用的列ID
      */
@@ -79,22 +79,22 @@ public class FieldDto extends BaseDto {
     /**
      * 默认排序类型
      */
-    private Short orderByType;
+    private Short orderType;
 
-    public Long getFieldId() {
-        return fieldId;
+    public Long getComponentId() {
+        return componentId;
     }
 
-    public void setFieldId(Long fieldId) {
-        this.fieldId = fieldId;
+    public void setComponentId(Long componentId) {
+        this.componentId = componentId;
     }
 
-    public Long getViewerId() {
-        return viewerId;
+    public Long getBlockId() {
+        return blockId;
     }
 
-    public void setViewerId(Long viewerId) {
-        this.viewerId = viewerId;
+    public void setBlockId(Long blockId) {
+        this.blockId = blockId;
     }
 
     public Long getColumnId() {
@@ -202,12 +202,12 @@ public class FieldDto extends BaseDto {
         this.groupType = groupType;
     }
 
-    public Short getOrderByType() {
-        return orderByType;
+    public Short getOrderType() {
+        return orderType;
     }
 
-    public void setOrderByType(Short orderByType) {
-        this.orderByType = orderByType;
+    public void setOrderType(Short orderType) {
+        this.orderType = orderType;
     }
 
     public Integer getHorSpan() {

@@ -1,6 +1,6 @@
 package com.ranranx.aolie.datameta.datamodal;
 
-import com.ranranx.aolie.datameta.dto.ViewerDto;
+import com.ranranx.aolie.datameta.dto.BlockViewDto;
 
 import java.util.List;
 
@@ -12,18 +12,18 @@ import java.util.List;
  **/
 public class Viewer {
 
-    private ViewerDto viewerDto;
+    private BlockViewDto blockViewDto;
     /**
      * 字段显示信息列表
      */
     private List<Field> lstField;
 
-    public ViewerDto getViewerDto() {
-        return viewerDto;
+    public BlockViewDto getBlockViewDto() {
+        return blockViewDto;
     }
 
-    public void setViewerDto(ViewerDto viewerDto) {
-        this.viewerDto = viewerDto;
+    public void setBlockViewDto(BlockViewDto blockViewDto) {
+        this.blockViewDto = blockViewDto;
     }
 
     public List<Field> getLstField() {

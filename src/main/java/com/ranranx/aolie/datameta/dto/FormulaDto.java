@@ -16,7 +16,17 @@ public class FormulaDto extends BaseDto {
     private Long columnId;
     private String formula;
     private String filter;
-    private Integer index;
+    private Integer orderNum;
+
+    private String memo;
+
+    public String getMemo() {
+        return memo;
+    }
+
+    public void setMemo(String memo) {
+        this.memo = memo;
+    }
 
     public Long getFormulaId() {
         return formulaId;
@@ -50,11 +60,11 @@ public class FormulaDto extends BaseDto {
         this.filter = filter;
     }
 
-    public Integer getIndex() {
-        return index;
+    public Integer getOrderNum() {
+        return orderNum;
     }
 
-    public void setIndex(Integer index) {
-        this.index = index;
+    public void setOrderNum(Integer orderNum) {
+        this.orderNum = orderNum;
     }
 }

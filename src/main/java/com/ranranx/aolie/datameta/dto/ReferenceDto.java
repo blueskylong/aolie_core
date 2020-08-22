@@ -13,10 +13,9 @@ public class ReferenceDto extends BaseDto {
     private String tableName;
     private String idField;
     private String nameField;
-    private Integer isOnlyLeaf;
+    private Integer onlyLeaf;
     private String parentField;
     private String codeField;
-    private Integer isTreeLike;
     /**
      * 如果是统一表中的引用,则要提供类型
      */
@@ -62,12 +61,12 @@ public class ReferenceDto extends BaseDto {
         this.nameField = nameField;
     }
 
-    public Integer getIsOnlyLeaf() {
-        return isOnlyLeaf;
+    public Integer getOnlyLeaf() {
+        return onlyLeaf;
     }
 
-    public void setIsOnlyLeaf(Integer isOnlyLeaf) {
-        this.isOnlyLeaf = isOnlyLeaf;
+    public void setOnlyLeaf(Integer onlyLeaf) {
+        this.onlyLeaf = onlyLeaf;
     }
 
     public String getParentField() {
@@ -86,11 +85,4 @@ public class ReferenceDto extends BaseDto {
         this.codeField = codeField;
     }
 
-    public Integer getIsTreeLike() {
-        return isTreeLike;
-    }
-
-    public void setIsTreeLike(Integer isTreeLike) {
-        this.isTreeLike = isTreeLike;
-    }
 }
