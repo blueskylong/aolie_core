@@ -15,25 +15,25 @@ public class Constraint {
     /**
      * 引用到的表,方便查询
      */
-    private List<Double> lstRefTable;
+    private List<Long> lstRefTable;
     /**
      * 引用到的列,方便查询
      */
-    private List<Double> lstRefColumn;
+    private List<Long> lstRefColumn;
 
-    public List<Double> getLstRefTable() {
+    public List<Long> getLstRefTable() {
         return lstRefTable;
     }
 
-    public void setLstRefTable(List<Double> lstRefTable) {
+    public void setLstRefTable(List<Long> lstRefTable) {
         this.lstRefTable = lstRefTable;
     }
 
-    public List<Double> getLstRefColumn() {
+    public List<Long> getLstRefColumn() {
         return lstRefColumn;
     }
 
-    public void setLstRefColumn(List<Double> lstRefColumn) {
+    public void setLstRefColumn(List<Long> lstRefColumn) {
         this.lstRefColumn = lstRefColumn;
     }
 
