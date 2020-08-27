@@ -8,7 +8,7 @@ import com.ranranx.aolie.common.BaseDto;
  * @Date 2020/8/19 17:19
  * @Version V0.0.1
  **/
-public class PageViewerDto  extends BaseDto {
+public class PageViewerDto extends BaseDto {
     /**
      *
      */
@@ -33,6 +33,11 @@ public class PageViewerDto  extends BaseDto {
      * 对话框高度
      */
     private Integer height;
+
+    /**
+     * 布局ID
+     */
+    private Long layoutId;
 
     public Long getPageId() {
         return pageId;
@@ -80,5 +85,13 @@ public class PageViewerDto  extends BaseDto {
 
     public void setSchemaId(Long schemaId) {
         this.schemaId = schemaId;
+    }
+
+    public Long getLayoutId() {
+        return layoutId;
+    }
+
+    public void setLayoutId(Long layoutId) {
+        this.layoutId = layoutId;
     }
 }

@@ -2,6 +2,9 @@ package com.ranranx.aolie.datameta.dto;
 
 import com.ranranx.aolie.common.BaseDto;
 
+import javax.persistence.Transient;
+import java.util.List;
+
 /**
  * @Author xxl
  * @Description
@@ -12,6 +15,9 @@ public class SchemaDto extends BaseDto {
     private Long schemaId;
     private String schemaName;
     private String memo;
+
+    @Transient
+    private List<TableDto> lstTable;
 
     public Long getSchemaId() {
         return schemaId;

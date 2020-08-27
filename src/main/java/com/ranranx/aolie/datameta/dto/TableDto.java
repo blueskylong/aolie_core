@@ -3,6 +3,7 @@ package com.ranranx.aolie.datameta.dto;
 import com.ranranx.aolie.common.BaseDto;
 
 import javax.persistence.Table;
+import java.util.List;
 
 /**
  * @Author xxl
@@ -38,6 +39,26 @@ public class TableDto extends BaseDto {
      * 数据源名
      */
     private Long dataOperId;
+    /**
+     * 设计的界面元素的顶部位置
+     */
+    private Integer posTop;
+    /**
+     * 设计的界面元素的左边位置
+     */
+    private Integer posLeft;
+
+    /**
+     * 宽度
+     */
+    private Integer width;
+    /**
+     * 高度
+     */
+    private Integer height;
+
+    private List<ColumnDto> lstColumn;
+    private List<ConstraintDto> lstConstraint;
 
 
     public String getTableName() {
@@ -86,6 +107,22 @@ public class TableDto extends BaseDto {
 
     public void setDataOperId(Long dataOperId) {
         this.dataOperId = dataOperId;
+    }
+
+    public Integer getPosTop() {
+        return posTop;
+    }
+
+    public void setPosTop(Integer posTop) {
+        this.posTop = posTop;
+    }
+
+    public Integer getPosLeft() {
+        return posLeft;
+    }
+
+    public void setPosLeft(Integer posLeft) {
+        this.posLeft = posLeft;
     }
 }
 

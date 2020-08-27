@@ -36,7 +36,7 @@ public class ComponentDto extends BaseDto {
      */
     private Integer horSpan;
     /**
-     * 纵向行数,如textArea这类的,会占用多行.
+     * 纵向行数,如textArea这类的,会占用多行...
      */
     private Integer verSpan;
     /**
@@ -59,6 +59,11 @@ public class ComponentDto extends BaseDto {
      * 自定义标题的颜色
      */
     private String titleColor;
+
+    /**
+     * 背景色
+     */
+    private String backgroudColor;
     /**
      * 说明
      */
@@ -224,5 +229,13 @@ public class ComponentDto extends BaseDto {
 
     public void setVerSpan(Integer verSpan) {
         this.verSpan = verSpan;
+    }
+
+    public String getBackgroudColor() {
+        return backgroudColor;
+    }
+
+    public void setBackgroudColor(String backgroudColor) {
+        this.backgroudColor = backgroudColor;
     }
 }

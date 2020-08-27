@@ -9,7 +9,7 @@ import com.ranranx.aolie.common.BaseDto;
  * @Version V0.0.1
  **/
 public class BlockViewDto extends BaseDto {
-    private Long blockId;
+    private Long blockViewId;
 
     private String blockName;
     /**
@@ -26,12 +26,12 @@ public class BlockViewDto extends BaseDto {
     private String schemaId;
 
 
-    public Long getBlockId() {
-        return blockId;
+    public Long getBlockViewId() {
+        return blockViewId;
     }
 
-    public void setBlockId(Long blockId) {
-        this.blockId = blockId;
+    public void setBlockViewId(Long blockViewId) {
+        this.blockViewId = blockViewId;
     }
 
     public String getBlockName() {
