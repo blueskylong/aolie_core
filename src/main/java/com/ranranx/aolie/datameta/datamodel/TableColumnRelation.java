@@ -1,4 +1,4 @@
-package com.ranranx.aolie.datameta.datamodal;
+package com.ranranx.aolie.datameta.datamodel;
 
 import com.ranranx.aolie.datameta.dto.TableColumnRelationDto;
 

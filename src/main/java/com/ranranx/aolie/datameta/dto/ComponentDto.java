@@ -2,19 +2,22 @@ package com.ranranx.aolie.datameta.dto;
 
 import com.ranranx.aolie.common.BaseDto;
 
+import javax.persistence.Table;
+
 /**
  * @Author xxl
  * @Description 视图列信息
  * @Date 2020/8/4 17:39
  * @Version V0.0.1
  **/
+@Table(name = "aolie_dm_component")
 public class ComponentDto extends BaseDto {
 
     private Long componentId;
     /**
      * 主表ID
      */
-    private Long blockId;
+    private Long blockViewId;
     /**
      * 引用的列ID
      */
@@ -22,7 +25,7 @@ public class ComponentDto extends BaseDto {
     /**
      * 级次编码,本系统都采用的3位一级的编码格式
      */
-    private String LvlCode;
+    private String lvlCode;
     /**
      * 标题
      */
@@ -63,7 +66,7 @@ public class ComponentDto extends BaseDto {
     /**
      * 背景色
      */
-    private String backgroudColor;
+    private String backgroundColor;
     /**
      * 说明
      */
@@ -86,6 +89,9 @@ public class ComponentDto extends BaseDto {
      */
     private Short orderType;
 
+    private String titlePosition;
+    private String titleSpan;
+
     public Long getComponentId() {
         return componentId;
     }
@@ -94,12 +100,12 @@ public class ComponentDto extends BaseDto {
         this.componentId = componentId;
     }
 
-    public Long getBlockId() {
-        return blockId;
+    public Long getBlockViewId() {
+        return blockViewId;
     }
 
-    public void setBlockId(Long blockId) {
-        this.blockId = blockId;
+    public void setBlockViewId(Long blockViewId) {
+        this.blockViewId = blockViewId;
     }
 
     public Long getColumnId() {
@@ -111,11 +117,11 @@ public class ComponentDto extends BaseDto {
     }
 
     public String getLvlCode() {
-        return LvlCode;
+        return lvlCode;
     }
 
     public void setLvlCode(String lvlCode) {
-        LvlCode = lvlCode;
+        this.lvlCode = lvlCode;
     }
 
     public String getTitle() {
@@ -231,11 +237,27 @@ public class ComponentDto extends BaseDto {
         this.verSpan = verSpan;
     }
 
-    public String getBackgroudColor() {
-        return backgroudColor;
+    public String getBackgroundColor() {
+        return backgroundColor;
     }
 
-    public void setBackgroudColor(String backgroudColor) {
-        this.backgroudColor = backgroudColor;
+    public void setBackgroundColor(String backgroundColor) {
+        this.backgroundColor = backgroundColor;
+    }
+
+    public String getTitlePosition() {
+        return titlePosition;
+    }
+
+    public void setTitlePosition(String titlePosition) {
+        this.titlePosition = titlePosition;
+    }
+
+    public String getTitleSpan() {
+        return titleSpan;
+    }
+
+    public void setTitleSpan(String titleSpan) {
+        this.titleSpan = titleSpan;
     }
 }

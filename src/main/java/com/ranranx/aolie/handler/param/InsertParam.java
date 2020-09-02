@@ -1,6 +1,6 @@
 package com.ranranx.aolie.handler.param;
 
-import com.ranranx.aolie.datameta.datamodal.Table;
+import com.ranranx.aolie.datameta.datamodel.Table;
 
 import java.util.List;
 import java.util.Map;

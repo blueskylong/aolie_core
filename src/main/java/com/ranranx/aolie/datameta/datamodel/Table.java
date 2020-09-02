@@ -1,9 +1,10 @@
-package com.ranranx.aolie.datameta.datamodal;
+package com.ranranx.aolie.datameta.datamodel;
 
 import com.ranranx.aolie.datameta.dto.TableDto;
 import com.ranranx.aolie.ds.dataoperator.DataSourceUtils;
 import com.ranranx.aolie.exceptions.NotExistException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -15,10 +16,16 @@ import java.util.List;
 public class Table {
 
     private TableDto tableDto;
+
+
+    public Table(TableDto tableDto) {
+        this.tableDto = tableDto;
+    }
+
     /**
      * 表内列表
      */
-    private List<Column> lstColumn;
+    private List<Column> lstColumn = new ArrayList<>();
 
     public String getDsKey() {
         if (tableDto.getDataOperId() == null) {
@@ -38,6 +45,10 @@ public class Table {
 
     public List<Column> getLstColumn() {
         return lstColumn;
+    }
+
+    public void addColumn(Column column) {
+        lstColumn.add(column);
     }
 
     public void setLstColumn(List<Column> lstColumn) {

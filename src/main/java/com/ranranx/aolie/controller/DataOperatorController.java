@@ -25,7 +25,7 @@ public class DataOperatorController {
     /**
      * 查询数据
      *
-     * @param mapParam
+     * @param mapParam 此map需要符合查询参数 QueryParam
      * @return
      */
     @PostMapping("/findData")
@@ -37,7 +37,7 @@ public class DataOperatorController {
     /**
      * 新增数据
      *
-     * @param mapParam
+     * @param mapParam  此map需要符合查询参数 InsertParam
      * @return
      */
     @PostMapping("/insert")

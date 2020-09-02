@@ -2,12 +2,15 @@ package com.ranranx.aolie.datameta.dto;
 
 import com.ranranx.aolie.common.BaseDto;
 
+import javax.persistence.Table;
+
 /**
  * @Author xxl
- * @Description
+ * @Description 约束信息,这里表间和表内使用同一个数据,当需要做约束计算时,从方案中查询与此表和字段有关系的约束来检查.
  * @Date 2020/8/4 16:35
  * @Version V0.0.1
  **/
+@Table(name = "aolie_dm_constraint")
 public class ConstraintDto extends BaseDto {
     /**
      * 表达式

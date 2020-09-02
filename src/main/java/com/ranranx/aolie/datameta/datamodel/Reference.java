@@ -1,4 +1,4 @@
-package com.ranranx.aolie.datameta.datamodal;
+package com.ranranx.aolie.datameta.datamodel;
 
 import com.ranranx.aolie.datameta.dto.ReferenceDto;
 
@@ -10,6 +10,10 @@ import com.ranranx.aolie.datameta.dto.ReferenceDto;
  **/
 public class Reference {
     private ReferenceDto referenceDto;
+
+    public Reference(ReferenceDto referenceDto) {
+        this.referenceDto = referenceDto;
+    }
 
     public ReferenceDto getReferenceDto() {
         return referenceDto;

@@ -1,6 +1,8 @@
-package com.ranranx.aolie.datameta.datamodal;
+package com.ranranx.aolie.datameta.datamodel;
 
 import com.ranranx.aolie.datameta.dto.ColumnDto;
+
+import java.util.List;
 
 /**
  * @Author xxl
@@ -11,6 +13,16 @@ import com.ranranx.aolie.datameta.dto.ColumnDto;
 public class Column {
     private ColumnDto columnDto;
     private Reference reference;
+
+    private List<Formula> lstFormula;
+
+    public Column(ColumnDto columnDto, Reference reference) {
+        this.columnDto = columnDto;
+        this.reference = reference;
+    }
+
+    public Column() {
+    }
 
     public ColumnDto getColumnDto() {
         return columnDto;
@@ -26,5 +38,13 @@ public class Column {
 
     public void setReference(Reference reference) {
         this.reference = reference;
+    }
+
+    public List<Formula> getLstFormula() {
+        return lstFormula;
+    }
+
+    public void setLstFormula(List<Formula> lstFormula) {
+        this.lstFormula = lstFormula;
     }
 }

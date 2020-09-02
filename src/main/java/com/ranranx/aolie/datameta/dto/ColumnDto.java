@@ -2,12 +2,15 @@ package com.ranranx.aolie.datameta.dto;
 
 import com.ranranx.aolie.common.BaseDto;
 
+import javax.persistence.Table;
+
 /**
  * @Author xxl
  * @Description 列信息
  * @Date 2020/8/4 16:33
  * @Version V0.0.1
  **/
+@Table(name = "aolie_dm_column")
 public class ColumnDto extends BaseDto {
     /**
      * 表ID
@@ -20,7 +23,7 @@ public class ColumnDto extends BaseDto {
     private Short fieldIndex;
     private String title;
     private String defaultValue;
-    private Long refTableId;
+    private Long refId;
     private String memo;
     private String fieldType;
     private Integer length;
@@ -142,11 +145,11 @@ public class ColumnDto extends BaseDto {
         this.columnId = columnId;
     }
 
-    public Long getRefTableId() {
-        return refTableId;
+    public Long getRefId() {
+        return refId;
     }
 
-    public void setRefTableId(Long refTableId) {
-        this.refTableId = refTableId;
+    public void setRefId(Long refId) {
+        this.refId = refId;
     }
 }

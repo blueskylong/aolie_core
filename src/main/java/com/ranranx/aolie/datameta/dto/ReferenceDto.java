@@ -2,12 +2,15 @@ package com.ranranx.aolie.datameta.dto;
 
 import com.ranranx.aolie.common.BaseDto;
 
+import javax.persistence.Table;
+
 /**
  * @Author xxl
  * @Description 引用数据
  * @Date 2020/8/4 17:46
  * @Version V0.0.1
  **/
+@Table(name = "aolie_dm_reference")
 public class ReferenceDto extends BaseDto {
     private Long refId;
     private String tableName;

@@ -1,4 +1,4 @@
-package com.ranranx.aolie.datameta.datamodal;
+package com.ranranx.aolie.datameta.datamodel;
 
 import com.ranranx.aolie.datameta.dto.SchemaDto;
 import com.ranranx.aolie.interfaces.SchemaMessageReceiveHandler;
@@ -13,6 +13,12 @@ import java.util.List;
  * @Version V0.0.1
  **/
 public class Schema {
+    public Schema() {
+    }
+
+    public Schema(SchemaDto schemaDto) {
+        this.schemaDto = schemaDto;
+    }
 
     private SchemaDto schemaDto;
     /**
@@ -31,6 +37,23 @@ public class Schema {
      * 通知外面消息
      */
     private List<SchemaMessageSendHandler> lstSendHandler;
+    /**
+     * 所有的引用信息
+     */
+    private List<Reference> lstReference;
+
+    /**
+     * 所有的公式
+     */
+    private List<Formula> lstFormula;
+
+    public List<Reference> getLstReference() {
+        return lstReference;
+    }
+
+    public void setLstReference(List<Reference> lstReference) {
+        this.lstReference = lstReference;
+    }
 
     public List<Constraint> getLstConstraint() {
         return lstConstraint;
@@ -70,5 +93,13 @@ public class Schema {
 
     public void setLstSendHandler(List<SchemaMessageSendHandler> lstSendHandler) {
         this.lstSendHandler = lstSendHandler;
+    }
+
+    public List<Formula> getLstFormula() {
+        return lstFormula;
+    }
+
+    public void setLstFormula(List<Formula> lstFormula) {
+        this.lstFormula = lstFormula;
     }
 }

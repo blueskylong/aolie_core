@@ -181,7 +181,7 @@ public class CommonUtils {
     public static String getTableName(Class<?> clazz) {
         Table table = clazz.getAnnotation(Table.class);
         if (table == null || CommonUtils.isEmpty(table.name())) {
-            throw new InvalidParamException("查询操作没有找到指定的表信息");
+            throw new InvalidParamException("查询操作没有找到指定的表信息:" + clazz.getName());
         }
         return table.name();
     }

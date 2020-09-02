@@ -1,9 +1,11 @@
 package com.ranranx.aolie.ds.definition;
 
 import com.ranranx.aolie.common.CommonUtils;
+import com.ranranx.aolie.exceptions.InvalidException;
 import com.ranranx.aolie.handler.param.condition.Criteria;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -47,6 +49,13 @@ public class QueryParamDefinition {
         this.lstOrder = lstOrder;
     }
 
+    public void addOrder(FieldOrder order) {
+        if (this.lstOrder == null) {
+            this.lstOrder = new ArrayList<>();
+        }
+        this.lstOrder.add(order);
+    }
+
 
     public List<TableRelation> getLstRelation() {
         return lstRelation;
@@ -54,6 +63,24 @@ public class QueryParamDefinition {
 
     public void setLstRelation(List<TableRelation> lstRelation) {
         this.lstRelation = lstRelation;
+    }
+
+    /**
+     * 设置DTO代替表名
+     *
+     * @param lstClass
+     */
+    public void setTableDtos(Class... lstClass) {
+        this.tableNames = new ArrayList<>();
+        String tableName;
+        for (Class clazz : lstClass) {
+            tableName = CommonUtils.getTableName(clazz);
+            if (CommonUtils.isEmpty(tableName)) {
+                throw new InvalidException("指定的类没有@Table注解");
+
+            }
+            tableNames.add(tableName);
+        }
     }
 
 
@@ -102,6 +129,11 @@ public class QueryParamDefinition {
 
     public void setTableNames(List<String> tableNames) {
         this.tableNames = tableNames;
+    }
+
+    public void setTableNames(String... tableName) {
+
+        this.tableNames = Arrays.asList(tableName);
     }
 
     public List<Field> getFields() {

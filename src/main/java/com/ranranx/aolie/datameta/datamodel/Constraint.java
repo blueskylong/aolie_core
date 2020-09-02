@@ -1,4 +1,4 @@
-package com.ranranx.aolie.datameta.datamodal;
+package com.ranranx.aolie.datameta.datamodel;
 
 import com.ranranx.aolie.datameta.dto.ConstraintDto;
 
@@ -12,6 +12,15 @@ import java.util.List;
  **/
 public class Constraint {
     private ConstraintDto constraintDto;
+
+    public Constraint() {
+
+    }
+
+    public Constraint(ConstraintDto constraintDto) {
+        this.constraintDto = constraintDto;
+    }
+
     /**
      * 引用到的表,方便查询
      */

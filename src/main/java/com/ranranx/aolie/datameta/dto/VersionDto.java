@@ -2,12 +2,15 @@ package com.ranranx.aolie.datameta.dto;
 
 import com.ranranx.aolie.common.BaseDto;
 
+import javax.persistence.Table;
+
 /**
  * @Author xxl
  * @Description
  * @Date 2020/8/6 12:46
  * @Version V0.0.1
  **/
+@Table(name = "aolie_dm_version")
 public class VersionDto extends BaseDto {
     private Long versionId;
     private String versionCode;

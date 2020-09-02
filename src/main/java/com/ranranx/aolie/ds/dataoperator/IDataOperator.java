@@ -1,9 +1,12 @@
 package com.ranranx.aolie.ds.dataoperator;
 
+import com.ranranx.aolie.common.CommonUtils;
 import com.ranranx.aolie.ds.definition.DeleteParamDefinition;
 import com.ranranx.aolie.ds.definition.InsertParamDefinition;
 import com.ranranx.aolie.ds.definition.QueryParamDefinition;
 import com.ranranx.aolie.ds.definition.UpdateParamDefinition;
+import com.ranranx.aolie.exceptions.DataInvalidException;
+import com.ranranx.aolie.exceptions.InvalidException;
 
 import java.util.List;
 import java.util.Map;
@@ -31,6 +34,38 @@ public interface IDataOperator {
      * @return
      */
     List<Map<String, Object>> select(QueryParamDefinition queryParamDefinition);
+
+    /**
+     * 查询
+     *
+     * @param queryParamDefinition
+     * @return
+     */
+    default <T> List<T> select(QueryParamDefinition queryParamDefinition, Class<T> clazz) {
+        return CommonUtils.convertCamelAndToObject(select(queryParamDefinition), clazz);
+    }
+
+    /**
+     * 查询
+     *
+     * @param queryParamDefinition
+     * @return
+     */
+    default <T> T selectOne(QueryParamDefinition queryParamDefinition, Class<T> clazz) {
+        List<Map<String, Object>> lstData = select(queryParamDefinition);
+        if (lstData == null || lstData.isEmpty()) {
+            return null;
+        }
+        if (lstData.size() > 1) {
+            throw new DataInvalidException("SelectOne返回多行数据");
+        }
+        try {
+            return CommonUtils.populateBean(clazz, lstData.get(0));
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new InvalidException("生成对象失败:" + e.getMessage());
+        }
+    }
 
     /**
      * 删除

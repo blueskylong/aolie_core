@@ -27,7 +27,7 @@ public class TestController {
 
     @RequestMapping("/findContries")
     public List<Map<String, Object>> findContries() {
-        return factory.getDataOperatorByName("mybatisDbOperator", "1").select(null);
+        return factory.getDefaultDataOperator().select(null);
     }
 
     @RequestMapping("/testQuery")

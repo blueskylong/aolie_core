@@ -2,8 +2,7 @@ package com.ranranx.aolie.datameta.dto;
 
 import com.ranranx.aolie.common.BaseDto;
 
-import javax.persistence.Transient;
-import java.util.List;
+import javax.persistence.Table;
 
 /**
  * @Author xxl
@@ -11,13 +10,12 @@ import java.util.List;
  * @Date 2020/8/5 9:39
  * @Version V0.0.1
  **/
+@Table(name = "aolie_dm_schema")
 public class SchemaDto extends BaseDto {
     private Long schemaId;
     private String schemaName;
     private String memo;
-
-    @Transient
-    private List<TableDto> lstTable;
+    private Integer enabled;
 
     public Long getSchemaId() {
         return schemaId;
@@ -41,5 +39,13 @@ public class SchemaDto extends BaseDto {
 
     public void setMemo(String memo) {
         this.memo = memo;
+    }
+
+    public Integer getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(Integer enabled) {
+        this.enabled = enabled;
     }
 }

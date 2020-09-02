@@ -2,12 +2,15 @@ package com.ranranx.aolie.datameta.dto;
 
 import com.ranranx.aolie.common.BaseDto;
 
+import javax.persistence.Table;
+
 /**
  * @Author xxl
  * @Description
  * @Date 2020/8/5 18:54
  * @Version V0.0.1
  **/
+@Table(name = "aolie_dm_formula")
 public class FormulaDto extends BaseDto {
     private Long formulaId;
     /**
@@ -17,6 +20,7 @@ public class FormulaDto extends BaseDto {
     private String formula;
     private String filter;
     private Integer orderNum;
+    private Long schemaId;
 
     private String memo;
 
@@ -62,6 +66,14 @@ public class FormulaDto extends BaseDto {
 
     public Integer getOrderNum() {
         return orderNum;
+    }
+
+    public Long getSchemaId() {
+        return schemaId;
+    }
+
+    public void setSchemaId(Long schemaId) {
+        this.schemaId = schemaId;
     }
 
     public void setOrderNum(Integer orderNum) {

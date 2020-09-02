@@ -2,12 +2,15 @@ package com.ranranx.aolie.datameta.dto;
 
 import com.ranranx.aolie.common.BaseDto;
 
+import javax.persistence.Table;
+
 /**
  * @Author xxl
  * @Description
  * @Date 2020/8/19 17:33
  * @Version V0.0.1
  **/
+@Table(name = "aolie_dm_layout_block")
 public class LayoutBlockDto extends BaseDto {
 
     private Long schemaId;

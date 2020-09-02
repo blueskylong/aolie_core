@@ -165,7 +165,7 @@ public class MybatisDbOperatorConfig implements BeanPostProcessor, BeanDefinitio
     @Bean
     @ConditionalOnMissingBean(value = {DataSource.class})
     @ConditionalOnBean(value = {DataOperatorDto.class})
-    public static DynamicDataSource getDds() {
+    public DynamicDataSource getDds() {
         return new DynamicDataSource();
     }
 }

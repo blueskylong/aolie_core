@@ -27,6 +27,13 @@ public class FieldOrder implements Ordered {
      */
     private int order;
 
+    public FieldOrder(String tableName, String field, boolean isAsc, int order) {
+        this.tableName = tableName;
+        this.field = field;
+        this.isAsc = isAsc;
+        this.order = order;
+    }
+
     public boolean isAsc() {
         return isAsc;
     }

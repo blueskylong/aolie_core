@@ -6,6 +6,10 @@ package com.ranranx.aolie.datameta.dto;
  * @Date 2020/8/8 16:29
  * @Version V0.0.1
  **/
+
+import javax.persistence.Table;
+
+@Table(name = "aolie_dm_column_relation")
 public class TableColumnRelationDto {
     /**
      * 关系类型,值 参考Constants.TableRelationType.

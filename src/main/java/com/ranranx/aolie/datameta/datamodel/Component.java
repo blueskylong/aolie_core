@@ -1,4 +1,4 @@
-package com.ranranx.aolie.datameta.datamodal;
+package com.ranranx.aolie.datameta.datamodel;
 
 import com.ranranx.aolie.datameta.dto.ComponentDto;
 
@@ -8,7 +8,15 @@ import com.ranranx.aolie.datameta.dto.ComponentDto;
  * @Date 2020/8/5 17:34
  * @Version V0.0.1
  **/
-public class Field {
+public class Component {
+    public Component() {
+    }
+
+    public Component(ComponentDto componentDto, Column column) {
+        this.componentDto = componentDto;
+        this.column = column;
+    }
+
     private ComponentDto componentDto;
     /**
      * 对应的列设置
