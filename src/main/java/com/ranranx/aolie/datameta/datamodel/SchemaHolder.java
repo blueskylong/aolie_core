@@ -3,7 +3,6 @@ package com.ranranx.aolie.datameta.datamodel;
 import com.ranranx.aolie.common.CommonUtils;
 import com.ranranx.aolie.datameta.dto.*;
 import com.ranranx.aolie.service.DataModelService;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
@@ -20,8 +19,8 @@ import java.util.Map;
 @org.springframework.stereotype.Component
 public class SchemaHolder {
 
-    @Autowired
-    private DataModelService service;
+
+    private static DataModelService service;
 
     /**
      * 所有表信息 key:SCHEMA_VERSION value:Table
@@ -61,7 +60,8 @@ public class SchemaHolder {
      */
     private static Map<String, Schema> mapSchema;
 
-    public SchemaHolder() {
+    public SchemaHolder(DataModelService service) {
+        SchemaHolder.service = service;
     }
 
 
@@ -106,6 +106,10 @@ public class SchemaHolder {
             }
         }
         return mapSchema.get(version);
+    }
+
+    public static BlockViewer getViewerInfo(Long blockId, String version) {
+        return service.getViewerInfo(blockId, version);
     }
 
     /**

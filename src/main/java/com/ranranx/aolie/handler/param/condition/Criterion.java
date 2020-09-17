@@ -1,6 +1,9 @@
 package com.ranranx.aolie.handler.param.condition;
 
 import com.ranranx.aolie.common.CommonUtils;
+import com.ranranx.aolie.ds.dataoperator.IDataOperator;
+import com.ranranx.aolie.ds.dataoperator.mybatis.MyBatisDataOperator;
+import com.ranranx.aolie.ds.definition.QueryParamDefinition;
 
 import java.util.Collection;
 import java.util.Map;
@@ -27,6 +30,10 @@ public class Criterion implements ICondition {
     private boolean betweenValue;
 
     private boolean listValue;
+    /**
+     * in 查询
+     */
+    private boolean inSelectionValue;
 
     protected Criterion(String preCondition) {
         this(preCondition, false);
@@ -62,6 +69,8 @@ public class Criterion implements ICondition {
         this.andOr = isOr ? "or" : "and";
         if (value instanceof Collection<?>) {
             this.listValue = true;
+        } else if (value instanceof QueryParamDefinition) {
+            this.inSelectionValue = true;
         } else {
             this.singleValue = true;
         }
@@ -134,10 +143,19 @@ public class Criterion implements ICondition {
         if (noValue) {
             return andOrStr + preCondition;
         } else if (singleValue) {
-            mapValue.put(firstParamName, value);
+            if (preCondition.indexOf("like") == preCondition.length() - 4) {
+                mapValue.put(firstParamName, "%" + value + "%");
+            } else {
+                mapValue.put(firstParamName, value);
+            }
             return andOrStr + alias + preCondition + wrapperParam(firstParamName);
         } else if (listValue && CommonUtils.isNotEmpty(value)) {
             return andOrStr + alias + preCondition + genInString(mapValue, alias, index);
+        } else if (inSelectionValue) {
+            Map<String, Object> mapValues = genInSelect((QueryParamDefinition) value);
+            String sql = "(" + mapValues.remove(IDataOperator.SQL_PARAM_NAME).toString() + ")";
+            mapValue.putAll(mapValues);
+            return andOrStr + alias + preCondition + sql;
         } else if (betweenValue) {
             mapValue.put(firstParamName, value);
             mapValue.put(secondParamName, secondValue);
@@ -147,8 +165,12 @@ public class Criterion implements ICondition {
 
     }
 
+    private Map<String, Object> genInSelect(QueryParamDefinition definition) {
+        return MyBatisDataOperator.genSelectParams(definition);
+    }
+
     private String wrapperParam(String paramName) {
-        return "#{" + paramName + "}";
+        return " #{" + paramName + "}";
     }
 
     private String genInString(Map<String, Object> mapValue, String alias, int index) {
@@ -157,7 +179,7 @@ public class Criterion implements ICondition {
         String parIndex = makeParIndexName(index);
         for (int i = 0; i < values.length; i++) {
             mapValue.put(parIndex + i, values[i]);
-            sb.append("#{").append(parIndex + i).append("},");
+            sb.append(" #{").append(parIndex + i).append("},");
         }
         return sb.substring(0, sb.length() - 1) + ")";
     }

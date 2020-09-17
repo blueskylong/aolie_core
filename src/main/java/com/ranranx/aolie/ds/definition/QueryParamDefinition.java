@@ -2,6 +2,7 @@ package com.ranranx.aolie.ds.definition;
 
 import com.ranranx.aolie.common.CommonUtils;
 import com.ranranx.aolie.exceptions.InvalidException;
+import com.ranranx.aolie.handler.param.Page;
 import com.ranranx.aolie.handler.param.condition.Criteria;
 
 import java.util.ArrayList;
@@ -33,6 +34,8 @@ public class QueryParamDefinition {
      * 表间关系,多表时传入
      */
     private List<TableRelation> lstRelation;
+
+    private Page page;
 
 
     /**
@@ -124,6 +127,14 @@ public class QueryParamDefinition {
     }
 
     public List<String> getTableNames() {
+        if (this.tableNames == null && fields != null && fields.size() > 0) {
+            tableNames = new ArrayList<>();
+            for (Field field : fields) {
+                if (tableNames.indexOf(field.getTableName()) == -1) {
+                    tableNames.add(field.getTableName());
+                }
+            }
+        }
         return tableNames;
     }
 
@@ -207,6 +218,14 @@ public class QueryParamDefinition {
         }
         return null;
 
+    }
+
+    public Page getPage() {
+        return page;
+    }
+
+    public void setPage(Page page) {
+        this.page = page;
     }
 }
 

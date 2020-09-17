@@ -24,6 +24,7 @@
 
 package com.ranranx.aolie.handler.param.condition;
 
+import com.ranranx.aolie.ds.definition.QueryParamDefinition;
 import com.ranranx.aolie.exceptions.InvalidException;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.SystemMetaObject;
@@ -202,6 +203,11 @@ public class Criteria implements ICondition {
 
     public Criteria andNotIn(String property, Iterable values) {
         addCriterion(property + " not in", values, property);
+        return (Criteria) this;
+    }
+
+    public Criteria andNotIn(String property, QueryParamDefinition queryParamDefinition) {
+        addCriterion(property + " not in", queryParamDefinition, property);
         return (Criteria) this;
     }
 

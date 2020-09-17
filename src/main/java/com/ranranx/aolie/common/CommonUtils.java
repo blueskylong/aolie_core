@@ -185,4 +185,15 @@ public class CommonUtils {
         }
         return table.name();
     }
+
+    public static String getStringField(Map<String, Object> map, String fieldName) {
+        if (map == null || map.isEmpty()) {
+            return null;
+        }
+        Object obj = map.get(fieldName);
+        if (obj == null) {
+            return null;
+        }
+        return obj.toString();
+    }
 }

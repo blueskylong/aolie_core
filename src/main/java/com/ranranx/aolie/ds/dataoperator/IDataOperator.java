@@ -60,7 +60,7 @@ public interface IDataOperator {
             throw new DataInvalidException("SelectOne返回多行数据");
         }
         try {
-            return CommonUtils.populateBean(clazz, lstData.get(0));
+            return CommonUtils.populateBean(clazz, CommonUtils.convertToCamel(lstData.get(0)));
         } catch (Exception e) {
             e.printStackTrace();
             throw new InvalidException("生成对象失败:" + e.getMessage());

@@ -47,7 +47,6 @@ public class TableDto extends BaseDto {
      * 设计的界面元素的左边位置
      */
     private Integer posLeft;
-
     /**
      * 宽度
      */

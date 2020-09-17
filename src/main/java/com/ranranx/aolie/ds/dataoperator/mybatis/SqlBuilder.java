@@ -27,6 +27,9 @@ public class SqlBuilder {
      */
     public static String buildFields(List<Field> lstField, Map<String, String> mapAlias) {
         StringBuilder sb = new StringBuilder();
+        if (lstField == null || lstField.isEmpty()) {
+            return " * ";
+        }
         for (Field field : lstField) {
             if (field.isShow()) {
                 sb.append(field.getSelectExp(mapAlias.get(field.getTableName()))).append(",");
@@ -46,9 +49,11 @@ public class SqlBuilder {
     public static String buildTables(List<TableRelation> lstRelation, Map<String, String> mapTableAlias, List<String> tableNames) {
         List<String> hasAddedTable = new ArrayList<>();
         StringBuilder sb = new StringBuilder();
-        for (TableRelation relation : lstRelation) {
-            sb.append(addTable(relation, mapTableAlias, lstRelation,
-                    relation == lstRelation.get(0), hasAddedTable));
+        if (lstRelation != null && !lstRelation.isEmpty()) {
+            for (TableRelation relation : lstRelation) {
+                sb.append(addTable(relation, mapTableAlias, lstRelation,
+                        relation == lstRelation.get(0), hasAddedTable));
+            }
         }
         //如果还存在没有关联的表,则直接加到后面
         List<String> notUsedTable = findNotUsedTable(tableNames, hasAddedTable);

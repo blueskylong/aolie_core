@@ -30,6 +30,7 @@ public class ColumnDto extends BaseDto {
     private Integer precision;
     private Double maxValue;
     private Double minValue;
+    private Short isKey;
 
 
     public String getFieldName() {
@@ -151,5 +152,13 @@ public class ColumnDto extends BaseDto {
 
     public void setRefId(Long refId) {
         this.refId = refId;
+    }
+
+    public Short getIsKey() {
+        return isKey;
+    }
+
+    public void setIsKey(Short isKey) {
+        this.isKey = isKey;
     }
 }

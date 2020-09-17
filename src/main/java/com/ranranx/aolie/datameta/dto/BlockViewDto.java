@@ -27,7 +27,19 @@ public class BlockViewDto extends BaseDto {
     private String memo;
 
     private String schemaId;
+    /**
+     * 是否需要把字段自动转换成驼峰型
+     */
+    private Short fieldToCamel;
 
+    /**
+     * 宽度
+     */
+    private Integer colSpan;
+    /**
+     * 高度
+     */
+    private Integer rowSpan;
 
     public Long getBlockViewId() {
         return blockViewId;
@@ -75,5 +87,29 @@ public class BlockViewDto extends BaseDto {
 
     public void setSchemaId(String schemaId) {
         this.schemaId = schemaId;
+    }
+
+    public Short getFieldToCamel() {
+        return fieldToCamel;
+    }
+
+    public void setFieldToCamel(Short fieldToCamel) {
+        this.fieldToCamel = fieldToCamel;
+    }
+
+    public Integer getColSpan() {
+        return colSpan;
+    }
+
+    public void setColSpan(Integer colSpan) {
+        this.colSpan = colSpan;
+    }
+
+    public Integer getRowSpan() {
+        return rowSpan;
+    }
+
+    public void setRowSpan(Integer rowSpan) {
+        this.rowSpan = rowSpan;
     }
 }

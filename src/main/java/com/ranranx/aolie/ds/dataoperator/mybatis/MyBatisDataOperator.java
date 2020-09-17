@@ -11,10 +11,7 @@ import com.ranranx.aolie.exceptions.InvalidException;
 import com.ranranx.aolie.handler.param.condition.Criteria;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @Author xxl
@@ -67,6 +64,10 @@ public class MyBatisDataOperator implements IDataOperator {
      * @return
      */
     private List<Map<String, Object>> multiTableSelect(QueryParamDefinition queryParamDefinition) {
+        return mapper.select(genSelectParams(queryParamDefinition));
+    }
+
+    public static Map<String, Object> genSelectParams(QueryParamDefinition queryParamDefinition) {
         Map<String, String> mapAlias = genTableAlias(queryParamDefinition.getTableNames());
         Map<String, Object> mapParamValue = new HashMap<>();
         String sField = SqlBuilder.buildFields(queryParamDefinition.getFields(), mapAlias);
@@ -86,7 +87,7 @@ public class MyBatisDataOperator implements IDataOperator {
         sql.append(sGroup);
         sql.append(" ").append(sOrder);
         mapParamValue.put(SQL_PARAM_NAME, sql.toString());
-        return mapper.select(mapParamValue);
+        return mapParamValue;
     }
 
 
@@ -96,7 +97,7 @@ public class MyBatisDataOperator implements IDataOperator {
      * @param tableNames
      * @return
      */
-    private Map<String, String> genTableAlias(List<String> tableNames) {
+    private static Map<String, String> genTableAlias(List<String> tableNames) {
         Map<String, String> map = new HashMap<>();
         for (int i = 0; i < tableNames.size(); i++) {
             map.put(tableNames.get(i), makeTableAliasString(i));
@@ -104,8 +105,8 @@ public class MyBatisDataOperator implements IDataOperator {
         return map;
     }
 
-    private String makeTableAliasString(int index) {
-        return "table" + index;
+    private static String makeTableAliasString(int index) {
+        return "table" + UUID.randomUUID().toString().replace("-","");
     }
 
     /**

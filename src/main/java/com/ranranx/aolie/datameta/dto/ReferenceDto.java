@@ -13,12 +13,14 @@ import javax.persistence.Table;
 @Table(name = "aolie_dm_reference")
 public class ReferenceDto extends BaseDto {
     private Long refId;
+    private String refName;
     private String tableName;
     private String idField;
     private String nameField;
     private Integer onlyLeaf;
     private String parentField;
     private String codeField;
+
     /**
      * 如果是统一表中的引用,则要提供类型
      */
@@ -88,4 +90,11 @@ public class ReferenceDto extends BaseDto {
         this.codeField = codeField;
     }
 
+    public String getRefName() {
+        return refName;
+    }
+
+    public void setRefName(String refName) {
+        this.refName = refName;
+    }
 }

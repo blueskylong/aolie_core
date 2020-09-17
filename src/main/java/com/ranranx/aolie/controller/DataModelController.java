@@ -1,5 +1,8 @@
 package com.ranranx.aolie.controller;
 
+import com.ranranx.aolie.common.SessionUtils;
+import com.ranranx.aolie.datameta.datamodel.Schema;
+import com.ranranx.aolie.datameta.datamodel.SchemaHolder;
 import com.ranranx.aolie.datameta.dto.ConstraintDto;
 import com.ranranx.aolie.datameta.dto.FormulaDto;
 import com.ranranx.aolie.service.DataModelService;
@@ -23,6 +26,9 @@ public class DataModelController {
     @Autowired
     private DataModelService service;
 
+    @Autowired
+    private SchemaHolder schemaHolder;
+
     @GetMapping("/findSchemaFormulas/{schemaId}/{version}")
     public List<FormulaDto> findSchemaFormulas(@PathVariable Long schemaId, @PathVariable String version) {
         return service.findSchemaFormula(schemaId, version);
@@ -33,5 +39,20 @@ public class DataModelController {
         return service.findSchemaConstraints(schemaId, version);
     }
 
+    @GetMapping("/findSchemaInfo/{schemaId}/{version}")
+    public Schema findSchemaInfo(@PathVariable Long schemaId, @PathVariable String version) {
+        return schemaHolder.getSchema(schemaId, version);
+    }
+
+    /**
+     * 查询默认的数据连接的表，并且还没有增到方案中。
+     *
+     * @param schemaId
+     * @return
+     */
+    @GetMapping("/findDefaultDBTablesNotInSchema/{schemaId}")
+    public List<String> findDefaultDBTablesNotInSchema(@PathVariable long schemaId) {
+        return service.findDefaultDBTablesNotInSchema(schemaId, SessionUtils.getLoginVersion());
+    }
 
 }

@@ -10,6 +10,18 @@ public class Page {
     private int currentPage;
     private int totalRecord;
     private int pageSize;
+    private int totalPage;
+
+    public Page(int currentPage, int totalRecord, int pageSize) {
+        this.currentPage = currentPage;
+        this.totalRecord = totalRecord;
+        this.pageSize = pageSize;
+        this.totalPage = new Double(Math.ceil((0.0 + this.totalRecord) / this.pageSize)).intValue();
+    }
+
+    public Page() {
+    }
+
 
     public int getCurrentPage() {
         return currentPage;
@@ -33,5 +45,13 @@ public class Page {
 
     public void setPageSize(int pageSize) {
         this.pageSize = pageSize;
+    }
+
+    public int getTotalPage() {
+        return totalPage;
+    }
+
+    public void setTotalPage(int totalPage) {
+        this.totalPage = totalPage;
     }
 }
