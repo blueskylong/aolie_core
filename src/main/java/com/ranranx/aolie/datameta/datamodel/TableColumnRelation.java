@@ -2,6 +2,9 @@ package com.ranranx.aolie.datameta.datamodel;
 
 import com.ranranx.aolie.datameta.dto.TableColumnRelationDto;
 
+import javax.persistence.Transient;
+import java.util.List;
+
 /**
  * @Author xxl
  * @Description 表关系模型数据
@@ -16,11 +19,29 @@ public class TableColumnRelation {
     /**
      * 起始表信息
      */
-    private Table tableFrom;
+    @Transient
+    private TableInfo tableFrom;
     /**
      * 终止表信息
      */
-    private Table tableTo;
+    @Transient
+    private TableInfo tableTo;
+
+    /**
+     * 这里主要是为了更新公式
+     *
+     * @param columnIds
+     */
+    public void columnIdChanged(List<Long[]> columnIds) {
+        for (int i = 0; i < columnIds.size(); i++) {
+            Long[] ids = columnIds.get(i);
+            if (ids[0] == this.dto.getFieldFrom()) {
+                this.dto.setFieldFrom(ids[1]);
+            } else if (ids[0] == this.dto.getFieldTo()) {
+                this.dto.setFieldTo(ids[1]);
+            }
+        }
+    }
 
     public TableColumnRelationDto getDto() {
         return dto;
@@ -30,19 +51,19 @@ public class TableColumnRelation {
         this.dto = dto;
     }
 
-    public Table getTableFrom() {
+    public TableInfo getTableFrom() {
         return tableFrom;
     }
 
-    public void setTableFrom(Table tableFrom) {
+    public void setTableFrom(TableInfo tableFrom) {
         this.tableFrom = tableFrom;
     }
 
-    public Table getTableTo() {
+    public TableInfo getTableTo() {
         return tableTo;
     }
 
-    public void setTableTo(Table tableTo) {
+    public void setTableTo(TableInfo tableTo) {
         this.tableTo = tableTo;
     }
 }

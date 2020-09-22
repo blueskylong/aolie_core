@@ -1,5 +1,6 @@
 package com.ranranx.aolie.ds.definition;
 
+import com.ranranx.aolie.common.CommonUtils;
 import com.ranranx.aolie.handler.param.condition.Criteria;
 
 import java.util.List;
@@ -40,6 +41,9 @@ public class DeleteParamDefinition {
     }
 
     public Criteria getCriteria() {
+        if (this.criteria == null) {
+            this.criteria = new Criteria();
+        }
         return criteria;
     }
 
@@ -54,6 +58,10 @@ public class DeleteParamDefinition {
 
     public void setTableName(String tableName) {
         this.tableName = tableName;
+    }
+
+    public void setTableDto(Class clazz) {
+        tableName = CommonUtils.getTableName(clazz);
     }
 
     public String getIdField() {

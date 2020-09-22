@@ -28,6 +28,7 @@ public class UIController {
     @Autowired
     private DataModelService service;
 
+
     /**
      * 取得方案视图信息,只包含自身及控件信息(含列),不包含公式及约束,用于显示
      *

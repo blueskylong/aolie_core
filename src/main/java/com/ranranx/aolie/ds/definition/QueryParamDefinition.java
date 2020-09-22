@@ -39,7 +39,7 @@ public class QueryParamDefinition {
 
 
     /**
-     * 复杂过滤条件,针对每张表
+     * 复杂过滤条件
      */
     private List<Criteria> lstCriteria = new ArrayList<>();
 

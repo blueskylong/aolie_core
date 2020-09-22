@@ -1,7 +1,5 @@
 package com.ranranx.aolie.datameta.dto;
 
-import com.ranranx.aolie.common.BaseDto;
-
 import javax.persistence.Table;
 
 /**
@@ -11,11 +9,10 @@ import javax.persistence.Table;
  * @Version V0.0.1
  **/
 @Table(name = "aolie_dm_column")
-public class ColumnDto extends BaseDto {
+public class ColumnDto extends SchemaBaseDto {
     /**
      * 表ID
      */
-    private Long schemaId;
     private Long tableId;
     private Long columnId;
     private String fieldName;
@@ -27,7 +24,7 @@ public class ColumnDto extends BaseDto {
     private String memo;
     private String fieldType;
     private Integer length;
-    private Integer precision;
+    private Integer precisionNum;
     private Double maxValue;
     private Double minValue;
     private Short isKey;
@@ -98,12 +95,12 @@ public class ColumnDto extends BaseDto {
         this.length = length;
     }
 
-    public Integer getPrecision() {
-        return precision;
+    public Integer getPrecisionNum() {
+        return precisionNum;
     }
 
-    public void setPrecision(Integer precision) {
-        this.precision = precision;
+    public void setPrecisionNum(Integer precisionNum) {
+        this.precisionNum = precisionNum;
     }
 
     public Double getMaxValue() {
@@ -122,13 +119,6 @@ public class ColumnDto extends BaseDto {
         this.minValue = minValue;
     }
 
-    public Long getSchemaId() {
-        return schemaId;
-    }
-
-    public void setSchemaId(Long schemaId) {
-        this.schemaId = schemaId;
-    }
 
     public Long getTableId() {
         return tableId;

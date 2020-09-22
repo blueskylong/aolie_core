@@ -95,6 +95,62 @@ public class CommonUtils {
     }
 
     /**
+     * 驼峰转下划线
+     */
+    public static String convertToUnderline(String param) {
+        if (param == null || "".equals(param.trim())) {
+            return "";
+        }
+        int len = param.length();
+        StringBuilder sb = new StringBuilder(len);
+        for (int i = 0; i < len; i++) {
+            char c = param.charAt(i);
+            if (Character.isUpperCase(c)) {
+                sb.append("_");
+            }
+            //统一都转小写
+            sb.append(Character.toLowerCase(c));
+        }
+        return sb.toString();
+    }
+
+    public static List<Map<String, Object>> toMap(List<?> lstObject) {
+        List<Map<String, Object>> lstResult = new ArrayList<>();
+        for (Object obj : lstObject) {
+            lstResult.add(toMap(obj, false));
+        }
+        return lstResult;
+    }
+
+    public static List<Map<String, Object>> toMapAndConvertToUnderLine(List<?> lstObject) {
+        List<Map<String, Object>> lstResult = new ArrayList<>();
+        for (Object obj : lstObject) {
+            lstResult.add(toMap(obj, true));
+        }
+        return lstResult;
+    }
+
+    public static Map<String, Object> toMap(Object obj, boolean isConvertToUnderLine) {
+        try {
+            Map<String, Object> result = new HashMap<>();
+            Map<String, String> describe = BeanUtils.describe(obj);
+            if (isConvertToUnderLine) {
+                Iterator<Map.Entry<String, String>> it = describe.entrySet().iterator();
+                while (it.hasNext()) {
+                    Map.Entry<String, String> next = it.next();
+                    result.put(CommonUtils.convertToUnderline(next.getKey()), next.getValue());
+                }
+
+            } else {
+                result.putAll(describe);
+            }
+            return result;
+        } catch (Exception e) {
+            throw new InvalidException(e.getMessage());
+        }
+    }
+
+    /**
      * Map的KEY由下划线转成驼峰
      *
      * @param map
@@ -195,5 +251,19 @@ public class CommonUtils {
             return null;
         }
         return obj.toString();
+    }
+
+    public static Integer getIntegerField(Map<String, Object> map, String fieldName) {
+        if (map == null || map.isEmpty()) {
+            return null;
+        }
+        Object obj = map.get(fieldName);
+        if (obj == null) {
+            return null;
+        }
+        if (obj instanceof Integer) {
+            return (Integer) obj;
+        }
+        return Integer.parseInt(obj.toString());
     }
 }

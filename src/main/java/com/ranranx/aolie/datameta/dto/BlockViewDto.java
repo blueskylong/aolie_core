@@ -1,7 +1,5 @@
 package com.ranranx.aolie.datameta.dto;
 
-import com.ranranx.aolie.common.BaseDto;
-
 import javax.persistence.Table;
 
 /**
@@ -11,7 +9,7 @@ import javax.persistence.Table;
  * @Version V0.0.1
  **/
 @Table(name = "aolie_dm_blockview")
-public class BlockViewDto extends BaseDto {
+public class BlockViewDto extends SchemaBaseDto {
     private Long blockViewId;
 
     private String blockName;
@@ -26,7 +24,6 @@ public class BlockViewDto extends BaseDto {
 
     private String memo;
 
-    private String schemaId;
     /**
      * 是否需要把字段自动转换成驼峰型
      */
@@ -81,13 +78,6 @@ public class BlockViewDto extends BaseDto {
         this.memo = memo;
     }
 
-    public String getSchemaId() {
-        return schemaId;
-    }
-
-    public void setSchemaId(String schemaId) {
-        this.schemaId = schemaId;
-    }
 
     public Short getFieldToCamel() {
         return fieldToCamel;

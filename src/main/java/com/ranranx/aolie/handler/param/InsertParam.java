@@ -1,6 +1,6 @@
 package com.ranranx.aolie.handler.param;
 
-import com.ranranx.aolie.datameta.datamodel.Table;
+import com.ranranx.aolie.datameta.datamodel.TableInfo;
 
 import java.util.List;
 import java.util.Map;
@@ -15,18 +15,18 @@ public class InsertParam {
     /**
      * 表信息
      */
-    private Table table;
+    private TableInfo table;
 
     /**
      * 更新的列信息
      */
     private List<Map<String, Object>> lstRows;
 
-    public Table getTable() {
+    public TableInfo getTable() {
         return table;
     }
 
-    public void setTable(Table table) {
+    public void setTable(TableInfo table) {
         this.table = table;
     }
 

@@ -25,7 +25,7 @@ public class SchemaHolder {
     /**
      * 所有表信息 key:SCHEMA_VERSION value:Table
      */
-    private static Map<String, Table> mapTables;
+    private static Map<String, TableInfo> mapTables;
     /**
      * 所有显示字段信息
      */
@@ -69,7 +69,7 @@ public class SchemaHolder {
         return mapFields.get(CommonUtils.makeKey(fieldId.toString(), version));
     }
 
-    public static Table getTable(Long tableId, String version) {
+    public static TableInfo getTable(Long tableId, String version) {
         return mapTables.get(CommonUtils.makeKey(tableId.toString(), version));
     }
 
@@ -101,15 +101,28 @@ public class SchemaHolder {
                 if (mapSchema == null) {
                     refresh();
                 }
-                return mapSchema.get(version);
+                return mapSchema.get(CommonUtils.makeKey(schemaId.toString(),
+                        version));
 
             }
         }
-        return mapSchema.get(version);
+        return schema;
     }
 
     public static BlockViewer getViewerInfo(Long blockId, String version) {
         return service.getViewerInfo(blockId, version);
+    }
+
+    /**
+     * 保存方案
+     *
+     * @param schema
+     * @return
+     */
+    public String saveSchema(Schema schema) {
+        String err = service.saveSchema(schema);
+        refresh();
+        return err;
     }
 
     /**
@@ -124,31 +137,63 @@ public class SchemaHolder {
         mapOperatorInfo = new HashMap<>(200);
         mapColumns = new HashMap<>(200);
         mapReference = new HashMap<>(200);
+
         List<SchemaDto> allSchemaDto = service.findAllSchemaDto(true);
         if (allSchemaDto == null || allSchemaDto.isEmpty()) {
             return;
         }
         for (SchemaDto dto : allSchemaDto) {
-            mapSchema.put(CommonUtils.makeKey(dto.getSchemaId().toString(),
-                    dto.getVersionCode()), initSchema(dto));
+            initSchema(dto);
         }
+        initOperator();
 
 
+    }
+
+    private void initOperator() {
+        List<DataOperatorInfo> lstOperInfo = service.findAllOperatorInfo();
+        if (lstOperInfo != null && !lstOperInfo.isEmpty()) {
+            lstOperInfo.forEach(info -> {
+                mapOperatorInfo.put(CommonUtils.makeKey(info.getOperatorDto().getId().toString(),
+                        info.getOperatorDto().getVersionCode()), info);
+            });
+        }
     }
 
     /**
      * 初始化单个方案
      *
-     * @param schemaDto
+     * @param dto
      */
-    private Schema initSchema(SchemaDto schemaDto) {
-        Schema schema = new Schema(schemaDto);
+    public void initSchema(SchemaDto dto) {
+        service.clearSchemaCache(dto.getSchemaId(), dto.getVersionCode());
+
+        Schema schema = new Schema(dto);
         initReference(schema);
         setSchemaTable(schema);
         setTableColumn(schema);
         setSchemaConstraint(schema);
         setSchemaFormula(schema);
-        return schema;
+        setSchemaRelation(schema);
+        mapSchema.put(CommonUtils.makeKey(dto.getSchemaId().toString(),
+                dto.getVersionCode()), schema);
+    }
+
+    private void setSchemaRelation(Schema schema) {
+        List<TableColumnRelationDto> lstDto = service.findRelationDto(schema.getSchemaDto().getSchemaId(),
+                schema.getSchemaDto().getVersionCode());
+        if (lstDto == null || lstDto.isEmpty()) {
+            return;
+        }
+        List<TableColumnRelation> lstRelation = new ArrayList<>();
+        lstDto.forEach(((dto) -> {
+            TableColumnRelation re = new TableColumnRelation();
+            re.setDto(dto);
+            re.setTableFrom(getTable(getColumn(dto.getFieldFrom(), dto.getVersionCode()).getColumnDto().getTableId(), dto.getVersionCode()));
+            re.setTableTo(getTable(getColumn(dto.getFieldTo(), dto.getVersionCode()).getColumnDto().getTableId(), dto.getVersionCode()));
+            lstRelation.add(re);
+        }));
+        schema.setLstRelation(lstRelation);
     }
 
     /**
@@ -181,12 +226,12 @@ public class SchemaHolder {
             return;
         }
         Formula formula;
-        List<Formula> lstFormula = new ArrayList<>();
+//        List<Formula> lstFormula = new ArrayList<>();
         List<Formula> formulas;
 
         for (FormulaDto dto : lstDto) {
             formula = new Formula(dto);
-            lstFormula.add(formula);
+//            lstFormula.add(formula);
             String columnKey = CommonUtils.makeKey(dto.getColumnId().toString(), dto.getVersionCode());
             formulas = mapFormula.get(columnKey);
             if (formulas == null) {
@@ -198,7 +243,7 @@ public class SchemaHolder {
             column.setLstFormula(formulas);
 
         }
-        schema.setLstFormula(lstFormula);
+//        schema.setLstFormula(lstFormula);
     }
 
     /**
@@ -210,9 +255,9 @@ public class SchemaHolder {
         List<TableDto> schemaTables = service.findSchemaTables(schema.getSchemaDto().getSchemaId(),
                 schema.getSchemaDto().getVersionCode());
         if (schemaTables != null && !schemaTables.isEmpty()) {
-            List<Table> lstTable = new ArrayList<>();
+            List<TableInfo> lstTable = new ArrayList<>();
             for (TableDto tableDto : schemaTables) {
-                Table table = new Table(tableDto);
+                TableInfo table = new TableInfo(tableDto);
                 lstTable.add(table);
                 mapTables.put(CommonUtils.makeKey(String.valueOf(tableDto.getTableId()), tableDto.getVersionCode()), table);
             }

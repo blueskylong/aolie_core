@@ -1,6 +1,6 @@
 package com.ranranx.aolie.handler.param;
 
-import com.ranranx.aolie.datameta.datamodel.Table;
+import com.ranranx.aolie.datameta.datamodel.TableInfo;
 import com.ranranx.aolie.handler.param.condition.Criteria;
 
 import java.util.List;
@@ -23,7 +23,7 @@ public class DeleteParam {
     /**
      * 表信息
      */
-    private Table table;
+    private TableInfo table;
     /**
      * 要删除的ID
      */
@@ -46,11 +46,11 @@ public class DeleteParam {
     }
 
 
-    public Table getTable() {
+    public TableInfo getTable() {
         return table;
     }
 
-    public void setTable(Table table) {
+    public void setTable(TableInfo table) {
         this.table = table;
     }
 

@@ -1,9 +1,6 @@
 package com.ranranx.aolie.datameta.dto;
 
-import com.ranranx.aolie.common.BaseDto;
-
 import javax.persistence.Table;
-import java.util.List;
 
 /**
  * @Author xxl
@@ -12,11 +9,8 @@ import java.util.List;
  * @Version V0.0.1
  **/
 @Table(name = "AOLIE_DM_TABLE")
-public class TableDto extends BaseDto {
-    /**
-     * 设计ID
-     */
-    private Long schemaId;
+public class TableDto extends SchemaBaseDto {
+
     /**
      * 表ID
      */
@@ -56,9 +50,6 @@ public class TableDto extends BaseDto {
      */
     private Integer height;
 
-    private List<ColumnDto> lstColumn;
-    private List<ConstraintDto> lstConstraint;
-
 
     public String getTableName() {
         return tableName;
@@ -76,13 +67,6 @@ public class TableDto extends BaseDto {
         this.title = title;
     }
 
-    public Long getSchemaId() {
-        return schemaId;
-    }
-
-    public void setSchemaId(Long schemaId) {
-        this.schemaId = schemaId;
-    }
 
     public Long getTableId() {
         return tableId;
@@ -122,6 +106,22 @@ public class TableDto extends BaseDto {
 
     public void setPosLeft(Integer posLeft) {
         this.posLeft = posLeft;
+    }
+
+    public Integer getWidth() {
+        return width;
+    }
+
+    public void setWidth(Integer width) {
+        this.width = width;
+    }
+
+    public Integer getHeight() {
+        return height;
+    }
+
+    public void setHeight(Integer height) {
+        this.height = height;
     }
 }
 

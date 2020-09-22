@@ -2,12 +2,11 @@ package com.ranranx.aolie.service;
 
 import com.ranranx.aolie.common.CommonUtils;
 import com.ranranx.aolie.common.Constants;
+import com.ranranx.aolie.common.IdGenerator;
 import com.ranranx.aolie.datameta.datamodel.*;
 import com.ranranx.aolie.datameta.dto.*;
 import com.ranranx.aolie.ds.dataoperator.DataOperatorFactory;
-import com.ranranx.aolie.ds.definition.Field;
-import com.ranranx.aolie.ds.definition.FieldOrder;
-import com.ranranx.aolie.ds.definition.QueryParamDefinition;
+import com.ranranx.aolie.ds.definition.*;
 import com.ranranx.aolie.handler.param.condition.Criteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -79,6 +78,7 @@ public class DataModelService {
         queryParamDefinition.setTableDtos(ColumnDto.class);
         queryParamDefinition.appendCriteria().andEqualTo("schema_id", schemaId)
                 .andEqualTo("version_code", version);
+        queryParamDefinition.addOrder(new FieldOrder(null, "field_index", true, 0));
         return factory.getDefaultDataOperator()
                 .select(queryParamDefinition, ColumnDto.class);
     }
@@ -216,6 +216,13 @@ public class DataModelService {
 
     }
 
+    /**
+     * 查找没有被引用的表信息,这里只针对MYSql做的查询
+     *
+     * @param schemaId
+     * @param version
+     * @return
+     */
     public List<String> findDefaultDBTablesNotInSchema(Long schemaId, String version) {
         QueryParamDefinition definition = new QueryParamDefinition();
         definition.setTableNames("information_schema.tables");
@@ -248,6 +255,209 @@ public class DataModelService {
             lst.add(map.get("table_name").toString());
         }
         return lst;
+    }
+
+    /**
+     * 查询一张表的字段信息,并生成DTO
+     *
+     * @param tableName
+     * @return
+     */
+    public List<ColumnDto> findTableFieldAsColumnDto(String tableName) {
+
+        QueryParamDefinition definition = new QueryParamDefinition();
+        definition.setTableNames("information_schema.COLUMNS");
+        definition.appendCriteria().andEqualTo("table_name", tableName)
+                .andCondition("TABLE_SCHEMA=(select database())");
+        List<Map<String, Object>> lstResult = factory.getDefaultDataOperator().select(definition);
+        List<ColumnDto> lstDto = new ArrayList<>();
+
+        if (lstResult != null && !lstResult.isEmpty()) {
+            for (Map<String, Object> map : lstResult) {
+                lstDto.add(createColumnDto(map));
+            }
+        }
+        return lstDto;
+    }
+
+    private ColumnDto createColumnDto(Map<String, Object> map) {
+        ColumnDto dto = new ColumnDto();
+        dto.setFieldName(CommonUtils.getStringField(map, "COLUMN_NAME"));
+        dto.setFieldType(CommonUtils.getStringField(map, "DATA_TYPE"));
+        dto.setLength(CommonUtils.getIntegerField(map, "CHARACTER_MAXIMUM_LENGTH"));
+        dto.setNullable("YES".equals(CommonUtils.getStringField(map, "IS_NULLABLE")) ? new Byte((byte) 1) : new Byte((byte) 0));
+        dto.setDefaultValue(CommonUtils.getStringField(map, "COLUMN_DEFAULT"));
+        dto.setPrecisionNum(CommonUtils.getIntegerField(map, "NUMERIC_SCALE"));
+        dto.setTitle(dto.getFieldName());
+        return dto;
+    }
+
+    /**
+     * 保存方案
+     *
+     * @param schema
+     * @return
+     */
+    public String saveSchema(Schema schema) {
+
+        String sErr = validateSchema(schema);
+        if (!CommonUtils.isEmpty(sErr)) {
+            return sErr;
+        }
+        deleteSchema(schema.getSchemaDto().getSchemaId(), schema.getSchemaDto().getVersionCode());
+        //更新新增加的ID
+        updateIds(schema);
+        if (schema.getSchemaDto().getSchemaId() == 1) {
+            return "系统保留方案不允许修改";
+        }
+        saveData(schema);
+        return "";
+    }
+
+    private void saveData(Schema schema) {
+
+        InsertParamDefinition insertParamDefinition = new InsertParamDefinition();
+        insertParamDefinition.setNeedConvertToUnderLine(true);
+        insertParamDefinition.setObject(schema.getSchemaDto());
+        factory.getDefaultDataOperator().insert(insertParamDefinition);
+
+        List<FormulaDto> formulas = schema.getFormulas();
+        if (formulas != null && !formulas.isEmpty()) {
+            insertParamDefinition.setObjects(formulas);
+            insertParamDefinition.setTableDto(FormulaDto.class);
+            factory.getDefaultDataOperator().insert(insertParamDefinition);
+        }
+        List<ColumnDto> lstColumnDto = schema.getColumnDtos();
+        if (lstColumnDto != null && !lstColumnDto.isEmpty()) {
+            insertParamDefinition.setObjects(lstColumnDto);
+            insertParamDefinition.setTableDto(ColumnDto.class);
+            factory.getDefaultDataOperator().insert(insertParamDefinition);
+        }
+
+        List<ConstraintDto> constraintDtos = schema.getConstraintDtos();
+        if (constraintDtos != null && !constraintDtos.isEmpty()) {
+            insertParamDefinition.setObjects(constraintDtos);
+            insertParamDefinition.setTableDto(ConstraintDto.class);
+            factory.getDefaultDataOperator().insert(insertParamDefinition);
+        }
+
+        List<TableColumnRelationDto> relations = schema.getRelationDto();
+        if (relations != null && !relations.isEmpty()) {
+            insertParamDefinition.setObjects(relations);
+            insertParamDefinition.setTableDto(TableColumnRelationDto.class);
+            factory.getDefaultDataOperator().insert(insertParamDefinition);
+        }
+
+        List<TableDto> lstTableDtos = schema.getTableDtos();
+        if (lstTableDtos != null && !lstTableDtos.isEmpty()) {
+            insertParamDefinition.setTableDto(TableDto.class);
+            insertParamDefinition.setObjects(lstTableDtos);
+            factory.getDefaultDataOperator().insert(insertParamDefinition);
+        }
+    }
+
+
+    private String validateSchema(Schema schema) {
+        return null;
+    }
+
+    /**
+     * 处理临时id
+     *
+     * @param schema
+     */
+    private void updateIds(Schema schema) {
+        if (schema.getSchemaDto().getSchemaId() < 0) {
+            schema.getSchemaDto().setSchemaId(IdGenerator.getNextId(Schema.class.getName()));
+        }
+        List<Long[]> lstChangedColumn = new ArrayList<>();
+        if (schema.getLstTable() != null) {
+            for (TableInfo table : schema.getLstTable()) {
+                List<Long[]> changedIds = table.updateColId();
+                if (changedIds != null) {
+                    lstChangedColumn.addAll(changedIds);
+                }
+            }
+            if (!lstChangedColumn.isEmpty()) {
+                for (TableInfo table : schema.getLstTable()) {
+                    table.columnIdChanged(lstChangedColumn);
+                }
+            }
+        }
+        if (schema.getLstRelation() != null) {
+            schema.getLstRelation().forEach((relation -> {
+                relation.getDto().setSchemaId(schema.getSchemaDto().getSchemaId());
+                relation.getDto().setVersionCode(
+                        schema.getSchemaDto().getVersionCode());
+                if (relation.getDto().getId() < 0) {
+                    relation.getDto().setId(IdGenerator.getNextId(TableColumnRelation.class.getName()));
+                }
+            }));
+        }
+        if (!lstChangedColumn.isEmpty()) {
+            if (schema.getLstConstraint() != null) {
+                for (Constraint constraint : schema.getLstConstraint()) {
+                    constraint.columnIdChanged(lstChangedColumn);
+                }
+            }
+            List<TableColumnRelation> lstRelation = schema.getLstRelation();
+            if (lstRelation != null && !lstRelation.isEmpty()) {
+                lstRelation.forEach((relation -> {
+                    relation.columnIdChanged(lstChangedColumn);
+                }));
+            }
+        }
+    }
+
+    private void deleteSchema(Long schemaId, String version) {
+        //方案表
+        DeleteParamDefinition deleteParamDefinition = new DeleteParamDefinition();
+        deleteParamDefinition.setTableDto(SchemaDto.class);
+        deleteParamDefinition.getCriteria().andEqualTo("schema_id", schemaId)
+                .andEqualTo("version_code", version);
+        factory.getDefaultDataOperator().delete(deleteParamDefinition);
+
+        deleteParamDefinition.setTableDto(TableDto.class);
+        factory.getDefaultDataOperator().delete(deleteParamDefinition);
+
+        deleteParamDefinition.setTableDto(FormulaDto.class);
+        factory.getDefaultDataOperator().delete(deleteParamDefinition);
+
+        deleteParamDefinition.setTableDto(ConstraintDto.class);
+        factory.getDefaultDataOperator().delete(deleteParamDefinition);
+
+        deleteParamDefinition.setTableDto(TableColumnRelationDto.class);
+        factory.getDefaultDataOperator().delete(deleteParamDefinition);
+
+        deleteParamDefinition.setTableDto(ColumnDto.class);
+        factory.getDefaultDataOperator().delete(deleteParamDefinition);
+    }
+
+    /**
+     * 查询所有的数据操作信息
+     *
+     * @return
+     */
+    public List<DataOperatorInfo> findAllOperatorInfo() {
+        QueryParamDefinition queryParamDefinition = new QueryParamDefinition();
+        queryParamDefinition.setTableDtos(DataOperatorDto.class);
+        List<DataOperatorDto> lstDto = factory.getDefaultDataOperator().select(queryParamDefinition, DataOperatorDto.class);
+        if (lstDto != null && !lstDto.isEmpty()) {
+            List<DataOperatorInfo> lstInfo = new ArrayList<>();
+            lstDto.forEach((dataOperatorDto -> {
+                lstInfo.add(new DataOperatorInfo(dataOperatorDto));
+            }));
+            return lstInfo;
+        }
+        return null;
+    }
+
+    public List<TableColumnRelationDto> findRelationDto(Long schemaId, String version) {
+        QueryParamDefinition definition = new QueryParamDefinition();
+        definition.setTableDtos(TableColumnRelationDto.class);
+        definition.appendCriteria().andEqualTo("schema_id", schemaId)
+                .andEqualTo("version_code", version);
+        return factory.getDefaultDataOperator().select(definition, TableColumnRelationDto.class);
     }
 
 }

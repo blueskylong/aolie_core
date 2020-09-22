@@ -11,6 +11,10 @@ import com.ranranx.aolie.datameta.dto.ReferenceDto;
 public class Reference {
     private ReferenceDto referenceDto;
 
+    public Reference() {
+
+    }
+
     public Reference(ReferenceDto referenceDto) {
         this.referenceDto = referenceDto;
     }

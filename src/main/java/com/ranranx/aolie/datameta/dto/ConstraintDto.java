@@ -1,7 +1,5 @@
 package com.ranranx.aolie.datameta.dto;
 
-import com.ranranx.aolie.common.BaseDto;
-
 import javax.persistence.Table;
 
 /**
@@ -11,7 +9,7 @@ import javax.persistence.Table;
  * @Version V0.0.1
  **/
 @Table(name = "aolie_dm_constraint")
-public class ConstraintDto extends BaseDto {
+public class ConstraintDto extends SchemaBaseDto {
     /**
      * 表达式
      */
@@ -36,6 +34,7 @@ public class ConstraintDto extends BaseDto {
      * 禁用
      */
     private Short disabled;
+
 
     public String getExpression() {
         return expression;

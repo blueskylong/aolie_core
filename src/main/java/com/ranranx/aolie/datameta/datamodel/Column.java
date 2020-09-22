@@ -16,9 +16,32 @@ public class Column {
 
     private List<Formula> lstFormula;
 
+
     public Column(ColumnDto columnDto, Reference reference) {
         this.columnDto = columnDto;
         this.reference = reference;
+    }
+
+    public void updateTableId(long tableId) {
+        this.columnDto.setTableId(tableId);
+    }
+
+    public void updateColumnId(Long colId) {
+        this.columnDto.setColumnId(colId);
+        if (this.lstFormula != null) {
+            for (Formula formula : this.lstFormula) {
+                formula.getFormulaDto().setColumnId(colId);
+            }
+        }
+
+    }
+
+    public void columnIdChanged(List<Long[]> columnIds) {
+        if (this.lstFormula != null) {
+            for (Formula formula : this.lstFormula) {
+                formula.columnIdChanged(columnIds);
+            }
+        }
     }
 
     public Column() {

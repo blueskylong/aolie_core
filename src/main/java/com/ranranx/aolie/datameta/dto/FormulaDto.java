@@ -1,7 +1,5 @@
 package com.ranranx.aolie.datameta.dto;
 
-import com.ranranx.aolie.common.BaseDto;
-
 import javax.persistence.Table;
 
 /**
@@ -11,7 +9,7 @@ import javax.persistence.Table;
  * @Version V0.0.1
  **/
 @Table(name = "aolie_dm_formula")
-public class FormulaDto extends BaseDto {
+public class FormulaDto extends SchemaBaseDto {
     private Long formulaId;
     /**
      * 对应表列的ID,一个列可以有多个公式
@@ -66,14 +64,6 @@ public class FormulaDto extends BaseDto {
 
     public Integer getOrderNum() {
         return orderNum;
-    }
-
-    public Long getSchemaId() {
-        return schemaId;
-    }
-
-    public void setSchemaId(Long schemaId) {
-        this.schemaId = schemaId;
     }
 
     public void setOrderNum(Integer orderNum) {

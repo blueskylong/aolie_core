@@ -10,13 +10,14 @@ package com.ranranx.aolie.datameta.dto;
 import javax.persistence.Table;
 
 @Table(name = "aolie_dm_column_relation")
-public class TableColumnRelationDto {
+public class TableColumnRelationDto extends SchemaBaseDto {
     /**
      * 关系类型,值 参考Constants.TableRelationType.
      */
     private Integer relationType;
     private Long fieldFrom;
     private Long fieldTo;
+    private Long id;
 
     public Integer getRelationType() {
         return relationType;
@@ -26,19 +27,28 @@ public class TableColumnRelationDto {
         this.relationType = relationType;
     }
 
-    public long getFieldFrom() {
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getFieldFrom() {
         return fieldFrom;
     }
 
-    public void setFieldFrom(long fieldFrom) {
+    public void setFieldFrom(Long fieldFrom) {
         this.fieldFrom = fieldFrom;
     }
 
-    public long getFieldTo() {
+    public Long getFieldTo() {
         return fieldTo;
     }
 
-    public void setFieldTo(long fieldTo) {
+    public void setFieldTo(Long fieldTo) {
         this.fieldTo = fieldTo;
     }
 }

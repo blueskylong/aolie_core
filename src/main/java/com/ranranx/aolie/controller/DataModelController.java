@@ -3,14 +3,12 @@ package com.ranranx.aolie.controller;
 import com.ranranx.aolie.common.SessionUtils;
 import com.ranranx.aolie.datameta.datamodel.Schema;
 import com.ranranx.aolie.datameta.datamodel.SchemaHolder;
+import com.ranranx.aolie.datameta.dto.ColumnDto;
 import com.ranranx.aolie.datameta.dto.ConstraintDto;
 import com.ranranx.aolie.datameta.dto.FormulaDto;
 import com.ranranx.aolie.service.DataModelService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -53,6 +51,23 @@ public class DataModelController {
     @GetMapping("/findDefaultDBTablesNotInSchema/{schemaId}")
     public List<String> findDefaultDBTablesNotInSchema(@PathVariable long schemaId) {
         return service.findDefaultDBTablesNotInSchema(schemaId, SessionUtils.getLoginVersion());
+    }
+
+    @GetMapping("/findTableFieldAsColumnDto/{tableName}")
+    public List<ColumnDto> findTableFieldAsColumnDto(@PathVariable String tableName) {
+        return service.findTableFieldAsColumnDto(tableName);
+    }
+
+    /**
+     * 保存方案
+     *
+     * @param schema
+     * @return
+     */
+
+    @PostMapping("/saveSchema")
+    public String saveSchema(@RequestBody Schema schema) {
+        return schemaHolder.saveSchema(schema);
     }
 
 }

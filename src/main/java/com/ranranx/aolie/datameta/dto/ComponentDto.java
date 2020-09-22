@@ -1,7 +1,5 @@
 package com.ranranx.aolie.datameta.dto;
 
-import com.ranranx.aolie.common.BaseDto;
-
 import javax.persistence.Table;
 
 /**
@@ -11,7 +9,7 @@ import javax.persistence.Table;
  * @Version V0.0.1
  **/
 @Table(name = "aolie_dm_component")
-public class ComponentDto extends BaseDto {
+public class ComponentDto extends SchemaBaseDto {
 
     private Long componentId;
     /**

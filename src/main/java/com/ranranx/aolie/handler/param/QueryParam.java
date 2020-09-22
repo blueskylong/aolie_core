@@ -1,6 +1,6 @@
 package com.ranranx.aolie.handler.param;
 
-import com.ranranx.aolie.datameta.datamodel.Table;
+import com.ranranx.aolie.datameta.datamodel.TableInfo;
 import com.ranranx.aolie.ds.definition.FieldOrder;
 import com.ranranx.aolie.handler.param.condition.Criteria;
 
@@ -34,7 +34,7 @@ public class QueryParam {
     /**
      * 表信息   表条件
      */
-    private Table[] table;
+    private TableInfo[] table;
     /**
      * 分页信息  综合条件
      */
@@ -85,11 +85,11 @@ public class QueryParam {
         this.criteria = criteria;
     }
 
-    public Table[] getTable() {
+    public TableInfo[] getTable() {
         return table;
     }
 
-    public void setTable(Table[] table) {
+    public void setTable(TableInfo[] table) {
         this.table = table;
     }
 

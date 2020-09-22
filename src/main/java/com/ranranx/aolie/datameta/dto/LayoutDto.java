@@ -1,7 +1,5 @@
 package com.ranranx.aolie.datameta.dto;
 
-import com.ranranx.aolie.common.BaseDto;
-
 import javax.persistence.Table;
 
 /**
@@ -11,12 +9,8 @@ import javax.persistence.Table;
  * @Version V0.0.1
  **/
 @Table(name = "aolie_dm_layout")
-public class LayoutDto extends BaseDto {
+public class LayoutDto extends SchemaBaseDto {
 
-    /**
-     * 方案ID
-     */
-    private Long schemaId;
     /**
      * 布局ID
      */
@@ -30,13 +24,6 @@ public class LayoutDto extends BaseDto {
      */
     private String lvlCode;
 
-    public Long getSchemaId() {
-        return schemaId;
-    }
-
-    public void setSchemaId(Long schemaId) {
-        this.schemaId = schemaId;
-    }
 
     public Long getLayoutId() {
         return layoutId;

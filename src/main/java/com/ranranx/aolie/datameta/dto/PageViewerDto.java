@@ -1,7 +1,5 @@
 package com.ranranx.aolie.datameta.dto;
 
-import com.ranranx.aolie.common.BaseDto;
-
 import javax.persistence.Table;
 
 /**
@@ -11,11 +9,8 @@ import javax.persistence.Table;
  * @Version V0.0.1
  **/
 @Table(name = "aolie_dm_page")
-public class PageViewerDto extends BaseDto {
-    /**
-     *
-     */
-    private Long schemaId;
+public class PageViewerDto extends SchemaBaseDto {
+
     /**
      * id
      */
@@ -80,14 +75,6 @@ public class PageViewerDto extends BaseDto {
 
     public void setHeight(Integer height) {
         this.height = height;
-    }
-
-    public Long getSchemaId() {
-        return schemaId;
-    }
-
-    public void setSchemaId(Long schemaId) {
-        this.schemaId = schemaId;
     }
 
     public Long getLayoutId() {

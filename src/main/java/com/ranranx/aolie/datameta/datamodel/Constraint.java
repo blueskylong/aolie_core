@@ -2,6 +2,7 @@ package com.ranranx.aolie.datameta.datamodel;
 
 import com.ranranx.aolie.datameta.dto.ConstraintDto;
 
+import javax.persistence.Transient;
 import java.util.List;
 
 /**
@@ -24,11 +25,22 @@ public class Constraint {
     /**
      * 引用到的表,方便查询
      */
+    @Transient
     private List<Long> lstRefTable;
     /**
      * 引用到的列,方便查询
      */
+    @Transient
     private List<Long> lstRefColumn;
+
+    /**
+     * 这里主要是为了更新公式
+     *
+     * @param columnIds
+     */
+    public void columnIdChanged(List<Long[]> columnIds) {
+        //TODO update formula
+    }
 
     public List<Long> getLstRefTable() {
         return lstRefTable;

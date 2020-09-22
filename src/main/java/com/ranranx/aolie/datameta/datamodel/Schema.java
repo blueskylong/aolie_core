@@ -1,9 +1,11 @@
 package com.ranranx.aolie.datameta.datamodel;
 
-import com.ranranx.aolie.datameta.dto.SchemaDto;
+import com.ranranx.aolie.datameta.dto.*;
 import com.ranranx.aolie.interfaces.SchemaMessageReceiveHandler;
 import com.ranranx.aolie.interfaces.SchemaMessageSendHandler;
 
+import java.beans.Transient;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -21,10 +23,12 @@ public class Schema {
     }
 
     private SchemaDto schemaDto;
+
+    private List<TableColumnRelation> lstRelation;
     /**
      * 下属表
      */
-    private List<Table> lstTable;
+    private List<TableInfo> lstTable;
     /**
      * 表间约束
      */
@@ -42,13 +46,74 @@ public class Schema {
      */
     private List<Reference> lstReference;
 
-    /**
-     * 所有的公式
-     */
-    private List<Formula> lstFormula;
+    @Transient
+    public List<TableDto> getTableDtos() {
+        List<TableDto> lstResult = new ArrayList<>();
+        if (this.lstTable != null) {
+            this.lstTable.forEach((table -> {
+                table.getTableDto().setSchemaId(this.getSchemaDto().getSchemaId());
+                table.getTableDto().setVersionCode(this.getSchemaDto().getVersionCode());
+                lstResult.add(table.getTableDto());
+            }));
+
+        }
+        return lstResult;
+    }
+
+    @Transient
+    public List<FormulaDto> getFormulas() {
+        List<FormulaDto> lstFormulaDto = new ArrayList<>();
+        if (this.lstTable != null) {
+            Long schemaId = getSchemaDto().getSchemaId();
+            String version = getSchemaDto().getVersionCode();
+            lstTable.forEach((table -> {
+                List<FormulaDto> formulas = table.getFormulas(schemaId,
+                        version);
+                if (formulas != null && !formulas.isEmpty()) {
+                    lstFormulaDto.addAll(formulas);
+                }
+            }));
+        }
+        return lstFormulaDto;
+    }
+
+    @Transient
+    public List<ColumnDto> getColumnDtos() {
+        List<ColumnDto> lstFormulaDto = new ArrayList<>();
+        if (this.lstTable != null) {
+            Long schemaId = getSchemaDto().getSchemaId();
+            String version = getSchemaDto().getVersionCode();
+            lstTable.forEach((table -> {
+                List<ColumnDto> columnDtos = table.getColumnDtos(schemaId, version);
+                if (columnDtos != null && !columnDtos.isEmpty()) {
+                    lstFormulaDto.addAll(columnDtos);
+                }
+            }));
+        }
+        return lstFormulaDto;
+    }
+    @Transient
+    public List<ConstraintDto> getConstraintDtos() {
+        List<ConstraintDto> lstResult = new ArrayList<>();
+        if (this.lstConstraint != null && !this.lstConstraint.isEmpty()) {
+            Long schemaId = getSchemaDto().getSchemaId();
+            String version = getSchemaDto().getVersionCode();
+            this.lstConstraint.forEach((constraint -> {
+                ConstraintDto dto = constraint.getConstraintDto();
+                dto.setSchemaId(schemaId);
+                dto.setVersionCode(version);
+                lstResult.add(dto);
+            }));
+        }
+        return lstResult;
+    }
 
     public List<Reference> getLstReference() {
         return lstReference;
+    }
+
+    public String validate() {
+        return null;
     }
 
     public void setLstReference(List<Reference> lstReference) {
@@ -63,11 +128,11 @@ public class Schema {
         this.lstConstraint = lstConstraint;
     }
 
-    public List<Table> getLstTable() {
+    public List<TableInfo> getLstTable() {
         return lstTable;
     }
 
-    public void setLstTable(List<Table> lstTable) {
+    public void setLstTable(List<TableInfo> lstTable) {
         this.lstTable = lstTable;
     }
 
@@ -95,11 +160,23 @@ public class Schema {
         this.lstSendHandler = lstSendHandler;
     }
 
-    public List<Formula> getLstFormula() {
-        return lstFormula;
+    public List<TableColumnRelation> getLstRelation() {
+        return lstRelation;
     }
 
-    public void setLstFormula(List<Formula> lstFormula) {
-        this.lstFormula = lstFormula;
+    public void setLstRelation(List<TableColumnRelation> lstRelation) {
+        this.lstRelation = lstRelation;
+    }
+
+    @Transient
+    public List<TableColumnRelationDto> getRelationDto() {
+        if (this.lstRelation != null && !this.lstRelation.isEmpty()) {
+            List<TableColumnRelationDto> lstDto = new ArrayList<>();
+            this.lstRelation.forEach(relation -> {
+                lstDto.add(relation.getDto());
+            });
+            return lstDto;
+        }
+        return null;
     }
 }
