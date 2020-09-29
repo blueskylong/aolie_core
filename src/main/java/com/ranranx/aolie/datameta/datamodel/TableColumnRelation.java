@@ -35,9 +35,9 @@ public class TableColumnRelation {
     public void columnIdChanged(List<Long[]> columnIds) {
         for (int i = 0; i < columnIds.size(); i++) {
             Long[] ids = columnIds.get(i);
-            if (ids[0] == this.dto.getFieldFrom()) {
+            if (ids[0].equals(this.dto.getFieldFrom())) {
                 this.dto.setFieldFrom(ids[1]);
-            } else if (ids[0] == this.dto.getFieldTo()) {
+            } else if (ids[0].equals(this.dto.getFieldTo())) {
                 this.dto.setFieldTo(ids[1]);
             }
         }

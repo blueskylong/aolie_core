@@ -37,6 +37,8 @@ public class BlockViewDto extends SchemaBaseDto {
      * 高度
      */
     private Integer rowSpan;
+    private String title;
+    private Integer showHead;
 
     public Long getBlockViewId() {
         return blockViewId;
@@ -101,5 +103,21 @@ public class BlockViewDto extends SchemaBaseDto {
 
     public void setRowSpan(Integer rowSpan) {
         this.rowSpan = rowSpan;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public Integer getShowHead() {
+        return showHead;
+    }
+
+    public void setShowHead(Integer showHead) {
+        this.showHead = showHead;
     }
 }

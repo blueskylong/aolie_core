@@ -70,4 +70,10 @@ public class DataModelController {
         return schemaHolder.saveSchema(schema);
     }
 
+    @RequestMapping("/refreshCache/{schemaId}/{version}")
+    public boolean refreshCache(@PathVariable long schemaId, @PathVariable String version) {
+        schemaHolder.initSchema(schemaId, version);
+        return true;
+    }
+
 }

@@ -71,19 +71,47 @@ public class TableInfo {
      * @param versionCode
      * @return
      */
-    public List<FormulaDto> getFormulas(Long schemaId, String versionCode) {
+    public List<FormulaDto> getFormulaDtos(Long schemaId, String versionCode) {
         List<FormulaDto> lstResult = new ArrayList<>();
         if (lstColumn != null && !lstColumn.isEmpty()) {
             lstColumn.forEach((column -> {
                 List<Formula> lstFormula = column.getLstFormula();
                 if (lstFormula != null && !lstFormula.isEmpty()) {
-                    lstFormula.forEach((formula -> {
-                        FormulaDto dto = formula.getFormulaDto();
+                    for (int i = 0; i < lstFormula.size(); i++) {
+                        FormulaDto dto = lstFormula.get(i).getFormulaDto();
+                        dto.setOrderNum(i + 1);
+                        dto.setColumnId(column.getColumnDto().getColumnId());
                         dto.setSchemaId(schemaId);
                         dto.setVersionCode(versionCode);
                         lstResult.add(dto);
-                    }));
+                    }
+                }
+            }));
+        }
+        return lstResult;
+    }
 
+    /**
+     * 取得所有公式对象
+     *
+     * @param schemaId
+     * @param versionCode
+     * @return
+     */
+    public List<Formula> getFormulas(Long schemaId, String versionCode) {
+        List<Formula> lstResult = new ArrayList<>();
+        if (lstColumn != null && !lstColumn.isEmpty()) {
+            lstColumn.forEach((column -> {
+                List<Formula> lstFormula = column.getLstFormula();
+                if (lstFormula != null && !lstFormula.isEmpty()) {
+                    for (int i = 0; i < lstFormula.size(); i++) {
+                        FormulaDto dto = lstFormula.get(i).getFormulaDto();
+                        dto.setOrderNum(i + 1);
+                        dto.setColumnId(column.getColumnDto().getColumnId());
+                        dto.setSchemaId(schemaId);
+                        dto.setVersionCode(versionCode);
+                        lstResult.add(lstFormula.get(i));
+                    }
                 }
             }));
         }

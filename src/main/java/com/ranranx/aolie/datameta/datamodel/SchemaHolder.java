@@ -2,13 +2,12 @@ package com.ranranx.aolie.datameta.datamodel;
 
 import com.ranranx.aolie.common.CommonUtils;
 import com.ranranx.aolie.datameta.dto.*;
+import com.ranranx.aolie.exceptions.InvalidParamException;
+import com.ranranx.aolie.exceptions.NotExistException;
 import com.ranranx.aolie.service.DataModelService;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @Author xxl
@@ -119,6 +118,7 @@ public class SchemaHolder {
      * @param schema
      * @return
      */
+//    @Transactional(rollbackFor = Exception.class)
     public String saveSchema(Schema schema) {
         String err = service.saveSchema(schema);
         refresh();
@@ -167,6 +167,7 @@ public class SchemaHolder {
      */
     public void initSchema(SchemaDto dto) {
         service.clearSchemaCache(dto.getSchemaId(), dto.getVersionCode());
+        clearCache(dto.getSchemaId(), dto.getVersionCode());
 
         Schema schema = new Schema(dto);
         initReference(schema);
@@ -177,6 +178,50 @@ public class SchemaHolder {
         setSchemaRelation(schema);
         mapSchema.put(CommonUtils.makeKey(dto.getSchemaId().toString(),
                 dto.getVersionCode()), schema);
+    }
+
+    private void clearCache(long schemaId, String version) {
+        if (mapTables != null && !mapTables.isEmpty()) {
+            Iterator<Map.Entry<String, TableInfo>> iterator = mapTables.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Map.Entry<String, TableInfo> entry = iterator.next();
+                if (entry.getValue().getTableDto().getSchemaId() == schemaId
+                        && entry.getValue().getTableDto().getVersionCode().equals(version)) {
+                    iterator.remove();
+                }
+            }
+        }
+        if (mapColumns != null && !mapColumns.isEmpty()) {
+            Iterator<Map.Entry<String, Column>> iterator = mapColumns.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Map.Entry<String, Column> entry = iterator.next();
+                if (entry.getValue().getColumnDto().getSchemaId() == schemaId
+                        && entry.getValue().getColumnDto().getVersionCode().equals(version)) {
+                    iterator.remove();
+                }
+            }
+        }
+        if (mapFormula != null && !mapFormula.isEmpty()) {
+            Iterator<Map.Entry<String, List<Formula>>> iterator = mapFormula.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Map.Entry<String, List<Formula>> entry = iterator.next();
+                if (entry.getValue().get(0).getFormulaDto().getSchemaId() == schemaId
+                        && entry.getValue().get(0).getFormulaDto().getVersionCode().equals(version)) {
+                    iterator.remove();
+                }
+            }
+        }
+    }
+
+    public void initSchema(long schemaId, String version) {
+        if (schemaId < 0 || CommonUtils.isEmpty(version)) {
+            throw new InvalidParamException("初始化失败,参数不下正确,schemaId:" + schemaId + "; version:" + version);
+        }
+        SchemaDto schemaDto = service.findSchemaDto(schemaId, version);
+        if (schemaDto == null) {
+            throw new NotExistException("指定的方案不存在:schemaId:" + schemaId + "; version:" + version);
+        }
+        this.initSchema(schemaDto);
     }
 
     private void setSchemaRelation(Schema schema) {
@@ -228,6 +273,9 @@ public class SchemaHolder {
         Formula formula;
 //        List<Formula> lstFormula = new ArrayList<>();
         List<Formula> formulas;
+        if (mapFormula == null) {
+            mapFormula = new HashMap<>();
+        }
 
         for (FormulaDto dto : lstDto) {
             formula = new Formula(dto);

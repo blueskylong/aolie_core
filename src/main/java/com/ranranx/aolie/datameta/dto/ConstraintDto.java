@@ -4,7 +4,7 @@ import javax.persistence.Table;
 
 /**
  * @Author xxl
- * @Description 约束信息,这里表间和表内使用同一个数据,当需要做约束计算时,从方案中查询与此表和字段有关系的约束来检查.
+ * @Description 约束信息, 这里表间和表内使用同一个数据, 当需要做约束计算时, 从方案中查询与此表和字段有关系的约束来检查.
  * @Date 2020/8/4 16:35
  * @Version V0.0.1
  **/
@@ -34,6 +34,13 @@ public class ConstraintDto extends SchemaBaseDto {
      * 禁用
      */
     private Short disabled;
+
+    private Long id;
+
+    /**
+     * 处理方式
+     */
+    private Integer handleType;
 
 
     public String getExpression() {
@@ -82,5 +89,21 @@ public class ConstraintDto extends SchemaBaseDto {
 
     public void setDisabled(Short disabled) {
         this.disabled = disabled;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Integer getHandleType() {
+        return handleType;
+    }
+
+    public void setHandleType(Integer handleType) {
+        this.handleType = handleType;
     }
 }

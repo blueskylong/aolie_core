@@ -109,4 +109,19 @@ public class Constants {
         public static final short MIN = 5;
 
     }
+
+    /**
+     * 约束的处理方式
+     */
+    public static class ConstraintHandleType {
+        /**
+         * 警告
+         */
+        public static final int WARNING = 1;
+
+        /**
+         * 错误
+         */
+        public static final int ERROR = 0;
+    }
 }

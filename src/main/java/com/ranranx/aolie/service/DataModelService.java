@@ -33,7 +33,7 @@ public class DataModelService {
     private static final String KEY_COLUMN_DTO = "'ColumnDto_'+#p0+'_'+#p1";
     private static final String KEY_REFERENCE_DTO = "'ReferenceDto_'+#p0+'_'+#p1";
     private static final String KEY_CONSTRAINT_DTO = "'ConstraintDto_'+#p0+'_'+#p1";
-    private static final String KEY_FORMULA_DTO = "'ConstraintDto_'+#p0+'_'+#p1";
+    private static final String KEY_FORMULA_DTO = "'FormulaDto'+#p0+'_'+#p1";
     private static final String KEY_VIEWER = "'VIEWER_'+#p0+'_'+#p1";
     private static final String KEY_REFERENCE = "'REFERENCE_'+#p0+'_'+#p1";
 
@@ -67,6 +67,7 @@ public class DataModelService {
         queryParamDefinition.setTableDtos(FormulaDto.class);
         queryParamDefinition.appendCriteria().andEqualTo("schema_id", schemaId)
                 .andEqualTo("version_code", version);
+        queryParamDefinition.addOrder(new FieldOrder(null, "order_num", true, 0));
         return factory.getDefaultDataOperator()
                 .select(queryParamDefinition, FormulaDto.class);
     }
@@ -101,6 +102,7 @@ public class DataModelService {
         queryParamDefinition.setTableDtos(ConstraintDto.class);
         queryParamDefinition.appendCriteria().andEqualTo("schema_id", schemaId)
                 .andEqualTo("version_code", version);
+        queryParamDefinition.addOrder(new FieldOrder(null, "order_num", true, 0));
         return factory.getDefaultDataOperator()
                 .select(queryParamDefinition, ConstraintDto.class);
     }
@@ -109,9 +111,27 @@ public class DataModelService {
     public List<SchemaDto> findAllSchemaDto(boolean isEnabled) {
         QueryParamDefinition queryParamDefinition = new QueryParamDefinition();
         queryParamDefinition.setTableDtos(SchemaDto.class);
-        queryParamDefinition.appendCriteria().andEqualTo("enabled", 1);
+        if (isEnabled) {
+            queryParamDefinition.appendCriteria().andEqualTo("enabled", 1);
+        }
         return factory.getDefaultDataOperator()
                 .select(queryParamDefinition, SchemaDto.class);
+    }
+
+    /**
+     * 查询一个方案的定义
+     *
+     * @param schemaId
+     * @param version
+     * @return
+     */
+    public SchemaDto findSchemaDto(Long schemaId, String version) {
+        QueryParamDefinition queryParamDefinition = new QueryParamDefinition();
+        queryParamDefinition.setTableDtos(SchemaDto.class);
+        queryParamDefinition.appendCriteria().andEqualTo("schema_id", schemaId)
+                .andEqualTo("version_code", version);
+        queryParamDefinition.appendCriteria().andEqualTo("enabled", 1);
+        return factory.getDefaultDataOperator().selectOne(queryParamDefinition, SchemaDto.class);
     }
 
     @Cacheable(value = GROUP_NAME,
@@ -321,7 +341,7 @@ public class DataModelService {
         insertParamDefinition.setObject(schema.getSchemaDto());
         factory.getDefaultDataOperator().insert(insertParamDefinition);
 
-        List<FormulaDto> formulas = schema.getFormulas();
+        List<FormulaDto> formulas = schema.getFormulaDtos();
         if (formulas != null && !formulas.isEmpty()) {
             insertParamDefinition.setObjects(formulas);
             insertParamDefinition.setTableDto(FormulaDto.class);
@@ -394,18 +414,49 @@ public class DataModelService {
                 }
             }));
         }
+        if (schema.getLstConstraint() != null) {
+            schema.getLstConstraint().forEach((constraint -> {
+                constraint.getConstraintDto().setSchemaId(schema.getSchemaDto().getSchemaId());
+                constraint.getConstraintDto().setVersionCode(
+                        schema.getSchemaDto().getVersionCode());
+                if (constraint.getConstraintDto().getId() < 0) {
+                    constraint.getConstraintDto().setId(IdGenerator.getNextId(TableColumnRelation.class.getName()));
+                }
+            }));
+        }
+        if (schema.getFormulaDtos() != null) {
+            schema.getFormulaDtos().forEach((formula -> {
+                formula.setSchemaId(schema.getSchemaDto().getSchemaId());
+                formula.setVersionCode(
+                        schema.getSchemaDto().getVersionCode());
+                if (formula.getFormulaId() < 0) {
+                    formula.setFormulaId(IdGenerator.getNextId(Formula.class.getName()));
+                }
+            }));
+        }
         if (!lstChangedColumn.isEmpty()) {
+            //更新约束
             if (schema.getLstConstraint() != null) {
                 for (Constraint constraint : schema.getLstConstraint()) {
                     constraint.columnIdChanged(lstChangedColumn);
                 }
             }
+            //更新关系
             List<TableColumnRelation> lstRelation = schema.getLstRelation();
             if (lstRelation != null && !lstRelation.isEmpty()) {
                 lstRelation.forEach((relation -> {
                     relation.columnIdChanged(lstChangedColumn);
                 }));
             }
+            //更新公式
+            List<FormulaDto> formulas = schema.getFormulaDtos();
+            if (formulas != null && !formulas.isEmpty()) {
+                formulas.forEach(formulaDto -> {
+                    new Formula(formulaDto).columnIdChanged(lstChangedColumn);
+                });
+
+            }
+
         }
     }
 

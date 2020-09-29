@@ -61,13 +61,13 @@ public class Schema {
     }
 
     @Transient
-    public List<FormulaDto> getFormulas() {
+    public List<FormulaDto> getFormulaDtos() {
         List<FormulaDto> lstFormulaDto = new ArrayList<>();
         if (this.lstTable != null) {
             Long schemaId = getSchemaDto().getSchemaId();
             String version = getSchemaDto().getVersionCode();
             lstTable.forEach((table -> {
-                List<FormulaDto> formulas = table.getFormulas(schemaId,
+                List<FormulaDto> formulas = table.getFormulaDtos(schemaId,
                         version);
                 if (formulas != null && !formulas.isEmpty()) {
                     lstFormulaDto.addAll(formulas);
@@ -75,6 +75,23 @@ public class Schema {
             }));
         }
         return lstFormulaDto;
+    }
+
+    @Transient
+    public List<Formula> getFormulas() {
+        List<Formula> lstFormula = new ArrayList<>();
+        if (this.lstTable != null) {
+            Long schemaId = getSchemaDto().getSchemaId();
+            String version = getSchemaDto().getVersionCode();
+            lstTable.forEach((table -> {
+                List<Formula> formulas = table.getFormulas(schemaId,
+                        version);
+                if (formulas != null && !formulas.isEmpty()) {
+                    lstFormula.addAll(formulas);
+                }
+            }));
+        }
+        return lstFormula;
     }
 
     @Transient
@@ -92,6 +109,7 @@ public class Schema {
         }
         return lstFormulaDto;
     }
+
     @Transient
     public List<ConstraintDto> getConstraintDtos() {
         List<ConstraintDto> lstResult = new ArrayList<>();
