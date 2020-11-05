@@ -118,7 +118,7 @@ public class MyBatisDataOperator implements IDataOperator {
     private List<Map<String, Object>> singleTableSelect(QueryParamDefinition queryParamDefinition) {
         String tableName = queryParamDefinition.getTableNames().get(0);
         String field = getFieldsExp((queryParamDefinition.getFields() == null || queryParamDefinition.getFields().isEmpty())
-                ? null : queryParamDefinition.getFields());
+                ? null : queryParamDefinition.getFields(), null);
         Map<String, Object> mapParam = new HashMap<>();
         String where = "";
         if (queryParamDefinition.getCriteria() != null) {
@@ -144,14 +144,14 @@ public class MyBatisDataOperator implements IDataOperator {
     }
 
 
-    private String getFieldsExp(List<Field> fields) {
+    private String getFieldsExp(List<Field> fields, String alias) {
         if (fields == null || fields.isEmpty()) {
             return "*";
         }
         StringBuilder sb = new StringBuilder();
         for (Field field : fields) {
 
-            sb.append(field.getFieldName()).append(",");
+            sb.append(field.getSelectExp(alias)).append(",");
         }
         return sb.substring(0, sb.length() - 1);
     }

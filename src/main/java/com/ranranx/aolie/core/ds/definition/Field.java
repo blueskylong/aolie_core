@@ -1,10 +1,11 @@
 package com.ranranx.aolie.core.ds.definition;
 
+import com.ranranx.aolie.core.common.CommonUtils;
 import com.ranranx.aolie.core.common.Constants;
 
 /**
  * @Author xxl
- * @Description  查询用的字段描述
+ * @Description 查询用的字段描述
  * @Date 2020/8/18 17:54
  * @Version V0.0.1
  **/
@@ -95,7 +96,7 @@ public class Field {
             case Constants.GroupType.SUM:
                 return getGroupSql("sum", alias, fieldName);
             default:
-                return alias + "." + fieldName;
+                return (CommonUtils.isNotEmpty(alias) ? (alias + ".") : "") + fieldName;
 
         }
     }
@@ -110,6 +111,11 @@ public class Field {
     }
 
     private String getGroupSql(String groupExp, String alias, String fieldName) {
-        return groupExp + "(" + alias + "." + fieldName + ") as " + fieldName;
+        if (CommonUtils.isNotEmpty(alias)) {
+            alias += ".";
+        } else {
+            alias = "";
+        }
+        return groupExp + "(" + alias + fieldName + ") as " + fieldName;
     }
 }

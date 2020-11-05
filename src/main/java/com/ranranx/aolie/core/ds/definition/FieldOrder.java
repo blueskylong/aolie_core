@@ -34,6 +34,13 @@ public class FieldOrder implements Ordered {
         this.order = order;
     }
 
+    public FieldOrder(Class clazz, String field, boolean isAsc, int order) {
+        this.tableName = CommonUtils.getTableName(clazz);
+        this.field = field;
+        this.isAsc = isAsc;
+        this.order = order;
+    }
+
     public boolean isAsc() {
         return isAsc;
     }

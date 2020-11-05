@@ -13,6 +13,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +26,7 @@ import java.util.Map;
  * @Version V0.0.1
  **/
 @Service
+@Transactional(readOnly = true)
 public class DataModelService {
 
     public static final String GROUP_NAME = "SCHEMA_VERSION";
@@ -67,7 +69,7 @@ public class DataModelService {
         queryParamDefinition.setTableDtos(FormulaDto.class);
         queryParamDefinition.appendCriteria().andEqualTo("schema_id", schemaId)
                 .andEqualTo("version_code", version);
-        queryParamDefinition.addOrder(new FieldOrder(null, "order_num", true, 0));
+        queryParamDefinition.addOrder(new FieldOrder((String) null, "order_num", true, 0));
         return factory.getDefaultDataOperator()
                 .select(queryParamDefinition, FormulaDto.class);
     }
@@ -79,7 +81,7 @@ public class DataModelService {
         queryParamDefinition.setTableDtos(ColumnDto.class);
         queryParamDefinition.appendCriteria().andEqualTo("schema_id", schemaId)
                 .andEqualTo("version_code", version);
-        queryParamDefinition.addOrder(new FieldOrder(null, "field_index", true, 0));
+        queryParamDefinition.addOrder(new FieldOrder((String) null, "field_index", true, 0));
         return factory.getDefaultDataOperator()
                 .select(queryParamDefinition, ColumnDto.class);
     }
@@ -102,7 +104,7 @@ public class DataModelService {
         queryParamDefinition.setTableDtos(ConstraintDto.class);
         queryParamDefinition.appendCriteria().andEqualTo("schema_id", schemaId)
                 .andEqualTo("version_code", version);
-        queryParamDefinition.addOrder(new FieldOrder(null, "order_num", true, 0));
+        queryParamDefinition.addOrder(new FieldOrder((String) null, "order_num", true, 0));
         return factory.getDefaultDataOperator()
                 .select(queryParamDefinition, ConstraintDto.class);
     }
@@ -133,9 +135,6 @@ public class DataModelService {
         queryParamDefinition.appendCriteria().andEqualTo("enabled", 1);
         return factory.getDefaultDataOperator().selectOne(queryParamDefinition, SchemaDto.class);
     }
-
-
-
 
 
     /**
@@ -269,6 +268,7 @@ public class DataModelService {
      * @param schema
      * @return
      */
+    @Transactional(readOnly = false)
     public String saveSchema(Schema schema) {
 
         String sErr = validateSchema(schema);

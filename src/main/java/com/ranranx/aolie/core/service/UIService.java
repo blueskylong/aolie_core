@@ -2,10 +2,12 @@ package com.ranranx.aolie.core.service;
 
 import com.ranranx.aolie.core.common.CommonUtils;
 import com.ranranx.aolie.core.common.Constants;
+import com.ranranx.aolie.core.common.IdGenerator;
 import com.ranranx.aolie.core.common.SessionUtils;
 import com.ranranx.aolie.core.datameta.datamodel.*;
 import com.ranranx.aolie.core.datameta.dto.BlockViewDto;
 import com.ranranx.aolie.core.datameta.dto.ComponentDto;
+import com.ranranx.aolie.core.datameta.dto.TableDto;
 import com.ranranx.aolie.core.ds.dataoperator.DataOperatorFactory;
 import com.ranranx.aolie.core.ds.definition.DeleteParamDefinition;
 import com.ranranx.aolie.core.ds.definition.FieldOrder;
@@ -35,6 +37,7 @@ import java.util.Map;
 public class UIService {
     public static final String GROUP_NAME = "SCHEMA_VERSION";
     private static final String KEY_VIEWER = "'VIEWER_'+#p0+'_'+#p1";
+    private static final String KEY_VIEWER_REMOVE = "'VIEWER_'+#p0.blockViewDto.blockViewId+'_'+#p0.blockViewDto.versionCode";
     @Autowired
     private DataOperatorFactory factory;
 
@@ -50,7 +53,6 @@ public class UIService {
         }
         List<Map<String, Object>> result = new ArrayList<>();
         String version = SessionUtils.getLoginVersion();
-        String id, code, name, parent;
         Map<String, Object> mapResult;
         for (long tableId : tableIds) {
             TableInfo tableInfo = SchemaHolder.getTable(tableId, version);
@@ -66,7 +68,6 @@ public class UIService {
             mapResult.put(Constants.TreeNodeNames.IS_LEAF, 0);
             result.add(mapResult);
             addColumnInfo(result, tableInfo.getLstColumn(), tableKey);
-
         }
         return result;
 
@@ -154,30 +155,38 @@ public class UIService {
         return lstResult;
     }
 
-    @Caching(evict = {@CacheEvict(value = GROUP_NAME, key = KEY_VIEWER)})
+    @Caching(evict = {@CacheEvict(value = GROUP_NAME, key = KEY_VIEWER_REMOVE)})
     @Transactional(readOnly = false)
     public String saveBlock(BlockViewer viewer) {
-
         String err = checkBlock(viewer);
         if (CommonUtils.isNotEmpty(err)) {
             return err;
         }
-        long viewId = viewer.getBlockViewDto().getBlockViewId();
+        Long viewId = viewer.getBlockViewDto().getBlockViewId();
+        if (viewId == null) {
+            throw new IllegalArgumentException("没有给出视图ID");
+        }
         viewer.updateViewKeys();
         //如果大于0,则需要先删除
         if (viewId > 0) {
-            DeleteParamDefinition deleteParam = new DeleteParamDefinition();
-            deleteParam.setTableDto(BlockViewDto.class);
-            deleteParam.getCriteria().andEqualTo("block_view_id", viewId).andEqualTo("version_code", SessionUtils.getLoginVersion());
-            factory.getDefaultDataOperator().delete(deleteParam);
-            deleteParam.setTableDto(ComponentDto.class);
-            factory.getDefaultDataOperator().delete(deleteParam);
+            deleteBlockView(viewId);
         }
         viewer.getBlockViewDto().setVersionCode(SessionUtils.getLoginVersion());
         saveBlockInfo(viewer.getBlockViewDto());
         saveComponents(viewer.getComponentDtos());
         return null;
 
+    }
+
+    @Transactional(readOnly = false)
+    public int deleteBlockView(long blockViewId) {
+        DeleteParamDefinition deleteParam = new DeleteParamDefinition();
+        deleteParam.setTableDto(BlockViewDto.class);
+        deleteParam.getCriteria().andEqualTo("block_view_id", blockViewId).andEqualTo("version_code", SessionUtils.getLoginVersion());
+        int number = factory.getDefaultDataOperator().delete(deleteParam);
+        deleteParam.setTableDto(ComponentDto.class);
+        factory.getDefaultDataOperator().delete(deleteParam);
+        return number;
     }
 
     private void saveComponents(List<ComponentDto> lstDto) {
@@ -199,5 +208,73 @@ public class UIService {
 
     private String checkBlock(BlockViewer viewer) {
         return null;
+    }
+
+    /**
+     * 查询方案中所有表的信息
+     *
+     * @param schemaId
+     * @param versionCode
+     * @return
+     */
+    public List<TableDto> findAllTableInfo(long schemaId, String versionCode) {
+        QueryParamDefinition queryParamDefinition = new QueryParamDefinition();
+        queryParamDefinition.setTableDtos(TableDto.class);
+        queryParamDefinition.appendCriteria().andEqualTo("schema_id", schemaId)
+                .andEqualTo("version_code", versionCode);
+        queryParamDefinition.addOrder(new FieldOrder(TableDto.class, "table_id", true, 0));
+        return factory.getDefaultDataOperator().select(queryParamDefinition, TableDto.class);
+    }
+
+    @Transactional(readOnly = false)
+    public Long genNewBlockViewer(String viewName, Long schemaId, String parentId) {
+
+        if (parentId != null && parentId.equals("null")) {
+            parentId = null;
+        }
+        if (CommonUtils.isEmpty(viewName)) {
+            throw new IllegalArgumentException("视图名称不可以为空");
+        }
+        BlockViewDto dto = new BlockViewDto();
+        dto.setBlockViewId(IdGenerator.getNextId(BlockViewDto.class.getName()));
+        dto.setBlockViewName(viewName);
+        dto.setSchemaId(schemaId);
+        dto.setColSpan(12);
+        dto.setVersionCode(SessionUtils.getLoginVersion());
+        //如果指定了父亲,则要生成相应的编码
+        String curCode = "";
+        if (parentId != null) {
+            BlockViewer viewerInfo = this.getViewerInfo(new Long(parentId), SessionUtils.getLoginVersion());
+            if (viewerInfo != null) {
+                //TODO 需要添加级次管理
+                curCode = viewerInfo.getBlockViewDto().getLvlCode();
+            }
+        }
+        String maxCode = getMaxLvlCode(schemaId, curCode);
+        String nextCode = "000" + (Integer.parseInt(maxCode) + 1);
+        nextCode = nextCode.substring(nextCode.length() - 3);
+        dto.setLvlCode(nextCode);
+        InsertParamDefinition insertParamDefinition = new InsertParamDefinition();
+        insertParamDefinition.setNeedConvertToUnderLine(true);
+        insertParamDefinition.setObject(dto);
+        factory.getDefaultDataOperator().insert(insertParamDefinition);
+        return dto.getBlockViewId();
+    }
+
+    private String getMaxLvlCode(Long schemaId, String curCode) {
+        List<BlockViewDto> blockViews = this.getBlockViews(String.valueOf(schemaId));
+        if (blockViews == null) {
+            return "000";
+        }
+        String maxCode = "000";
+        int len = CommonUtils.isEmpty(curCode) ? 3 : curCode.length() + 3;
+        for (BlockViewDto dto : blockViews) {
+
+            if (dto.getLvlCode().length() == len
+                    && (CommonUtils.isEmpty(curCode) || dto.getLvlCode().startsWith(curCode))) {
+                maxCode = maxCode.compareTo(dto.getLvlCode()) > 0 ? maxCode : dto.getLvlCode();
+            }
+        }
+        return maxCode;
     }
 }

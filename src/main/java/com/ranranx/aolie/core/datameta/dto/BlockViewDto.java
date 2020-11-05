@@ -24,6 +24,7 @@ public class BlockViewDto extends SchemaBaseDto {
 
     private String memo;
 
+    private String lvlCode;
     /**
      * 是否需要把字段自动转换成驼峰型
      */
@@ -119,5 +120,13 @@ public class BlockViewDto extends SchemaBaseDto {
 
     public void setShowHead(Integer showHead) {
         this.showHead = showHead;
+    }
+
+    public String getLvlCode() {
+        return lvlCode;
+    }
+
+    public void setLvlCode(String lvlCode) {
+        this.lvlCode = lvlCode;
     }
 }

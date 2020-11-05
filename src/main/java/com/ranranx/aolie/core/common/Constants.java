@@ -135,4 +135,21 @@ public class Constants {
         public static final String PARENT = "parent";
         public static final String IS_LEAF = "is_leaf";
     }
+
+    /**
+     * 默认业务方案ID
+     */
+    public static final Long DEFAULT_BS_SCHEMA = new Long(2);
+
+    /**
+     * 布局
+     */
+    public static class LayoutType {
+        /*边界布局*/
+        public static final int BORDER_LAYOUT = 1;
+        /*流式*/
+        public static final int FLOW_LAYOUT = 3;
+        /*绝对定位*/
+        public static final int ABSTRACT_LAYOUT = 5;
+    }
 }

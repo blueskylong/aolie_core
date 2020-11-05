@@ -155,6 +155,13 @@ public class QueryParamDefinition {
         this.fields = fields;
     }
 
+    public void addField(Field field) {
+        if (this.fields == null) {
+            this.fields = new ArrayList<>();
+        }
+        this.fields.add(field);
+    }
+
     /**
      * 是否需要分组
      *

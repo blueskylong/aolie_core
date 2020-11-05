@@ -1,9 +1,12 @@
 package com.ranranx.aolie.core.controller;
 
+import com.ranranx.aolie.core.common.CommonUtils;
 import com.ranranx.aolie.core.common.SessionUtils;
 import com.ranranx.aolie.core.datameta.datamodel.BlockViewer;
 import com.ranranx.aolie.core.datameta.datamodel.ReferenceData;
 import com.ranranx.aolie.core.datameta.dto.BlockViewDto;
+import com.ranranx.aolie.core.datameta.dto.TableDto;
+import com.ranranx.aolie.core.handler.HandleResult;
 import com.ranranx.aolie.core.service.DataModelService;
 import com.ranranx.aolie.core.service.UIService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,5 +77,34 @@ public class UIController {
         return uiService.saveBlock(viewer);
     }
 
+    /**
+     * 查询方案中所有表的信息
+     *
+     * @param schemaId
+     * @return
+     */
+    @GetMapping("/findAllTableInfo/{schemaId}")
+    public List<TableDto> findAllTableInfo(@PathVariable long schemaId) {
+        return uiService.findAllTableInfo(schemaId, SessionUtils.getLoginVersion());
+    }
 
+    /**
+     * 查询方案中所有表的信息
+     *
+     * @param viewName
+     * @param schemaId
+     * @param parentId
+     * @return
+     */
+    @PostMapping("/genNewBlockViewer/{schemaId}/{parentId}")
+    public Long genNewBlockViewer(@RequestBody Map viewName,
+                                  @PathVariable Long schemaId, @PathVariable String parentId) {
+        return uiService.genNewBlockViewer(CommonUtils.getStringField(viewName, "viewName"),
+                schemaId, parentId);
+    }
+
+    @RequestMapping("/deleteBlockView/{blockViewId}")
+    public HandleResult deleteBlockView(@PathVariable long blockViewId) {
+        return HandleResult.success(uiService.deleteBlockView(blockViewId));
+    }
 }

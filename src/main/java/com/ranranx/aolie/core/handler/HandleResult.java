@@ -74,4 +74,16 @@ public class HandleResult {
     public void setChangeNum(int changeNum) {
         this.changeNum = changeNum;
     }
+
+    /**
+     * 创建默认的成功返回值
+     * @param number
+     * @return
+     */
+    public static HandleResult success(int number) {
+        HandleResult result = new HandleResult();
+        result.setSuccess(true);
+        result.setChangeNum(number);
+        return result;
+    }
 }
