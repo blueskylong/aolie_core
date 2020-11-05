@@ -1,7 +1,9 @@
 package com.ranranx.aolie.core.ds.definition;
 
+import com.ranranx.aolie.core.common.CommonUtils;
 import com.ranranx.aolie.core.handler.param.condition.Criteria;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -54,12 +56,31 @@ public class UpdateParamDefinition {
         return lstRows;
     }
 
+    public void setObjects(List<?> lstObj, boolean needConvert) {
+        if (lstObj == null || lstObj.isEmpty()) {
+            this.lstRows = null;
+            return;
+        }
+        if (CommonUtils.isEmpty(this.tableName)) {
+            this.tableName = CommonUtils.getTableName(lstObj.get(0).getClass());
+        }
+        this.lstRows = new ArrayList<>();
+        for (Object obj : lstObj) {
+            CommonUtils.toMap(obj, needConvert);
+        }
+
+    }
+
     public void setLstRows(List<Map<String, Object>> lstRows) {
         this.lstRows = lstRows;
     }
 
     public boolean isSelective() {
         return isSelective;
+    }
+
+    public void setTableNameByDto(Class clazz) {
+        this.tableName = CommonUtils.getTableName(clazz);
     }
 
     public void setSelective(boolean selective) {

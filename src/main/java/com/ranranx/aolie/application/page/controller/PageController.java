@@ -17,9 +17,6 @@ import java.util.Map;
  * @Author xxl
  * @Description
  * @Date 2020/10/31 22:27
- *
- *
- *
  * @Version V0.0.1
  **/
 @RestController
@@ -63,9 +60,22 @@ public class PageController {
         return pageService.deletePage(pageId);
     }
 
-    @PostMapping("/savePageFullInfo}")
+    @PostMapping("/savePageFullInfo")
     public HandleResult savePageFullInfo(@RequestBody PageInfo pageInfo) {
         pageService.savePageFullInfo(pageInfo);
+        return HandleResult.success(1);
+    }
+
+    /**
+     * 更新页面的层次设置
+     *
+     * @param mapIdToCode
+     * @param schemaId
+     */
+    @PostMapping("/updatePageLevel/{schemaId}")
+    public HandleResult updatePageLevel(@RequestBody Map<Long, String> mapIdToCode,
+                                        @PathVariable long schemaId) {
+        pageService.updatePageLevel(mapIdToCode, schemaId);
         return HandleResult.success(1);
     }
 }

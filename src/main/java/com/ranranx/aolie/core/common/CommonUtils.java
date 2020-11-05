@@ -133,6 +133,10 @@ public class CommonUtils {
     }
 
     public static Map<String, Object> toMap(Object obj, boolean isConvertToUnderLine) {
+        return toMap(obj, isConvertToUnderLine, false);
+    }
+
+    public static Map<String, Object> toMap(Object obj, boolean isConvertToUnderLine, boolean isSelective) {
         try {
             Map<String, Object> result = new HashMap<>();
             Map<String, Object> describe = PropertyUtils.describe(obj);
@@ -140,17 +144,37 @@ public class CommonUtils {
                 Iterator<Map.Entry<String, Object>> it = describe.entrySet().iterator();
                 while (it.hasNext()) {
                     Map.Entry<String, Object> next = it.next();
+                    if (isSelective && CommonUtils.isEmpty(next.getValue())) {
+                        continue;
+                    }
                     result.put(CommonUtils.convertToUnderline(next.getKey()), next.getValue());
                 }
-
             } else {
-                result.putAll(describe);
+                result = isSelective ? removeEmptyValues(describe) : describe;
             }
             return result;
         } catch (Exception e) {
             throw new InvalidException(e.getMessage());
         }
     }
+
+
+    private static Map<String, Object> removeEmptyValues(Map<String, Object> map) {
+
+        if (map == null || map.isEmpty()) {
+            return map;
+        }
+        Map<String, Object> result = new HashMap();
+        Iterator<Map.Entry<String, Object>> iterator = map.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, Object> next = iterator.next();
+            if (CommonUtils.isNotEmpty(next.getValue())) {
+                result.put(next.getKey(), next.getValue());
+            }
+        }
+        return result;
+    }
+
 
     /**
      * Map的KEY由下划线转成驼峰

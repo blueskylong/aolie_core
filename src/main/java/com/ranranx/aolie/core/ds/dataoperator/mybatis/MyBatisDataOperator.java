@@ -218,19 +218,27 @@ public class MyBatisDataOperator implements IDataOperator {
     }
 
     private int updateRow(Map<String, Object> row, Criteria criteria,
-                          String idField, String tableName, boolean isSelective) {
+                          String filterFields, String tableName, boolean isSelective) {
         //情况1 ,存在id值及字段,则增加ID条件
         StringBuilder sb = new StringBuilder();
         int index = 0;
         String key;
-        if (CommonUtils.isNotEmpty(idField) && CommonUtils.isNotEmpty(row.get(idField))) {
+        List<String> lstFilterField = Arrays.asList(filterFields.split(","));
+        if (CommonUtils.isNotEmpty(filterFields)) {
             if (criteria == null) {
                 criteria = new Criteria();
             }
-            criteria.andEqualTo(idField, row.remove(idField));
+            for (String field : lstFilterField) {
+                if (CommonUtils.isEmpty(row.get(field))) {
+                    criteria.andIsNull(field);
+                } else {
+                    criteria.andEqualTo(field, row.remove(field));
+                }
+            }
+
         }
         Map<String, Object> mapParam = new HashMap<>();
-        sb.append("update ").append(tableName).append(" set ").append(genSetSql(row, mapParam, index++, isSelective));
+        sb.append("update ").append(tableName).append(" set ").append(genSetSql(row, mapParam, index++, isSelective, lstFilterField));
         if (criteria != null && !criteria.isEmpty()) {
             sb.append(" where ").append(criteria.getSqlWhere(mapParam, null, index++, false));
         }
@@ -248,7 +256,7 @@ public class MyBatisDataOperator implements IDataOperator {
      * @return
      */
     private String genSetSql(Map<String, Object> setValues, Map<String, Object> mapParamValues, int index,
-                             boolean isSelective) {
+                             boolean isSelective, List<String> expFields) {
         Iterator<Map.Entry<String, Object>> iterator = setValues.entrySet().iterator();
         StringBuilder sb = new StringBuilder();
         int subIndex = 1;
@@ -256,6 +264,9 @@ public class MyBatisDataOperator implements IDataOperator {
         while (iterator.hasNext()) {
             Map.Entry<String, Object> en = iterator.next();
             key = makeSubKey(index, subIndex++);
+            if (expFields.indexOf(en.getKey()) > -1) {
+                continue;
+            }
             if (CommonUtils.isEmpty(en.getValue())) {
                 if (isSelective) {
                     continue;
