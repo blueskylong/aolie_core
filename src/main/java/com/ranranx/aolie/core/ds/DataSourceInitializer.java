@@ -1,13 +1,17 @@
 package com.ranranx.aolie.core.ds;
 
 import com.ranranx.aolie.core.common.CommonUtils;
+import com.ranranx.aolie.core.datameta.datamodel.DataOperatorInfo;
 import com.ranranx.aolie.core.datameta.dto.DataOperatorDto;
 import com.ranranx.aolie.core.ds.dataoperator.DataOperatorFactory;
 import com.ranranx.aolie.core.ds.dataoperator.IDataOperator;
 import com.ranranx.aolie.core.ds.dataoperator.multids.DataSourceWrapper;
 import com.ranranx.aolie.core.ds.dataoperator.multids.DynamicDataSource;
+import com.ranranx.aolie.core.ds.dataoperator.mybatis.MyBatisDataOperator;
 import com.ranranx.aolie.core.ds.definition.QueryParamDefinition;
+import com.ranranx.aolie.core.exceptions.InvalidException;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Configuration;
@@ -35,19 +39,37 @@ public class DataSourceInitializer implements ApplicationContextAware {
         DataOperatorFactory dataOperatorFactory = (DataOperatorFactory) applicationContext.getBean("DataOperatorFactory");
         IDataOperator dataOperator = dataOperatorFactory.getDefaultDataOperator();
         List<DataOperatorDto> lstDop = findAllDataOperatorDto(dataOperator);
-
-        dynamicDataSource.addDataSourceWrappers(createDataSourceWrapper(lstDop));
+        dynamicDataSource.addDataSourceWrappers(createDataSourceWrapper(applicationContext, lstDop, dataOperatorFactory));
     }
 
 
-    private List<DataSourceWrapper> createDataSourceWrapper(List<DataOperatorDto> lstDop) {
+    private List<DataSourceWrapper> createDataSourceWrapper(ApplicationContext applicationContext,
+                                                            List<DataOperatorDto> lstDop, DataOperatorFactory dataOperatorFactory) {
         List<DataSourceWrapper> lstResult = new ArrayList<>();
         if (lstDop == null || lstDop.isEmpty()) {
             return lstResult;
         }
         DataSourceWrapper wrapper;
         for (DataOperatorDto dto : lstDop) {
-            lstResult.add(new DataSourceWrapper(dto));
+            if (dto.getId() == 0) {
+                continue;
+            }
+            DataOperatorInfo dataOperatorInfo = new DataOperatorInfo(dto);
+            AutowireCapableBeanFactory factory = applicationContext.getAutowireCapableBeanFactory();
+            try {
+                IDataOperator operator;
+                if (dto.getOperatorClass() != null) {
+                    operator = (IDataOperator) Class.forName(dto.getOperatorClass()).newInstance();
+                } else {
+                    operator = new MyBatisDataOperator(dto);
+                }
+                factory.autowireBean(operator);
+//                factory.initializeBean(operator, dataOperatorInfo.getDsKey());
+                lstResult.add(new DataSourceWrapper(dto));
+                dataOperatorFactory.regDataOperator(dataOperatorInfo.getDsKey(), operator);
+            } catch (Exception e) {
+                throw new InvalidException("生成数据源失败:" + dto.getName());
+            }
         }
         return lstResult;
     }

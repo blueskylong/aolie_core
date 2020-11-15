@@ -9,11 +9,9 @@ import com.ranranx.aolie.core.datameta.dto.BlockViewDto;
 import com.ranranx.aolie.core.datameta.dto.ComponentDto;
 import com.ranranx.aolie.core.datameta.dto.TableDto;
 import com.ranranx.aolie.core.ds.dataoperator.DataOperatorFactory;
-import com.ranranx.aolie.core.ds.definition.DeleteParamDefinition;
-import com.ranranx.aolie.core.ds.definition.FieldOrder;
-import com.ranranx.aolie.core.ds.definition.InsertParamDefinition;
-import com.ranranx.aolie.core.ds.definition.QueryParamDefinition;
+import com.ranranx.aolie.core.ds.definition.*;
 import com.ranranx.aolie.core.exceptions.NotExistException;
+import com.ranranx.aolie.core.tree.LevelProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -21,10 +19,7 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @Author xxl
@@ -40,6 +35,9 @@ public class UIService {
     private static final String KEY_VIEWER_REMOVE = "'VIEWER_'+#p0.blockViewDto.blockViewId+'_'+#p0.blockViewDto.versionCode";
     @Autowired
     private DataOperatorFactory factory;
+
+    @Autowired
+    private SchemaHolder schemaHolder;
 
     /**
      * 查询表及其字段,用于树状显示
@@ -223,7 +221,8 @@ public class UIService {
         queryParamDefinition.appendCriteria().andEqualTo("schema_id", schemaId)
                 .andEqualTo("version_code", versionCode);
         queryParamDefinition.addOrder(new FieldOrder(TableDto.class, "table_id", true, 0));
-        return factory.getDefaultDataOperator().select(queryParamDefinition, TableDto.class);
+        Schema schema = schemaHolder.getSchema(schemaId, versionCode);
+        return factory.getDataOperatorByKey(schema.getDsKey()).select(queryParamDefinition, TableDto.class);
     }
 
     @Transactional(readOnly = false)
@@ -251,8 +250,7 @@ public class UIService {
             }
         }
         String maxCode = getMaxLvlCode(schemaId, curCode);
-        String nextCode = "000" + (Integer.parseInt(maxCode) + 1);
-        nextCode = nextCode.substring(nextCode.length() - 3);
+        String nextCode = new LevelProvider(maxCode).getNextCode();
         dto.setLvlCode(nextCode);
         InsertParamDefinition insertParamDefinition = new InsertParamDefinition();
         insertParamDefinition.setNeedConvertToUnderLine(true);
@@ -266,15 +264,64 @@ public class UIService {
         if (blockViews == null) {
             return "000";
         }
-        String maxCode = "000";
-        int len = CommonUtils.isEmpty(curCode) ? 3 : curCode.length() + 3;
-        for (BlockViewDto dto : blockViews) {
 
+        int len = CommonUtils.isEmpty(curCode) ? 3 : curCode.length() + 3;
+        String maxCode = CommonUtils.appendChar(curCode, '0', len);
+        for (BlockViewDto dto : blockViews) {
             if (dto.getLvlCode().length() == len
                     && (CommonUtils.isEmpty(curCode) || dto.getLvlCode().startsWith(curCode))) {
                 maxCode = maxCode.compareTo(dto.getLvlCode()) > 0 ? maxCode : dto.getLvlCode();
             }
         }
         return maxCode;
+    }
+
+    /**
+     * 删除指定列对应的控件
+     *
+     * @param lstColId
+     * @param version
+     */
+    public void deleteColComponent(List<Object> lstColId, String version) {
+        DeleteParamDefinition definition = new DeleteParamDefinition();
+        definition.setTableDto(ComponentDto.class).getCriteria().andIn("column_id", lstColId)
+                .andEqualTo("version_code", version);
+        factory.getDefaultDataOperator().delete(definition);
+    }
+
+    /**
+     * 更新页面的层次设置
+     *
+     * @param mapIdToCode
+     */
+    @Transactional(readOnly = false)
+    public void updateBlockLevel(Map<Long, String> mapIdToCode, long schemaId) {
+        if (mapIdToCode == null || mapIdToCode.isEmpty()) {
+            return;
+        }
+        UpdateParamDefinition updateParamDefinition;
+        updateParamDefinition = new UpdateParamDefinition();
+        updateParamDefinition.setSelective(true);
+        updateParamDefinition.setTableNameByDto(BlockViewDto.class);
+        updateParamDefinition.setIdField("block_view_id,schema_id,version_code");
+
+        updateParamDefinition.setLstRows(toMap(mapIdToCode, schemaId));
+        factory.getDefaultDataOperator().update(updateParamDefinition);
+    }
+
+    private List<Map<String, Object>> toMap(Map<Long, String> mapIdToCode, long schemaId) {
+        Iterator<Map.Entry<Long, String>> iterator = mapIdToCode.entrySet().iterator();
+
+        List<Map<String, Object>> lstResult = new ArrayList<>();
+        while (iterator.hasNext()) {
+            Map.Entry<Long, String> next = iterator.next();
+            Map<String, Object> map = new HashMap<>();
+            map.put("version_code", SessionUtils.getLoginVersion());
+            map.put("block_view_id", next.getKey());
+            map.put("schema_id", schemaId);
+            map.put("lvl_code", next.getValue());
+            lstResult.add(map);
+        }
+        return lstResult;
     }
 }

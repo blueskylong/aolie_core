@@ -40,18 +40,15 @@ public class InsertParamDefinition {
         if (CommonUtils.isEmpty(tableName) && lstObj != null && !lstObj.isEmpty()) {
             this.tableName = CommonUtils.getTableName(lstObj.get(0).getClass());
         }
-        if (needConvertToUnderLine) {
-            this.lstRows = CommonUtils.toMapAndConvertToUnderLine(lstObj);
-        } else {
-            this.lstRows = CommonUtils.toMap(lstObj);
-        }
+        this.needConvertToUnderLine = true;
+        this.lstRows = CommonUtils.toMapAndConvertToUnderLine(lstObj);
     }
 
     public void setObject(Object obj) {
         if (CommonUtils.isEmpty(tableName) && obj != null) {
             this.tableName = CommonUtils.getTableName(obj.getClass());
         }
-
+        this.needConvertToUnderLine = true;
         this.lstRows = new ArrayList<>();
         this.lstRows.add(CommonUtils.toMap(obj, needConvertToUnderLine));
     }

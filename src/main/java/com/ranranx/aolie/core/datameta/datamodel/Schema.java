@@ -1,6 +1,8 @@
 package com.ranranx.aolie.core.datameta.datamodel;
 
 import com.ranranx.aolie.core.datameta.dto.*;
+import com.ranranx.aolie.core.ds.dataoperator.DataSourceUtils;
+import com.ranranx.aolie.core.exceptions.NotExistException;
 import com.ranranx.aolie.core.interfaces.SchemaMessageReceiveHandler;
 import com.ranranx.aolie.core.interfaces.SchemaMessageSendHandler;
 
@@ -196,5 +198,17 @@ public class Schema {
             return lstDto;
         }
         return null;
+    }
+
+    @Transient
+    public String getDsKey() {
+        if (this.getSchemaDto().getDataOperId() == null || this.getSchemaDto().getDataOperId() == 0) {
+            return DataSourceUtils.getDefaultDataSourceKey();
+        }
+        DataOperatorInfo dataOperatorInfo = SchemaHolder.getDataOperatorInfo(schemaDto.getDataOperId(), schemaDto.getVersionCode());
+        if (dataOperatorInfo == null) {
+            throw new NotExistException("数据库连接:[" + schemaDto.getDataOperId() + "__" + schemaDto.getVersionCode() + "]不存在");
+        }
+        return dataOperatorInfo.getDsKey();
     }
 }

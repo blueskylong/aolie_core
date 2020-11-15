@@ -20,7 +20,10 @@ public class ReferenceDto extends BaseDto {
     private Integer onlyLeaf;
     private String parentField;
     private String codeField;
+    private Integer xh;
 
+    private Long tableId;
+    private int treeLike;
     /**
      * 如果是统一表中的引用,则要提供类型
      */
@@ -96,5 +99,29 @@ public class ReferenceDto extends BaseDto {
 
     public void setRefName(String refName) {
         this.refName = refName;
+    }
+
+    public Long getTableId() {
+        return tableId;
+    }
+
+    public void setTableId(Long tableId) {
+        this.tableId = tableId;
+    }
+
+    public int getTreeLike() {
+        return treeLike;
+    }
+
+    public void setTreeLike(int treeLike) {
+        this.treeLike = treeLike;
+    }
+
+    public Integer getXh() {
+        return xh;
+    }
+
+    public void setXh(Integer xh) {
+        this.xh = xh;
     }
 }

@@ -15,6 +15,7 @@ public class SchemaDto extends SchemaBaseDto {
     private Integer enabled;
     private Integer width;
     private Integer height;
+    private Long dataOperId;
 
 
     public String getSchemaName() {
@@ -55,5 +56,13 @@ public class SchemaDto extends SchemaBaseDto {
 
     public void setHeight(Integer height) {
         this.height = height;
+    }
+
+    public Long getDataOperId() {
+        return dataOperId;
+    }
+
+    public void setDataOperId(Long dataOperId) {
+        this.dataOperId = dataOperId;
     }
 }

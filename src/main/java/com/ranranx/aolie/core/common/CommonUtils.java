@@ -210,6 +210,35 @@ public class CommonUtils {
         return builder.toString();
     }
 
+
+    public static String stuff(String oraStr, char c, int totalLen) {
+        if (oraStr == null) {
+            oraStr = "";
+        }
+        if (oraStr.length() > totalLen) {
+            return oraStr;
+        }
+        int addNum = totalLen - oraStr.length();
+        for (int i = 0; i < addNum; i++) {
+            oraStr = c + oraStr;
+        }
+        return oraStr;
+    }
+
+    public static String appendChar(String oraStr, char c, int totalLen) {
+        if (oraStr == null) {
+            oraStr = "";
+        }
+        if (oraStr.length() > totalLen) {
+            return oraStr;
+        }
+        int addNum = totalLen - oraStr.length();
+        for (int i = 0; i < addNum; i++) {
+            oraStr = oraStr + c;
+        }
+        return oraStr;
+    }
+
     /**
      * 生成单个Bean
      *

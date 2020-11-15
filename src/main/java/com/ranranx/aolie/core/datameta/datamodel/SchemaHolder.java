@@ -22,6 +22,11 @@ public class SchemaHolder {
 
     private static UIService uiService;
     private static DataModelService service;
+    private static SchemaHolder thas;
+    /**
+     * 记录动态查询的次数,出现在新增的情况下
+     */
+    private Map<String, Object> triedSchema = new HashMap<>();
 
     /**
      * 所有表信息 key:SCHEMA_VERSION value:Table
@@ -64,6 +69,11 @@ public class SchemaHolder {
     public SchemaHolder(DataModelService service, UIService uiService) {
         SchemaHolder.service = service;
         SchemaHolder.uiService = uiService;
+        SchemaHolder.thas = this;
+    }
+
+    public static SchemaHolder getInstance() {
+        return SchemaHolder.thas;
     }
 
 
@@ -88,6 +98,18 @@ public class SchemaHolder {
         return mapReference.get(CommonUtils.makeKey(id.toString(), version));
     }
 
+    public List<ReferenceDto> getReferenceDtos() {
+        if (mapSchema.isEmpty()) {
+            return null;
+        }
+        List<Reference> lstReference = mapSchema.values().iterator().next().getLstReference();
+        List<ReferenceDto> lstDto = new ArrayList<>();
+        for (Reference reference : lstReference) {
+            lstDto.add(reference.getReferenceDto());
+        }
+        return lstDto;
+    }
+
     /**
      * 取得并生成
      *
@@ -96,17 +118,30 @@ public class SchemaHolder {
      */
 
     public Schema getSchema(Long schemaId, String version) {
-        Schema schema = mapSchema.get(CommonUtils.makeKey(schemaId.toString(),
-                version));
+        String code = CommonUtils.makeKey(schemaId.toString(),
+                version);
+        Schema schema = mapSchema.get(code);
         if (mapSchema == null) {
             synchronized (SchemaHolder.class) {
                 if (mapSchema == null) {
                     refresh();
                 }
-                return mapSchema.get(CommonUtils.makeKey(schemaId.toString(),
-                        version));
-
+                schema = mapSchema.get(code);
             }
+        }
+        if (schema == null) {
+            synchronized (SchemaHolder.class) {
+                if (schema == null) {
+                    if (triedSchema.containsKey(code)) {//如果已尝试过,则直接返回
+                        return null;
+                    }
+                    triedSchema.put(code, null);
+                    initSchema(schemaId, version);
+                    schema = mapSchema.get(code);
+                }
+            }
+
+
         }
         return schema;
     }
@@ -153,6 +188,7 @@ public class SchemaHolder {
 
     }
 
+
     private void initOperator() {
         List<DataOperatorInfo> lstOperInfo = service.findAllOperatorInfo();
         if (lstOperInfo != null && !lstOperInfo.isEmpty()) {
@@ -161,6 +197,14 @@ public class SchemaHolder {
                         info.getOperatorDto().getVersionCode()), info);
             });
         }
+    }
+
+    private void initSchema(Long schemaId, String version) {
+        SchemaDto schemaDto = service.findSchemaDto(schemaId, version);
+        if (schemaDto == null) {
+            return;
+        }
+        initSchema(schemaDto);
     }
 
     /**
@@ -336,8 +380,26 @@ public class SchemaHolder {
 
     }
 
+    public void deleteSchema(long schemaId, String version) {
+        service.deleteSchemaForPublic(schemaId, version);
+        this.refresh();
+    }
+
+    /**
+     * 同步更新表列信息,保存到数据库中
+     *
+     * @param tableId
+     * @param version
+     */
+    public List<ColumnDto> syncTableColumn(long tableId, String version) {
+        List<ColumnDto> columnDtos = service.syncTableColumn(tableId, version);
+        refresh();
+        return columnDtos;
+    }
+
+
     private void initReference(Schema schema) {
-        List<ReferenceDto> schemaReferences = service.findSchemaReferences(schema.getSchemaDto().getSchemaId(),
+        List<ReferenceDto> schemaReferences = service.findSchemaReferences(
                 schema.getSchemaDto().getVersionCode());
         if (schemaReferences == null || schemaReferences.isEmpty()) {
             return;
@@ -350,6 +412,5 @@ public class SchemaHolder {
         }
         schema.setLstReference(lstReference);
     }
-
 
 }

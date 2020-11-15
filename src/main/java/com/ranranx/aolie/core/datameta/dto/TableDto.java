@@ -50,6 +50,11 @@ public class TableDto extends SchemaBaseDto {
      */
     private Integer height;
 
+    /**
+     * 默认编辑视图ID
+     */
+    private Long blockViewId;
+
 
     public String getTableName() {
         return tableName;
@@ -122,6 +127,14 @@ public class TableDto extends SchemaBaseDto {
 
     public void setHeight(Integer height) {
         this.height = height;
+    }
+
+    public Long getBlockViewId() {
+        return blockViewId;
+    }
+
+    public void setBlockViewId(Long blockViewId) {
+        this.blockViewId = blockViewId;
     }
 }
 

@@ -36,6 +36,14 @@ public class MyBatisDataOperator implements IDataOperator {
     @Autowired
     private MyBatisGeneralMapper mapper;
 
+    public MyBatisDataOperator() {
+
+    }
+
+    public MyBatisDataOperator(DataOperatorDto dto) {
+        this.setDto(dto);
+    }
+
     /**
      * 查询
      *
@@ -64,7 +72,8 @@ public class MyBatisDataOperator implements IDataOperator {
      * @return
      */
     private List<Map<String, Object>> multiTableSelect(QueryParamDefinition queryParamDefinition) {
-        return mapper.select(genSelectParams(queryParamDefinition));
+        DynamicDataSource.setDataSource(this.getKey());
+        return select(genSelectParams(queryParamDefinition));
     }
 
     public static Map<String, Object> genSelectParams(QueryParamDefinition queryParamDefinition) {
@@ -140,7 +149,8 @@ public class MyBatisDataOperator implements IDataOperator {
         StringBuilder sbSql = new StringBuilder();
         sbSql.append("select ").append(field).append(" from ").append(tableName).append(where).append(orderExp);
         mapParam.put(SQL_PARAM_NAME, sbSql.toString());
-        return mapper.select(mapParam);
+
+        return select(mapParam);
     }
 
 
@@ -364,6 +374,7 @@ public class MyBatisDataOperator implements IDataOperator {
         return dto;
     }
 
+    @Override
     public void setDto(DataOperatorDto dto) {
         this.dto = dto;
         if (this.dto == null) {

@@ -33,8 +33,11 @@ public class TableInfo {
      */
     private List<Column> lstColumn = new ArrayList<>();
 
-    public String getDsKey() {
+    public String getDsKey(Schema schema) {
         if (tableDto.getDataOperId() == null) {
+            if (schema != null) {
+                return schema.getDsKey();
+            }
             return DataSourceUtils.getDefaultDataSourceKey();
         }
         DataOperatorInfo dataOperatorInfo = SchemaHolder.getDataOperatorInfo(tableDto.getDataOperId(), tableDto.getVersionCode());

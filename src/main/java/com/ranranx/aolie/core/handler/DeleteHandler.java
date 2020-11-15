@@ -39,7 +39,7 @@ public class DeleteHandler<T extends DeleteParam> extends BaseHandler<T> {
         try {
             DeleteParamDefinition deleteParamDefinition = new DeleteParamDefinition();
             BeanUtils.copyProperties(deleteParam, deleteParamDefinition);
-            int num = factory.getDataOperatorByName(null).delete(
+            int num = factory.getDataOperatorByKey(null).delete(
                     deleteParamDefinition
             );
             result.setSuccess(true);

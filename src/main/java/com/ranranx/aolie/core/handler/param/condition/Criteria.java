@@ -35,7 +35,7 @@ import java.util.Map;
 
 /**
  * @Author xxl
- * @Description
+ * @Description 此设计复制于tk.mybatis插件, 并做修改
  * @Date 2020/8/14 15:38
  * @Version V0.0.1
  **/

@@ -1,16 +1,18 @@
 package com.ranranx.aolie.core.controller;
 
+import com.ranranx.aolie.core.common.CommonUtils;
 import com.ranranx.aolie.core.common.SessionUtils;
 import com.ranranx.aolie.core.datameta.datamodel.Schema;
 import com.ranranx.aolie.core.datameta.datamodel.SchemaHolder;
-import com.ranranx.aolie.core.datameta.dto.ColumnDto;
-import com.ranranx.aolie.core.datameta.dto.ConstraintDto;
-import com.ranranx.aolie.core.datameta.dto.FormulaDto;
+import com.ranranx.aolie.core.datameta.dto.*;
+import com.ranranx.aolie.core.handler.HandleResult;
 import com.ranranx.aolie.core.service.DataModelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author xxl
@@ -74,6 +76,87 @@ public class DataModelController {
     public boolean refreshCache(@PathVariable long schemaId, @PathVariable String version) {
         schemaHolder.initSchema(schemaId, version);
         return true;
+    }
+
+    /**
+     * 取得所有的方案信息
+     *
+     * @return
+     */
+    @GetMapping("/findAllSchemaDto")
+    public List<SchemaDto> findAllSchemaDto() {
+        return service.findAllSchemaDto(false);
+    }
+
+    /**
+     * 取得所有的方案信息
+     *
+     * @return
+     */
+    @GetMapping("/findSchemaIds")
+    public List<Long> findSchemaIds() {
+        List<SchemaDto> allSchemaDto = service.findAllSchemaDto(true);
+        if (allSchemaDto == null) {
+            return null;
+        }
+        List<Long> lstResult = new ArrayList<>(allSchemaDto.size());
+        for (SchemaDto dto : allSchemaDto) {
+            lstResult.add(dto.getSchemaId());
+        }
+        return lstResult;
+    }
+
+    /**
+     * 增加方案
+     *
+     * @return
+     */
+    @PostMapping("/addSchema")
+    public long addSchema(@RequestBody Map<String, Object> params) {
+        String schemaName = CommonUtils.getStringField(params, "schemaName");
+        return service.addSchema(schemaName);
+    }
+
+    /**
+     * 用于公开 使用的删除
+     *
+     * @param schemaId
+     */
+    @RequestMapping("/deleteSchema/{schemaId}")
+    public HandleResult deleteSchema(@PathVariable Long schemaId) {
+        schemaHolder.deleteSchema(schemaId, SessionUtils.getLoginVersion());
+        return HandleResult.success(1);
+    }
+
+    /**
+     * 同步更新表列信息
+     *
+     * @param tableId
+     */
+    @RequestMapping("/getSyncTableCols/{tableId}")
+    public List<ColumnDto> getSyncTableCols(@PathVariable long tableId) {
+        return service.getSyncTableCols(tableId, SessionUtils.getLoginVersion());
+    }
+
+    /**
+     * 查询引用数据
+     *
+     * @return
+     */
+    @GetMapping("/findReferenceInfo")
+    public List<ReferenceDto> findReferenceData() {
+        return schemaHolder.getReferenceDtos();
+    }
+
+    /**
+     * 保存引用信息
+     *
+     * @param lstDto
+     */
+    @PostMapping("/saveReference")
+    public HandleResult saveReference(@RequestBody List<ReferenceDto> lstDto) {
+        service.saveReference(lstDto);
+        return HandleResult.success(1);
     }
 
 }

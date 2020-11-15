@@ -36,8 +36,9 @@ public class DeleteParamDefinition {
         return ids;
     }
 
-    public void setIds(List<Object> ids) {
+    public DeleteParamDefinition setIds(List<Object> ids) {
         this.ids = ids;
+        return this;
     }
 
     public Criteria getCriteria() {
@@ -47,8 +48,9 @@ public class DeleteParamDefinition {
         return criteria;
     }
 
-    public void setCriteria(Criteria criteria) {
+    public DeleteParamDefinition setCriteria(Criteria criteria) {
         this.criteria = criteria;
+        return this;
     }
 
 
@@ -60,16 +62,18 @@ public class DeleteParamDefinition {
         this.tableName = tableName;
     }
 
-    public void setTableDto(Class clazz) {
+    public DeleteParamDefinition setTableDto(Class clazz) {
         tableName = CommonUtils.getTableName(clazz);
+        return this;
     }
 
     public String getIdField() {
         return idField;
     }
 
-    public void setIdField(String idField) {
+    public DeleteParamDefinition setIdField(String idField) {
         this.idField = idField;
+        return this;
     }
 }
 

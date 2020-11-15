@@ -238,7 +238,6 @@ public class PageService {
             map.put("page_id", next.getKey());
             map.put("schema_id", schemaId);
             map.put("lvl_code", next.getValue());
-
             lstResult.add(map);
         }
         return lstResult;

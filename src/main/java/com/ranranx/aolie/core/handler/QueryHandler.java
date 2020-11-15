@@ -41,7 +41,7 @@ public class QueryHandler<T extends QueryParam> extends BaseHandler<T> {
         criteria.andEqualTo("version", "1");
 
         //TODO 这里需要将查询分解,合并
-        List<Map<String, Object>> lstData = factory.getDataOperatorByName(null).select(queryParamDefinition);
+        List<Map<String, Object>> lstData = factory.getDataOperatorByKey(null).select(queryParamDefinition);
         HandleResult result = new HandleResult();
         result.setSuccess(true);
         result.setLstData(lstData);

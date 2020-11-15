@@ -5,6 +5,7 @@ import com.ranranx.aolie.core.common.SessionUtils;
 import com.ranranx.aolie.core.datameta.datamodel.BlockViewer;
 import com.ranranx.aolie.core.datameta.datamodel.ReferenceData;
 import com.ranranx.aolie.core.datameta.dto.BlockViewDto;
+import com.ranranx.aolie.core.datameta.dto.ReferenceDto;
 import com.ranranx.aolie.core.datameta.dto.TableDto;
 import com.ranranx.aolie.core.handler.HandleResult;
 import com.ranranx.aolie.core.service.DataModelService;
@@ -107,4 +108,17 @@ public class UIController {
     public HandleResult deleteBlockView(@PathVariable long blockViewId) {
         return HandleResult.success(uiService.deleteBlockView(blockViewId));
     }
+
+    /**
+     * 更新页面的层次设置
+     *
+     * @param mapIdToCode
+     */
+    @PostMapping("/updateBlockLevel/{schemaId}")
+    public HandleResult updateBlockLevel(@RequestBody Map<Long, String> mapIdToCode, @PathVariable long schemaId) {
+        uiService.updateBlockLevel(mapIdToCode, schemaId);
+        return HandleResult.success(1);
+    }
+
+
 }

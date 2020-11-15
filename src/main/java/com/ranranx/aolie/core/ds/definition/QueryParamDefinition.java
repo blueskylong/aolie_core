@@ -95,7 +95,7 @@ public class QueryParamDefinition {
         if (lstCriteria.size() > 0) {
             return lstCriteria.get(0);
         }
-        return new Criteria();
+        return this.appendCriteria();
     }
 
     public void setCriteria(List<Criteria> criteria) {

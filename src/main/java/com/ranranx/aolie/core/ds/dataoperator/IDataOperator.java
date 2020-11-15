@@ -1,6 +1,7 @@
 package com.ranranx.aolie.core.ds.dataoperator;
 
 import com.ranranx.aolie.core.common.CommonUtils;
+import com.ranranx.aolie.core.datameta.dto.DataOperatorDto;
 import com.ranranx.aolie.core.ds.definition.DeleteParamDefinition;
 import com.ranranx.aolie.core.ds.definition.InsertParamDefinition;
 import com.ranranx.aolie.core.ds.definition.QueryParamDefinition;
@@ -127,5 +128,13 @@ public interface IDataOperator {
      * @return
      */
     int executeDirect(Map<String, Object> mapParam);
+
+
+    /**
+     * 设置配置信息
+     *
+     * @param dto
+     */
+    void setDto(DataOperatorDto dto);
 
 }

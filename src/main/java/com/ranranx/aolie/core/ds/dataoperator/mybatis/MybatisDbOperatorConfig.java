@@ -10,6 +10,7 @@ import org.mybatis.spring.boot.autoconfigure.MybatisAutoConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -38,6 +39,7 @@ public class MybatisDbOperatorConfig implements BeanPostProcessor, BeanDefinitio
     /**
      * 这里需要初始化 TODO
      */
+    @Autowired
     private List<DataOperatorDto> lstOperSet;
 
 
@@ -157,7 +159,7 @@ public class MybatisDbOperatorConfig implements BeanPostProcessor, BeanDefinitio
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
         //这里开始注册
-
+        System.out.println("这里开始注册");
 
     }
 
