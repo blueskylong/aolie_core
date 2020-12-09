@@ -142,6 +142,11 @@ public class Constants {
     public static final Long DEFAULT_BS_SCHEMA = new Long(2);
 
     /**
+     * 全局引用方案
+     */
+    public static final Long DEFAULT_REFERENCE_SCHEMA = new Long(0);
+
+    /**
      * 布局
      */
     public static class LayoutType {

@@ -129,13 +129,21 @@ public class MyBatisDataOperator implements IDataOperator {
         String field = getFieldsExp((queryParamDefinition.getFields() == null || queryParamDefinition.getFields().isEmpty())
                 ? null : queryParamDefinition.getFields(), null);
         Map<String, Object> mapParam = new HashMap<>();
-        String where = "";
+        StringBuilder where = new StringBuilder();
         if (queryParamDefinition.getCriteria() != null) {
             if (queryParamDefinition.hasCriteria()) {
-                where = queryParamDefinition.getCriteria().get(0).getSqlWhere(mapParam, null, 1, false);
-                if (!CommonUtils.isEmpty(where)) {
-                    where = " where " + where;
+                List<Criteria> lstCriteria = queryParamDefinition.getCriteria();
+                for (Criteria criteria : lstCriteria) {
+                    String aWhere = criteria.getSqlWhere(mapParam, null, 1, false);
+                    if (!CommonUtils.isEmpty(aWhere)) {
+                        where.append(criteria.getAndOr()).append("  ").append(aWhere);
+                    }
                 }
+                if (where.length() > 0) {
+                    where.replace(0, 4, "");
+                    where.insert(0, " where ");
+                }
+
             }
         }
         String orderExp = "";
@@ -147,7 +155,7 @@ public class MyBatisDataOperator implements IDataOperator {
             orderExp = " order by " + orderExp.substring(0, orderExp.length() - 1);
         }
         StringBuilder sbSql = new StringBuilder();
-        sbSql.append("select ").append(field).append(" from ").append(tableName).append(where).append(orderExp);
+        sbSql.append("select ").append(field).append(" from ").append(tableName).append(where.toString()).append(orderExp);
         mapParam.put(SQL_PARAM_NAME, sbSql.toString());
 
         return select(mapParam);

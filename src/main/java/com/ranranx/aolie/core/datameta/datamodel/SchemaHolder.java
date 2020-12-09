@@ -220,6 +220,7 @@ public class SchemaHolder {
         initReference(schema);
         setSchemaTable(schema);
         setTableColumn(schema);
+        setTableReference(schema);
         setSchemaConstraint(schema);
         setSchemaFormula(schema);
         setSchemaRelation(schema);
@@ -378,6 +379,52 @@ public class SchemaHolder {
         }
 
 
+    }
+
+    /**
+     * 装配引用信息
+     *
+     * @param schema
+     */
+    private void setTableReference(Schema schema) {
+        //如果是全局引用的方案,才需要配置引用信息
+        if (!SchemaTools.isReferenceSchema(schema.getSchemaDto().getSchemaId())) {
+            return;
+        }
+        List<ReferenceDto> schemaReferences = service.findSchemaReferences(schema.getSchemaDto().getVersionCode());
+        List<TableInfo> lstTable = schema.getLstTable();
+        if (lstTable == null || lstTable.isEmpty()) {
+            return;
+        }
+        Map<Long, List<ReferenceDto>> mapReference = makeReferenceMap(schemaReferences);
+        if (mapReference.isEmpty()) {
+            return;
+        }
+        for (TableInfo info : lstTable) {
+            info.setLstReference(mapReference.get(info.getTableDto().getTableId()));
+        }
+    }
+
+    /**
+     * 将引用分类组装
+     *
+     * @param schemaReferences
+     * @return
+     */
+    private Map<Long, List<ReferenceDto>> makeReferenceMap(List<ReferenceDto> schemaReferences) {
+        if (schemaReferences == null || schemaReferences.isEmpty()) {
+            return new HashMap<>();
+        }
+        Map<Long, List<ReferenceDto>> result = new HashMap<>();
+        for (ReferenceDto dto : schemaReferences) {
+            List<ReferenceDto> referenceDtos = result.get(dto.getTableId());
+            if (referenceDtos == null) {
+                referenceDtos = new ArrayList<>();
+                result.put(dto.getTableId(), referenceDtos);
+            }
+            referenceDtos.add(dto);
+        }
+        return result;
     }
 
     public void deleteSchema(long schemaId, String version) {

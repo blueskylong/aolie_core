@@ -56,6 +56,7 @@ public class TableDto extends SchemaBaseDto {
     private Long blockViewId;
 
 
+
     public String getTableName() {
         return tableName;
     }

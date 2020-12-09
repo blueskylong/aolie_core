@@ -44,6 +44,16 @@ public class PageController {
     public List<PageDetailDto> findPageDetail(@PathVariable Long pageId) {
         return pageService.findPageDetail(pageId);
     }
+    /**
+     * 取得一页面的详细配置信息
+     *
+     * @param pageId
+     * @return
+     */
+    @RequestMapping("/findPageInfo/{pageId}")
+    public PageInfo findPageInfo(@PathVariable Long pageId) {
+        return pageService.findPageInfo(pageId);
+    }
 
     @PostMapping("/addPage/{schemaId}")
     public long addPage(@RequestBody Map<String, Object> map, @PathVariable Long schemaId) {
@@ -77,5 +87,16 @@ public class PageController {
                                         @PathVariable long schemaId) {
         pageService.updatePageLevel(mapIdToCode, schemaId);
         return HandleResult.success(1);
+    }
+
+    /**
+     * 查询所有的视图信息
+     *
+     * @param schemaId
+     * @return
+     */
+    @RequestMapping("/getPageElements/{schemaId}")
+    public List<Map<String, Object>> getPageElements(@PathVariable Long schemaId) {
+        return pageService.getPageElements(schemaId);
     }
 }

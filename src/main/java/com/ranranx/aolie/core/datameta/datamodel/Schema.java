@@ -1,5 +1,6 @@
 package com.ranranx.aolie.core.datameta.datamodel;
 
+import com.ranranx.aolie.core.common.IdGenerator;
 import com.ranranx.aolie.core.datameta.dto.*;
 import com.ranranx.aolie.core.ds.dataoperator.DataSourceUtils;
 import com.ranranx.aolie.core.exceptions.NotExistException;
@@ -195,6 +196,33 @@ public class Schema {
             this.lstRelation.forEach(relation -> {
                 lstDto.add(relation.getDto());
             });
+            return lstDto;
+        }
+        return null;
+    }
+
+    @Transient
+    public List<ReferenceDto> getReferenceDto() {
+        if (!SchemaTools.isReferenceSchema(this.getSchemaDto().getSchemaId())) {
+            return null;
+        }
+        List<ReferenceDto> lstDto = new ArrayList<>();
+        int index = 1;
+        if (this.getLstTable() != null) {
+            for (TableInfo tableInfo : this.getLstTable()) {
+                List<ReferenceDto> lstReference = tableInfo.getLstReference();
+                if (lstReference == null || lstReference.isEmpty()) {
+                    continue;
+                }
+                for (ReferenceDto dto : lstReference) {
+                    if (dto.getRefId() < 0) {
+                        dto.setRefId(IdGenerator.getNextId(Reference.class.getName()));
+                    }
+                    dto.setTableName(tableInfo.getTableDto().getTableName());
+                    dto.setXh(index++);
+                    lstDto.add(dto);
+                }
+            }
             return lstDto;
         }
         return null;

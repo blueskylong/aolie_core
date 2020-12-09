@@ -19,6 +19,7 @@ import java.util.regex.Pattern;
  * @Version V0.0.1
  **/
 public class CommonUtils {
+    private static final Pattern NUMBER_PATTERN = Pattern.compile("[+-]?(\\d+(\\.\\d*)?|\\.\\d+)(E\\d+)?");
 
     private static Pattern UNDERLINE_PATTEN = Pattern.compile("_[a-z]");
 
@@ -320,5 +321,9 @@ public class CommonUtils {
             return (Integer) obj;
         }
         return Integer.parseInt(obj.toString());
+    }
+
+    public static boolean isNumber(String str) {
+        return NUMBER_PATTERN.matcher(str).matches();
     }
 }

@@ -148,6 +148,11 @@ public class DataModelController {
         return schemaHolder.getReferenceDtos();
     }
 
+    @GetMapping("/getReferenceDto/{referenceId}")
+    public ReferenceDto getReferenceDto(@PathVariable Long referenceId) {
+        return SchemaHolder.getReference(referenceId, SessionUtils.getLoginVersion()).getReferenceDto();
+    }
+
     /**
      * 保存引用信息
      *

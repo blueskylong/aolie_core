@@ -90,6 +90,8 @@ public class ComponentDto extends SchemaBaseDto {
     private String titlePosition;
     private String titleSpan;
 
+    private Integer treeRole;
+
     public Long getComponentId() {
         return componentId;
     }
@@ -257,5 +259,13 @@ public class ComponentDto extends SchemaBaseDto {
 
     public void setTitleSpan(String titleSpan) {
         this.titleSpan = titleSpan;
+    }
+
+    public Integer getTreeRole() {
+        return treeRole;
+    }
+
+    public void setTreeRole(Integer treeRole) {
+        this.treeRole = treeRole;
     }
 }

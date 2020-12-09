@@ -7,11 +7,16 @@ import com.ranranx.aolie.core.common.CommonUtils;
 import com.ranranx.aolie.core.common.Constants;
 import com.ranranx.aolie.core.common.IdGenerator;
 import com.ranranx.aolie.core.common.SessionUtils;
+import com.ranranx.aolie.core.datameta.datamodel.SchemaHolder;
+import com.ranranx.aolie.core.datameta.dto.BlockViewDto;
+import com.ranranx.aolie.core.datameta.dto.ReferenceDto;
 import com.ranranx.aolie.core.ds.dataoperator.DataOperatorFactory;
 import com.ranranx.aolie.core.ds.definition.*;
 import com.ranranx.aolie.core.exceptions.InvalidException;
 import com.ranranx.aolie.core.handler.param.condition.Criteria;
+import com.ranranx.aolie.core.service.UIService;
 import com.ranranx.aolie.core.tree.LevelProvider;
+import com.ranranx.aolie.core.tree.SysCodeRule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +35,11 @@ public class PageService {
 
     @Autowired
     private DataOperatorFactory factory;
+    @Autowired
+    private UIService uiService;
+
+    @Autowired
+    private SchemaHolder schemaHolder;
 
     /**
      * 取得页面列表
@@ -59,6 +69,26 @@ public class PageService {
         queryParamDefinition.appendCriteria().andEqualTo("page_id", pageId)
                 .andEqualTo("version_code", SessionUtils.getLoginVersion());
         return factory.getDefaultDataOperator().select(queryParamDefinition, PageDetailDto.class);
+    }
+
+    /**
+     * 取得一页面的详细配置信息
+     *
+     * @param pageId
+     * @return
+     */
+    public PageInfo findPageInfo(Long pageId) {
+        QueryParamDefinition queryParamDefinition = new QueryParamDefinition();
+        queryParamDefinition.setTableDtos(PageDetailDto.class);
+        queryParamDefinition.appendCriteria().andEqualTo("page_id", pageId)
+                .andEqualTo("version_code", SessionUtils.getLoginVersion());
+        List<PageDetailDto> lstDetail = factory.getDefaultDataOperator().select(queryParamDefinition, PageDetailDto.class);
+        queryParamDefinition.setTableDtos(PageInfoDto.class);
+        PageInfoDto pageInfoDto = factory.getDefaultDataOperator().selectOne(queryParamDefinition, PageInfoDto.class);
+        PageInfo info = new PageInfo();
+        info.setLstPageDetail(lstDetail);
+        info.setPageInfoDto(pageInfoDto);
+        return info;
     }
 
     /**
@@ -241,5 +271,105 @@ public class PageService {
             lstResult.add(map);
         }
         return lstResult;
+    }
+
+    /**
+     * 查询所有的视图信息
+     *
+     * @param schemaId
+     * @return
+     */
+    public List<Map<String, Object>> getPageElements(Long schemaId) {
+        QueryParamDefinition queryParamDefinition = new QueryParamDefinition();
+        queryParamDefinition.setTableDtos(BlockViewDto.class);
+        queryParamDefinition.appendCriteria().andEqualTo("schema_id", schemaId)
+                .andEqualTo("version_code", SessionUtils.getLoginVersion());
+
+        List<PageInfoDto> lstPageDto = findPageInfos(schemaId);
+        List<ReferenceDto> referenceDtos = schemaHolder.getReferenceDtos();
+        List<BlockViewDto> blocks = uiService.getBlockViews(schemaId.toString());
+        //将三个组装成树状结构
+        List<Map<String, Object>> result = new ArrayList<>();
+        addBlockInfo(blocks, result);
+        addReferenceInfo(referenceDtos, result);
+        addPageInfo(lstPageDto, result);
+        return result;
+    }
+
+    /**
+     * 增加页面信息
+     *
+     * @param lstPageDto
+     * @param result
+     */
+    private void addPageInfo(List<PageInfoDto> lstPageDto, List<Map<String, Object>> result) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("id", 3);
+        map.put("code", "003");
+        map.put("name", "页面");
+        map.put("type", "3");
+        result.add(map);
+        if (lstPageDto != null && !lstPageDto.isEmpty()) {
+            for (PageInfoDto dto : lstPageDto) {
+                map = new HashMap<>();
+                map.put("id", dto.getPageId());
+                map.put("code", "003" + dto.getLvlCode());
+                map.put("name", dto.getPageName());
+                map.put("type", "3");
+                result.add(map);
+            }
+        }
+    }
+
+    /**
+     * 增加页面信息
+     *
+     * @param lstBlockDto
+     * @param result
+     */
+    private void addBlockInfo(List<BlockViewDto> lstBlockDto, List<Map<String, Object>> result) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("id", 1);
+        map.put("code", "001");
+        map.put("name", "视图");
+        map.put("type", "1");
+        result.add(map);
+        if (lstBlockDto != null && !lstBlockDto.isEmpty()) {
+            for (BlockViewDto dto : lstBlockDto) {
+                map = new HashMap<>();
+                map.put("id", dto.getBlockViewId());
+                map.put("code", "001" + dto.getLvlCode());
+                map.put("name", dto.getBlockViewName());
+                map.put("type", "1");
+                result.add(map);
+            }
+        }
+    }
+
+    /**
+     * 增加页面信息
+     *
+     * @param lstReferenceDto
+     * @param result
+     */
+    private void addReferenceInfo(List<ReferenceDto> lstReferenceDto, List<Map<String, Object>> result) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("id", 2);
+        map.put("code", "002");
+        map.put("name", "引用");
+        map.put("type", "2");
+        result.add(map);
+        LevelProvider provider = new LevelProvider(SysCodeRule
+                .createClient(new int[]{3, 6, 9}), "");
+        if (lstReferenceDto != null && !lstReferenceDto.isEmpty()) {
+            for (ReferenceDto dto : lstReferenceDto) {
+                map = new HashMap<>();
+                map.put("id", dto.getRefId());
+                map.put("code", "002" + provider.getNextCode());
+                map.put("name", dto.getRefName());
+                map.put("type", "2");
+                result.add(map);
+            }
+        }
     }
 }

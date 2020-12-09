@@ -3,6 +3,7 @@ package com.ranranx.aolie.core.datameta.datamodel;
 import com.ranranx.aolie.core.common.IdGenerator;
 import com.ranranx.aolie.core.datameta.dto.ColumnDto;
 import com.ranranx.aolie.core.datameta.dto.FormulaDto;
+import com.ranranx.aolie.core.datameta.dto.ReferenceDto;
 import com.ranranx.aolie.core.datameta.dto.TableDto;
 import com.ranranx.aolie.core.ds.dataoperator.DataSourceUtils;
 import com.ranranx.aolie.core.exceptions.NotExistException;
@@ -19,6 +20,8 @@ import java.util.List;
 public class TableInfo {
 
     private TableDto tableDto;
+
+    private List<ReferenceDto> lstReference;
 
     public TableInfo() {
 
@@ -131,6 +134,12 @@ public class TableInfo {
             if (lstColumn != null && !lstColumn.isEmpty()) {
                 this.lstColumn.forEach(column -> column.updateTableId(tableId));
             }
+            //更新本表的ID
+            if (this.lstReference != null) {
+                for (ReferenceDto dto : this.lstReference) {
+                    dto.setTableId(tableId);
+                }
+            }
         }
         return validateColumn();
 
@@ -191,5 +200,13 @@ public class TableInfo {
 
     public void setLstConstrant(List<Constraint> lstConstrant) {
         this.lstConstrant = lstConstrant;
+    }
+
+    public List<ReferenceDto> getLstReference() {
+        return lstReference;
+    }
+
+    public void setLstReference(List<ReferenceDto> lstReference) {
+        this.lstReference = lstReference;
     }
 }

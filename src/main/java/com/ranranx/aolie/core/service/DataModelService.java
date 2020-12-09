@@ -356,6 +356,12 @@ public class DataModelService {
             insertParamDefinition.setObjects(lstTableDtos);
             factory.getDefaultDataOperator().insert(insertParamDefinition);
         }
+        List<ReferenceDto> lstReference = schema.getReferenceDto();
+        if (lstReference != null && !lstReference.isEmpty()) {
+            insertParamDefinition.setTableDto(ReferenceDto.class);
+            insertParamDefinition.setObjects(lstReference);
+            factory.getDefaultDataOperator().insert(insertParamDefinition);
+        }
     }
 
 
@@ -482,6 +488,14 @@ public class DataModelService {
 
         deleteParamDefinition.setTableDto(ColumnDto.class);
         factory.getDefaultDataOperator().delete(deleteParamDefinition);
+
+        //删除引用信息
+        if (SchemaTools.isReferenceSchema(schemaId)) {
+            deleteParamDefinition = new DeleteParamDefinition();
+            deleteParamDefinition.setTableDto(ReferenceDto.class);
+            deleteParamDefinition.getCriteria().andEqualTo("version_code", version);
+            factory.getDefaultDataOperator().delete(deleteParamDefinition);
+        }
     }
 
     /**
@@ -751,6 +765,5 @@ public class DataModelService {
         deleteParamDefinition.getCriteria().andEqualTo("version_code", version);
         factory.getDefaultDataOperator().delete(deleteParamDefinition);
     }
-
 
 }
