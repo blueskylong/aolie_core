@@ -2,7 +2,7 @@ package com.ranranx.aolie.core.datameta.datamodel;
 
 import com.ranranx.aolie.core.datameta.dto.FormulaDto;
 
-import java.util.List;
+import java.util.Map;
 
 /**
  * @Author xxl
@@ -34,11 +34,10 @@ public class Formula {
      *
      * @param columnIds
      */
-    public void columnIdChanged(List<Long[]> columnIds) {
+    public void columnIdChanged(Map<Long, Long> columnIds) {
         for (int i = 0; i < columnIds.size(); i++) {
-            Long[] ids = columnIds.get(i);
-            if (ids[0].equals(this.formulaDto.getColumnId())) {
-                this.formulaDto.setColumnId(ids[1]);
+            if (columnIds.containsKey(this.formulaDto.getColumnId())) {
+                this.formulaDto.setColumnId(columnIds.get(this.formulaDto.getColumnId()));
             }
             //TODO 公式和过滤条件也需要相应的变化
         }

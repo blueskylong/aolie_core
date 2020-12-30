@@ -27,6 +27,11 @@ public class UpdateParam {
     private TableInfo table;
 
     /**
+     * 是否只更新有值的列
+     */
+    private boolean isSelective = false;
+
+    /**
      * 更新的列信息
      */
     private List<Map<String, Object>> lstRows;
@@ -61,5 +66,13 @@ public class UpdateParam {
 
     public void setLstRows(List<Map<String, Object>> lstRows) {
         this.lstRows = lstRows;
+    }
+
+    public boolean isSelective() {
+        return isSelective;
+    }
+
+    public void setSelective(boolean selective) {
+        isSelective = selective;
     }
 }

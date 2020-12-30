@@ -5,7 +5,6 @@ import com.ranranx.aolie.core.ds.dataoperator.DataOperatorFactory;
 import com.ranranx.aolie.core.interceptor.IOperInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -73,7 +72,7 @@ public abstract class BaseHandler<T> implements IDbHandler {
      * @return
      */
     @Override
-    public HandleResult doHandle(Map<String, Object> mapParam) {
+    public HandleResult doHandle(Object mapParam) {
         HandleResult result = new HandleResult();
         result.setSuccess(true);
         double transaction = -1;
@@ -105,6 +104,7 @@ public abstract class BaseHandler<T> implements IDbHandler {
             if (needTransaction()) {
                 rollback();
             }
+            e.printStackTrace();
             return result;
         }
     }
@@ -124,15 +124,19 @@ public abstract class BaseHandler<T> implements IDbHandler {
      * @return
      */
 
-    protected T checkAndMakeParam(Map<String, Object> mapParam) {
-        //TODO
+    protected T checkAndMakeParam(Object mapParam) {
+        //TODO_2 要做检查
         T param;
         try {
             if (entityClass == null) {
-                entityClass = (Class<T>) ((ParameterizedType) this.getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+                entityClass = (Class<T>) this.getClass().getTypeParameters()[0].getBounds()[0];
             }
-            param = CommonUtils.populateBean(entityClass, mapParam);
+            if (mapParam.getClass() == entityClass) {
+                return (T) mapParam;
+            }
+            param = CommonUtils.populateBean(entityClass, (Map<String, Object>) mapParam);
         } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
         return (T) param;

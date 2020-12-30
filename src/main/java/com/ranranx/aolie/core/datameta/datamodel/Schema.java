@@ -239,4 +239,53 @@ public class Schema {
         }
         return dataOperatorInfo.getDsKey();
     }
+
+    /**
+     * 查找指定表的关系信息,使用组合去查询
+     *
+     * @param tableIds
+     * @return
+     */
+    @Transient
+    public List<TableColumnRelation> getTablesRelation(Long... tableIds) {
+        if (tableIds == null || tableIds.length < 2) {
+            return null;
+        }
+        TableColumnRelation relation;
+        List<TableColumnRelation> lstResult = new ArrayList<>();
+        for (int i = 0; i < tableIds.length - 1; i++) {
+            for (int j = i + 1; j < tableIds.length; j++) {
+                relation = findTableRelation(tableIds[i], tableIds[j]);
+                if (relation != null) {
+                    lstResult.add(relation);
+                }
+            }
+        }
+        return lstResult;
+    }
+
+    /**
+     * 查询二张表的关系
+     *
+     * @param table1
+     * @param table2
+     * @return
+     */
+    private TableColumnRelation findTableRelation(long table1, long table2) {
+        List<TableColumnRelation> lstRelation = this.getLstRelation();
+        if (lstRelation == null || lstRelation.isEmpty()) {
+            return null;
+        }
+        for (TableColumnRelation tableColumnRelation : lstRelation) {
+            if ((tableColumnRelation.getTableFrom().getTableDto().getTableId() == table1 &&
+                    tableColumnRelation.getTableTo().getTableDto().getTableId() == table2)) {
+                return tableColumnRelation;
+            }
+            if (tableColumnRelation.getTableFrom().getTableDto().getTableId() == table2 &&
+                    tableColumnRelation.getTableTo().getTableDto().getTableId() == table1) {
+                return tableColumnRelation;
+            }
+        }
+        return null;
+    }
 }

@@ -40,7 +40,7 @@ public class QueryInterceptor implements IOperInterceptor {
      */
     @Override
     public HandleResult beforeOper(Object param) throws InvalidException {
-        logger.error("--> Query  " + getOrder() + ":beforeOper");
+        logger.info("--> Query  " + getOrder() + ":beforeOper");
         return null;
     }
 
@@ -53,7 +53,7 @@ public class QueryInterceptor implements IOperInterceptor {
      */
     @Override
     public HandleResult afterOper(Object param, HandleResult result) {
-        logger.error("--> Query  " + getOrder() + ":afterOper");
+        logger.info("--> Query  " + getOrder() + ":afterOper");
         return null;
     }
 
@@ -66,7 +66,7 @@ public class QueryInterceptor implements IOperInterceptor {
      */
     @Override
     public HandleResult beforeReturn(Object param, HandleResult handleResult) {
-        logger.error("--> Query  " + getOrder() + ":beforeReturn");
+        logger.info("--> Query  " + getOrder() + ":beforeReturn");
         return null;
     }
 

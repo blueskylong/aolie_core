@@ -98,16 +98,8 @@ public class SchemaHolder {
         return mapReference.get(CommonUtils.makeKey(id.toString(), version));
     }
 
-    public List<ReferenceDto> getReferenceDtos() {
-        if (mapSchema.isEmpty()) {
-            return null;
-        }
-        List<Reference> lstReference = mapSchema.values().iterator().next().getLstReference();
-        List<ReferenceDto> lstDto = new ArrayList<>();
-        for (Reference reference : lstReference) {
-            lstDto.add(reference.getReferenceDto());
-        }
-        return lstDto;
+    public List<ReferenceDto> getReferenceDtos(String version) {
+        return service.findAllReferences(version);
     }
 
     /**
@@ -163,6 +155,10 @@ public class SchemaHolder {
         return err;
     }
 
+    public String[] getAllVersionCode() {
+        return service.getAllVersionCode();
+    }
+
     /**
      * 初始化数据.
      */
@@ -180,12 +176,15 @@ public class SchemaHolder {
         if (allSchemaDto == null || allSchemaDto.isEmpty()) {
             return;
         }
+        List<String> lstVersion = new ArrayList<>();
         for (SchemaDto dto : allSchemaDto) {
             initSchema(dto);
+            if (lstVersion.indexOf(dto.getVersionCode()) == -1) {
+                lstVersion.add(dto.getVersionCode());
+                initReference(dto.getVersionCode());
+            }
         }
         initOperator();
-
-
     }
 
 
@@ -213,11 +212,13 @@ public class SchemaHolder {
      * @param dto
      */
     public void initSchema(SchemaDto dto) {
+        clearViewChange(dto.getSchemaId(), dto.getVersionCode());
         service.clearSchemaCache(dto.getSchemaId(), dto.getVersionCode());
+        service.clearSchemaCache2(dto.getVersionCode());
         clearCache(dto.getSchemaId(), dto.getVersionCode());
 
         Schema schema = new Schema(dto);
-        initReference(schema);
+//        initReference(schema);
         setSchemaTable(schema);
         setTableColumn(schema);
         setTableReference(schema);
@@ -226,6 +227,16 @@ public class SchemaHolder {
         setSchemaRelation(schema);
         mapSchema.put(CommonUtils.makeKey(dto.getSchemaId().toString(),
                 dto.getVersionCode()), schema);
+    }
+
+    private void clearViewChange(Long schemaId, String version) {
+        List<BlockViewDto> blockViews = uiService.getBlockViews(schemaId);
+        if (blockViews != null) {
+            for (BlockViewDto blockView : blockViews) {
+                uiService.clearViewCache(blockView.getBlockViewId(), version);
+            }
+        }
+
     }
 
     private void clearCache(long schemaId, String version) {
@@ -381,6 +392,17 @@ public class SchemaHolder {
 
     }
 
+    private void initReference(String versionCode) {
+        List<ReferenceDto> schemaReferences = service.findAllReferences(versionCode);
+        if (schemaReferences == null || schemaReferences.isEmpty()) {
+            return;
+        }
+        for (ReferenceDto dto : schemaReferences) {
+            Reference reference = new Reference(dto);
+            mapReference.put(CommonUtils.makeKey(dto.getRefId().toString(), dto.getVersionCode()), reference);
+        }
+    }
+
     /**
      * 装配引用信息
      *
@@ -391,7 +413,7 @@ public class SchemaHolder {
         if (!SchemaTools.isReferenceSchema(schema.getSchemaDto().getSchemaId())) {
             return;
         }
-        List<ReferenceDto> schemaReferences = service.findSchemaReferences(schema.getSchemaDto().getVersionCode());
+        List<ReferenceDto> schemaReferences = service.findAllReferences(schema.getSchemaDto().getVersionCode());
         List<TableInfo> lstTable = schema.getLstTable();
         if (lstTable == null || lstTable.isEmpty()) {
             return;
@@ -444,20 +466,35 @@ public class SchemaHolder {
         return columnDtos;
     }
 
-
-    private void initReference(Schema schema) {
-        List<ReferenceDto> schemaReferences = service.findSchemaReferences(
-                schema.getSchemaDto().getVersionCode());
-        if (schemaReferences == null || schemaReferences.isEmpty()) {
-            return;
+    /**
+     * 取得表关系,可以是多个
+     *
+     * @param versionCode
+     * @param tableIds
+     * @return
+     */
+    public static List<TableColumnRelation> getTableRelations(String versionCode, Long... tableIds) {
+        if (tableIds == null || tableIds.length < 2) {
+            return null;
         }
-        List<Reference> lstReference = new ArrayList<>();
-        for (ReferenceDto dto : schemaReferences) {
-            Reference reference = new Reference(dto);
-            lstReference.add(reference);
-            mapReference.put(CommonUtils.makeKey(dto.getRefId().toString(), dto.getVersionCode()), reference);
-        }
-        schema.setLstReference(lstReference);
+        long schemaId = SchemaHolder.getTable(tableIds[0], versionCode).getTableDto().getSchemaId();
+        return SchemaHolder.getInstance().getSchema(schemaId, versionCode).getTablesRelation(tableIds);
     }
+
+
+//    private void initReference(Schema schema) {
+//        List<ReferenceDto> schemaReferences = service.findAllReferences(
+//                schema.getSchemaDto().getVersionCode());
+//        if (schemaReferences == null || schemaReferences.isEmpty()) {
+//            return;
+//        }
+//        List<Reference> lstReference = new ArrayList<>();
+//        for (ReferenceDto dto : schemaReferences) {
+//            Reference reference = new Reference(dto);
+//            lstReference.add(reference);
+//            mapReference.put(CommonUtils.makeKey(dto.getRefId().toString(), dto.getVersionCode()), reference);
+//        }
+//        schema.setLstReference(lstReference);
+//    }
 
 }

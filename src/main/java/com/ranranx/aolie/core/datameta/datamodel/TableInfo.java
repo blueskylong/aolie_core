@@ -1,15 +1,21 @@
 package com.ranranx.aolie.core.datameta.datamodel;
 
+import com.ranranx.aolie.core.common.CommonUtils;
+import com.ranranx.aolie.core.common.Constants;
 import com.ranranx.aolie.core.common.IdGenerator;
 import com.ranranx.aolie.core.datameta.dto.ColumnDto;
 import com.ranranx.aolie.core.datameta.dto.FormulaDto;
 import com.ranranx.aolie.core.datameta.dto.ReferenceDto;
 import com.ranranx.aolie.core.datameta.dto.TableDto;
 import com.ranranx.aolie.core.ds.dataoperator.DataSourceUtils;
+import com.ranranx.aolie.core.exceptions.InvalidConfigException;
 import com.ranranx.aolie.core.exceptions.NotExistException;
 
+import java.beans.Transient;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author xxl
@@ -22,6 +28,10 @@ public class TableInfo {
     private TableDto tableDto;
 
     private List<ReferenceDto> lstReference;
+
+    private List<Column> lstKeyColumn;
+
+    private String keyFieldName;
 
     public TableInfo() {
 
@@ -36,8 +46,9 @@ public class TableInfo {
      */
     private List<Column> lstColumn = new ArrayList<>();
 
-    public String getDsKey(Schema schema) {
+    public String getDsKey() {
         if (tableDto.getDataOperId() == null) {
+            Schema schema = SchemaHolder.getInstance().getSchema(tableDto.getSchemaId(), tableDto.getVersionCode());
             if (schema != null) {
                 return schema.getDsKey();
             }
@@ -48,6 +59,52 @@ public class TableInfo {
             throw new NotExistException("数据库连接:[" + tableDto.getDataOperId() + "__" + tableDto.getVersionCode() + "]不存在");
         }
         return dataOperatorInfo.getDsKey();
+    }
+
+    /**
+     * 查询主键列
+     *
+     * @return
+     */
+    @Transient
+    public List<Column> getKeyColumn() {
+        if (this.lstKeyColumn != null) {
+            return this.lstKeyColumn;
+        }
+        this.lstKeyColumn = new ArrayList<>();
+        if (this.lstColumn == null || this.lstColumn.isEmpty()) {
+            return null;
+        }
+        this.lstColumn.forEach(column -> {
+            if (column.getColumnDto().getIsKey() != null && column.getColumnDto().getIsKey() == 1) {
+                //去掉版本字段
+                if (column.getColumnDto().getFieldName().equalsIgnoreCase(Constants.FixColumnName.VERSION_CODE)) {
+                    return;
+                }
+                lstKeyColumn.add(column);
+            }
+        });
+        return lstKeyColumn;
+    }
+
+    /**
+     * 查询主键列,包含版本. 含有版本字段就默认是主键之一
+     *
+     * @return
+     */
+    @Transient
+    public String getIdFieldIncludeVersionCode() {
+        if (this.lstColumn == null || this.lstColumn.isEmpty()) {
+            return null;
+        }
+        StringBuilder sb = new StringBuilder();
+        this.lstColumn.forEach(column -> {
+            if (column.getColumnDto().getIsKey() != null && column.getColumnDto().getIsKey() == 1
+                    || column.getColumnDto().getFieldName().equalsIgnoreCase(Constants.FixColumnName.VERSION_CODE)) {
+                sb.append(column.getColumnDto().getFieldName()).append(",");
+            }
+        });
+        return sb.substring(0, sb.length() - 1);
     }
 
     /**
@@ -127,9 +184,10 @@ public class TableInfo {
     /**
      * 修改列ID,并将变化的列返回
      */
-    public List<Long[]> updateColId() {
+    public Map<Long, Long> updateColId(Map<Long, Long> tableChangeId) {
         if (this.tableDto.getTableId() < 0) {
             long tableId = IdGenerator.getNextId(TableInfo.class.getName());
+            tableChangeId.put(this.tableDto.getTableId(), tableId);
             this.tableDto.setTableId(tableId);
             if (lstColumn != null && !lstColumn.isEmpty()) {
                 this.lstColumn.forEach(column -> column.updateTableId(tableId));
@@ -145,7 +203,7 @@ public class TableInfo {
 
     }
 
-    public void columnIdChanged(List<Long[]> columnIds) {
+    public void columnIdChanged(Map<Long, Long> columnIds) {
         if (this.lstColumn != null && !this.lstColumn.isEmpty()) {
             for (Column column : this.lstColumn) {
                 column.columnIdChanged(columnIds);
@@ -153,13 +211,13 @@ public class TableInfo {
         }
     }
 
-    private List<Long[]> validateColumn() {
+    private Map<Long, Long> validateColumn() {
         if (this.lstColumn != null && !this.lstColumn.isEmpty()) {
-            List<Long[]> lstResult = new ArrayList<>();
+            Map<Long, Long> lstResult = new HashMap<>();
             for (Column column : this.lstColumn) {
                 if (column.getColumnDto().getColumnId() < 0) {
                     long newId = IdGenerator.getNextId(Column.class.getName());
-                    lstResult.add(new Long[]{column.getColumnDto().getColumnId(), newId});
+                    lstResult.put(column.getColumnDto().getColumnId(), newId);
                     column.getColumnDto().setColumnId(newId);
                 }
             }
@@ -167,6 +225,23 @@ public class TableInfo {
         }
         return null;
 
+    }
+
+    /**
+     * 取得主键字段
+     *
+     * @return
+     */
+    public String getKeyField() {
+        if (CommonUtils.isNotEmpty(keyFieldName)) {
+            return keyFieldName;
+        }
+        List<Column> keyColumn = getKeyColumn();
+        if (keyColumn == null || keyColumn.size() != 1) {
+            throw new InvalidConfigException("表主键定义不正确:" + this.getTableDto().getTableId());
+        }
+        this.keyFieldName = keyColumn.get(0).getColumnDto().getFieldName();
+        return this.keyFieldName;
     }
 
     /**
@@ -209,4 +284,5 @@ public class TableInfo {
     public void setLstReference(List<ReferenceDto> lstReference) {
         this.lstReference = lstReference;
     }
+
 }

@@ -91,7 +91,7 @@ public class UIService {
      * @param schemaId
      * @return
      */
-    public List<BlockViewDto> getBlockViews(String schemaId) {
+    public List<BlockViewDto> getBlockViews(Long schemaId) {
         QueryParamDefinition queryParamDefinition = new QueryParamDefinition();
         queryParamDefinition.setTableDtos(BlockViewDto.class);
         queryParamDefinition.appendCriteria().andEqualTo("schema_id", schemaId)
@@ -149,6 +149,11 @@ public class UIService {
             lstResult.add(new Component(dto, SchemaHolder.getColumn(dto.getColumnId(), dto.getVersionCode())));
         }
         return lstResult;
+    }
+
+    @Caching(evict = {@CacheEvict(value = GROUP_NAME, key = KEY_VIEWER)})
+    public void clearViewCache(Long blockViewId, String version) {
+
     }
 
     @Caching(evict = {@CacheEvict(value = GROUP_NAME, key = KEY_VIEWER_REMOVE)})
@@ -258,7 +263,7 @@ public class UIService {
     }
 
     private String getMaxLvlCode(Long schemaId, String curCode) {
-        List<BlockViewDto> blockViews = this.getBlockViews(String.valueOf(schemaId));
+        List<BlockViewDto> blockViews = this.getBlockViews(schemaId);
         if (blockViews == null) {
             return "000";
         }
@@ -322,7 +327,6 @@ public class UIService {
         }
         return lstResult;
     }
-
 
 
 }

@@ -30,6 +30,7 @@ import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.SystemMetaObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -42,7 +43,6 @@ import java.util.Map;
 public class Criteria implements ICondition {
 
     protected List<ICondition> lstCondition = new ArrayList<>();
-    ;
     //字段是否必须存在
     protected boolean exists;
     //值是否不能为空
@@ -51,7 +51,12 @@ public class Criteria implements ICondition {
     protected String andOr;
 
     protected String tableName;
+    private static Criteria alwaysFalse = new Criteria();
 
+
+    static {
+        alwaysFalse.andCondition("1=2");
+    }
 
     public Criteria(boolean exists, boolean notNull) {
         super();
@@ -59,6 +64,10 @@ public class Criteria implements ICondition {
         this.notNull = notNull;
         lstCondition = new ArrayList<>();
         andOr = "and";
+    }
+
+    public static Criteria getFalseExpression() {
+        return alwaysFalse;
     }
 
     public Criteria() {
@@ -243,14 +252,19 @@ public class Criteria implements ICondition {
     }
 
     /**
-     * 手写左边条件，右边用value值
+     * 手写左边条件，右边用value值 ,可以是多个值
      *
-     * @param condition 例如 "length(countryname)="
-     * @param value     例如 5
+     * @param condition 例如 "length(countryname)="   或  length(#{f1}) >#{f2})
+     * @param value     例如 5  或 Map {f1:"dd",f2:5};
      * @return
      */
     public Criteria andCondition(String condition, Object value) {
-        lstCondition.add(new Criterion(condition, value));
+        if (value instanceof Collections) {
+            lstCondition.add(new Criterion(condition, value));
+        } else {
+            lstCondition.add(new Criterion(condition, value));
+        }
+
         return (Criteria) this;
     }
 

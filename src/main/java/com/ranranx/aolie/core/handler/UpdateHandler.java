@@ -1,10 +1,12 @@
 package com.ranranx.aolie.core.handler;
 
 import com.ranranx.aolie.core.common.Constants;
+import com.ranranx.aolie.core.ds.dataoperator.DataOperatorFactory;
+import com.ranranx.aolie.core.ds.definition.UpdateParamDefinition;
 import com.ranranx.aolie.core.handler.param.UpdateParam;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.Map;
 
 /**
  * @Author xxl
@@ -14,6 +16,8 @@ import java.util.Map;
  **/
 @Component
 public class UpdateHandler<T extends UpdateParam> extends BaseHandler<T> {
+    @Autowired
+    private DataOperatorFactory factory;
 
     /**
      * 默认可以处理的类型
@@ -32,18 +36,21 @@ public class UpdateHandler<T extends UpdateParam> extends BaseHandler<T> {
      * @return
      */
     @Override
-    protected HandleResult handle(T param) {
-        return null;
+    protected HandleResult handle(UpdateParam param) {
+        HandleResult result = new HandleResult();
+        if (param.getLstRows() == null || param.getLstRows().isEmpty()) {
+            result.setErr("没有指定更新的数据");
+            return result;
+        }
+        UpdateParamDefinition definition = new UpdateParamDefinition();
+        BeanUtils.copyProperties(param, definition);
+        definition.setTableName(param.getTable().getTableDto().getTableName());
+
+        definition.setIdField(param.getTable().getIdFieldIncludeVersionCode());
+        int count = factory.getDataOperatorByKey(param.getTable().getDsKey()).update(definition);
+        result.setSuccess(true);
+        result.setChangeNum(count);
+        return result;
     }
 
-    /**
-     * 生成结构化参数
-     *
-     * @param mapParam
-     * @return
-     */
-    @Override
-    protected T checkAndMakeParam(Map<String, Object> mapParam) {
-        return (T) new UpdateParam();
-    }
 }

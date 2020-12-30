@@ -1,9 +1,11 @@
 package com.ranranx.aolie.core.handler.param;
 
 import com.ranranx.aolie.core.datameta.datamodel.TableInfo;
+import com.ranranx.aolie.core.ds.definition.Field;
 import com.ranranx.aolie.core.ds.definition.FieldOrder;
 import com.ranranx.aolie.core.handler.param.condition.Criteria;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -26,7 +28,7 @@ public class QueryParam {
     /**
      * 复杂条件  表条件
      */
-    private Criteria[] criteria;
+    private List<Criteria> lstCriteria;
     /**
      * 字段条件    视图模式条件
      */
@@ -43,6 +45,7 @@ public class QueryParam {
      * 排序字段  综合条件
      */
     private List<FieldOrder> lstOrder;
+    private List<Field> fields;
 
     public Long getViewId() {
         return viewId;
@@ -77,12 +80,12 @@ public class QueryParam {
         this.displayType = displayType;
     }
 
-    public Criteria[] getCriteria() {
-        return criteria;
+    public List<Criteria> getLstCriteria() {
+        return lstCriteria;
     }
 
-    public void setCriteria(Criteria[] criteria) {
-        this.criteria = criteria;
+    public void setLstCriteria(List<Criteria> lstCriteria) {
+        this.lstCriteria = lstCriteria;
     }
 
     public TableInfo[] getTable() {
@@ -99,5 +102,36 @@ public class QueryParam {
 
     public void setPage(Page page) {
         this.page = page;
+    }
+
+    public void addOrder(FieldOrder order) {
+        if (this.lstOrder == null) {
+            this.lstOrder = new ArrayList<>();
+        }
+        order.setOrder(this.lstOrder.size() + 1);
+        this.lstOrder.add(order);
+    }
+
+    /**
+     * 增加过滤条件
+     * TODO  这里的条件需要支持字段的表示方式 ,比如EQUALSTO第一个参数可以用字段信息
+     *
+     * @return
+     */
+    public Criteria appendCriteria() {
+        if (lstCriteria == null) {
+            lstCriteria = new ArrayList<>();
+        }
+        Criteria criteria = new Criteria();
+        lstCriteria.add(criteria);
+        return criteria;
+    }
+
+    public List<Field> getFields() {
+        return fields;
+    }
+
+    public void setFields(List<Field> fields) {
+        this.fields = fields;
     }
 }

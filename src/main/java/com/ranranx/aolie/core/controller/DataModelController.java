@@ -145,7 +145,7 @@ public class DataModelController {
      */
     @GetMapping("/findReferenceInfo")
     public List<ReferenceDto> findReferenceData() {
-        return schemaHolder.getReferenceDtos();
+        return schemaHolder.getReferenceDtos(SessionUtils.getLoginVersion());
     }
 
     @GetMapping("/getReferenceDto/{referenceId}")

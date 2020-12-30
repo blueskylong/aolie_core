@@ -5,6 +5,7 @@ import com.ranranx.aolie.application.page.dto.PageInfo;
 import com.ranranx.aolie.application.page.dto.PageInfoDto;
 import com.ranranx.aolie.application.page.service.PageService;
 import com.ranranx.aolie.core.common.CommonUtils;
+import com.ranranx.aolie.core.common.SessionUtils;
 import com.ranranx.aolie.core.handler.HandleResult;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +45,7 @@ public class PageController {
     public List<PageDetailDto> findPageDetail(@PathVariable Long pageId) {
         return pageService.findPageDetail(pageId);
     }
+
     /**
      * 取得一页面的详细配置信息
      *
@@ -53,6 +55,17 @@ public class PageController {
     @RequestMapping("/findPageInfo/{pageId}")
     public PageInfo findPageInfo(@PathVariable Long pageId) {
         return pageService.findPageInfo(pageId);
+    }
+
+    /**
+     * 取得一页面的详细配置信息
+     *
+     * @param pageId
+     * @return
+     */
+    @RequestMapping("/findPageSchemaId/{pageId}")
+    public long findPageSchemaId(@PathVariable Long pageId) {
+        return pageService.findPageSchemaId(pageId, SessionUtils.getLoginVersion());
     }
 
     @PostMapping("/addPage/{schemaId}")

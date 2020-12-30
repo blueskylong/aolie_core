@@ -3,8 +3,6 @@ package com.ranranx.aolie.core.handler;
 import com.ranranx.aolie.core.common.Ordered;
 import com.ranranx.aolie.core.interfaces.IHandleFilter;
 
-import java.util.Map;
-
 /**
  * @Author xxl
  * @Description 数据处理接口, 就对内的使用接口,调用 IDataOperator接口进行数据操作
@@ -19,7 +17,7 @@ public interface IDbHandler extends Ordered, IHandleFilter {
      * @param mapParam
      * @return
      */
-    HandleResult doHandle(Map<String, Object> mapParam);
+    HandleResult doHandle(Object mapParam);
 
     /**
      * 开始事务

@@ -5,7 +5,6 @@ import com.ranranx.aolie.core.common.SessionUtils;
 import com.ranranx.aolie.core.datameta.datamodel.BlockViewer;
 import com.ranranx.aolie.core.datameta.datamodel.ReferenceData;
 import com.ranranx.aolie.core.datameta.dto.BlockViewDto;
-import com.ranranx.aolie.core.datameta.dto.ReferenceDto;
 import com.ranranx.aolie.core.datameta.dto.TableDto;
 import com.ranranx.aolie.core.handler.HandleResult;
 import com.ranranx.aolie.core.service.DataModelService;
@@ -51,9 +50,23 @@ public class UIController {
      * @param referenceId
      * @return
      */
-    @GetMapping("/findReferenceData/{referenceId}")
+    @RequestMapping("/findReferenceData/{referenceId}")
     public List<ReferenceData> findReferenceData(@PathVariable long referenceId) {
         return service.findReferenceData(referenceId, SessionUtils.getLoginVersion());
+    }
+
+    /**
+     * 查询引用数据,带过滤条件的,主要用于选择框
+     *
+     * @param referenceId
+     * @param colId
+     * @param filter
+     * @return
+     */
+    @RequestMapping("/findColumnReferenceData/{referenceId}/{colId}")
+    public List<ReferenceData> findColumnReferenceData(@PathVariable long referenceId, @PathVariable long colId,
+                                                       @RequestBody Map<String, Object> filter) {
+        return service.findColumnReferenceData(referenceId, colId, SessionUtils.getLoginVersion(), filter);
     }
 
     /**
@@ -68,7 +81,7 @@ public class UIController {
     }
 
     @GetMapping("/getBlockViews/{schemaId}")
-    public List<BlockViewDto> getBlockViews(@PathVariable String schemaId) {
+    public List<BlockViewDto> getBlockViews(@PathVariable Long schemaId) {
         return uiService.getBlockViews(schemaId);
     }
 

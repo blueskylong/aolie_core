@@ -8,7 +8,7 @@ import javax.persistence.Table;
 public class PageDetailDto extends SchemaBaseDto {
     private Long pageId;
     private Long pageDetailId;
-    private String viewId;
+    private Long viewId;
     private String pagePosition;
     private Float initWidth;
     private Float initHeight;
@@ -16,6 +16,7 @@ public class PageDetailDto extends SchemaBaseDto {
     private Integer innerButton;
     private Integer viewType;
     private Integer loadOnshow;
+    private Integer initState;
 
     public Long getPageId() {
         return pageId;
@@ -33,13 +34,6 @@ public class PageDetailDto extends SchemaBaseDto {
         this.pageDetailId = pageDetailId;
     }
 
-    public String getViewId() {
-        return viewId;
-    }
-
-    public void setViewId(String viewId) {
-        this.viewId = viewId;
-    }
 
     public String getPagePosition() {
         return pagePosition;
@@ -95,5 +89,21 @@ public class PageDetailDto extends SchemaBaseDto {
 
     public void setLoadOnshow(Integer loadOnshow) {
         this.loadOnshow = loadOnshow;
+    }
+
+    public Integer getInitState() {
+        return initState;
+    }
+
+    public void setInitState(Integer initState) {
+        this.initState = initState;
+    }
+
+    public Long getViewId() {
+        return viewId;
+    }
+
+    public void setViewId(Long viewId) {
+        this.viewId = viewId;
     }
 }

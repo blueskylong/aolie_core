@@ -2,8 +2,9 @@ package com.ranranx.aolie.core.datameta.datamodel;
 
 import com.ranranx.aolie.core.datameta.dto.ConstraintDto;
 
-import javax.persistence.Transient;
+import java.beans.Transient;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author xxl
@@ -25,12 +26,12 @@ public class Constraint {
     /**
      * 引用到的表,方便查询
      */
-    @Transient
+
     private List<Long> lstRefTable;
     /**
      * 引用到的列,方便查询
      */
-    @Transient
+
     private List<Long> lstRefColumn;
 
     /**
@@ -38,10 +39,11 @@ public class Constraint {
      *
      * @param columnIds
      */
-    public void columnIdChanged(List<Long[]> columnIds) {
+    public void columnIdChanged(Map<Long, Long> columnIds) {
         //TODO update formula
     }
 
+    @Transient
     public List<Long> getLstRefTable() {
         return lstRefTable;
     }
@@ -50,6 +52,7 @@ public class Constraint {
         this.lstRefTable = lstRefTable;
     }
 
+    @Transient
     public List<Long> getLstRefColumn() {
         return lstRefColumn;
     }

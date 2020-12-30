@@ -16,7 +16,7 @@ public class HandleResult {
     /**
      * 是否成功
      */
-    private boolean isSuccess = false;
+    private boolean success = false;
     /**
      * 返回的数据
      */
@@ -36,11 +36,11 @@ public class HandleResult {
     private Page page;
 
     public boolean isSuccess() {
-        return isSuccess;
+        return success;
     }
 
     public void setSuccess(boolean success) {
-        isSuccess = success;
+        this.success = success;
     }
 
     public List<Map<String, Object>> getLstData() {

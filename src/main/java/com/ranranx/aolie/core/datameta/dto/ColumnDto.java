@@ -28,6 +28,7 @@ public class ColumnDto extends SchemaBaseDto {
     private Double maxValue;
     private Double minValue;
     private Short isKey;
+    private String refFilter;
 
 
     public String getFieldName() {
@@ -150,5 +151,13 @@ public class ColumnDto extends SchemaBaseDto {
 
     public void setIsKey(Short isKey) {
         this.isKey = isKey;
+    }
+
+    public String getRefFilter() {
+        return refFilter;
+    }
+
+    public void setRefFilter(String refFilter) {
+        this.refFilter = refFilter;
     }
 }

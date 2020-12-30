@@ -1,6 +1,7 @@
 package com.ranranx.aolie.core.ds.definition;
 
 import com.ranranx.aolie.core.common.CommonUtils;
+import com.ranranx.aolie.core.exceptions.IllegalOperatorException;
 import com.ranranx.aolie.core.exceptions.InvalidException;
 import com.ranranx.aolie.core.handler.param.Page;
 import com.ranranx.aolie.core.handler.param.condition.Criteria;
@@ -56,7 +57,19 @@ public class QueryParamDefinition {
         if (this.lstOrder == null) {
             this.lstOrder = new ArrayList<>();
         }
+        order.setOrder(this.lstOrder.size() + 1);
         this.lstOrder.add(order);
+    }
+
+    /**
+     * 增加一个字段的升序排序,要求在单表情况下使用
+     */
+    public void addOrderField(String field) {
+        if (this.tableNames == null || this.tableNames.size() != 1) {
+            throw new IllegalOperatorException("'addOrderField'方法不可以在多表,或无表情况下使用");
+        }
+        FieldOrder fieldOrder = new FieldOrder(this.tableNames.get(0), field, true, 1);
+        this.addOrder(fieldOrder);
     }
 
 
@@ -108,13 +121,19 @@ public class QueryParamDefinition {
      * @return
      */
     public Criteria appendCriteria() {
-        Criteria criteria = new Criteria();
+        return appendCriteria(null);
+    }
+
+    public Criteria appendCriteria(Criteria criteria) {
+        if (criteria == null) {
+            criteria = new Criteria();
+        }
         lstCriteria.add(criteria);
         return criteria;
     }
 
     public boolean hasCriteria() {
-        return !lstCriteria.isEmpty();
+        return lstCriteria != null && !lstCriteria.isEmpty();
     }
 
 

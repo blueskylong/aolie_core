@@ -38,6 +38,9 @@ public class DeleteParam {
     }
 
     public Criteria getCriteria() {
+        if (this.criteria == null) {
+            this.criteria = new Criteria();
+        }
         return criteria;
     }
 

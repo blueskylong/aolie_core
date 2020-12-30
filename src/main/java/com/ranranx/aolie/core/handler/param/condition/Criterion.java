@@ -31,7 +31,15 @@ public class Criterion implements ICondition {
 
     private boolean listValue;
     /**
-     * in 查询
+     * 是不是直接给了参数,用在直接给语句和参数的情况
+     */
+    private boolean isMapValue;
+    /**
+     * 是不是直接指定语句和参数值的形式,如果是,则值为数组时,也不可以当作in
+     */
+    protected boolean isMultiParams = false;
+    /**
+     * in 查询(子查询)
      */
     private boolean inSelectionValue;
 
@@ -69,6 +77,8 @@ public class Criterion implements ICondition {
         this.andOr = isOr ? "or" : "and";
         if (value instanceof Collection<?>) {
             this.listValue = true;
+        } else if (value instanceof Map) {
+            this.isMultiParams = true;
         } else if (value instanceof QueryParamDefinition) {
             this.inSelectionValue = true;
         } else {
@@ -151,6 +161,9 @@ public class Criterion implements ICondition {
             return andOrStr + alias + preCondition + wrapperParam(firstParamName);
         } else if (listValue && CommonUtils.isNotEmpty(value)) {
             return andOrStr + alias + preCondition + genInString(mapValue, alias, index);
+        } else if (isMultiParams) {
+            mapValue.putAll((Map) value);
+            return andOrStr + preCondition;
         } else if (inSelectionValue) {
             Map<String, Object> mapValues = genInSelect((QueryParamDefinition) value);
             String sql = "(" + mapValues.remove(IDataOperator.SQL_PARAM_NAME).toString() + ")";
@@ -174,7 +187,23 @@ public class Criterion implements ICondition {
     }
 
     private String genInString(Map<String, Object> mapValue, String alias, int index) {
-        String[] values = value.toString().split(",");
+        String[] values;
+        if (value instanceof Collection) {
+            values = new String[((Collection) value).size()];
+            Object[] objs = ((Collection) value).toArray();
+            for (int i = 0; i < objs.length; i++) {
+                values[i] = objs[i].toString();
+            }
+        } else if (value.getClass().isArray()) {
+            Object[] objs = (Object[]) value;
+            values = new String[objs.length];
+            for (int i = 0; i < objs.length; i++) {
+                values[i] = objs[i].toString();
+            }
+        } else {
+            values = value.toString().split(",");
+        }
+
         StringBuilder sb = new StringBuilder("(");
         String parIndex = makeParIndexName(index);
         for (int i = 0; i < values.length; i++) {

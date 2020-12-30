@@ -157,4 +157,60 @@ public class Constants {
         /*绝对定位*/
         public static final int ABSTRACT_LAYOUT = 5;
     }
+
+    /**
+     * 表的固定字段名
+     */
+    public static class FixColumnName {
+        /*版本号*/
+        public static final String VERSION_CODE = "version_code";
+    }
+
+    /**
+     * 前后端协商的固定字段
+     */
+    public static class ConstFieldName {
+        /**
+         * 保存时用于存放变化过的主键数据
+         */
+        public static final String CHANGE_KEYS_FEILD = "keys";
+    }
+
+    /**
+     * 字段在树状结构中的显示角色
+     */
+    public static class TreeRole {
+        /*ID字段*/
+        public static final int idField = 1;
+        /**
+         * 编码字段,且是3|3|3编码的
+         */
+        public static final int codeField = 2;
+        /*名称字段*/
+        public static final int nameField = 3;
+        /*父字段*/
+        public static final int parentField = 4;
+    }
+
+    /**
+     * 页面明细的类型
+     */
+    public static class PageViewType {
+        //界面
+        public static final int blockView = 1;
+        //引用
+        public static final int reference = 2;
+        //页面
+        public static final int page = 3;
+    }
+
+    public static class SystemParamNames {
+        public static final long userId = -100;
+        public static final long role = -105;
+        public static final long belongOrgId = -109;
+        public static final long belongOrgCode = -110;
+        public static final long userType = -115;
+        public static final long versionCode = -120;
+    }
+
 }

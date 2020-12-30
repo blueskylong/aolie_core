@@ -5,22 +5,26 @@ import com.ranranx.aolie.core.common.Constants;
 import com.ranranx.aolie.core.common.IdGenerator;
 import com.ranranx.aolie.core.common.SessionUtils;
 import com.ranranx.aolie.core.datameta.datamodel.*;
+import com.ranranx.aolie.core.datameta.datamodel.expression.FilterExpression;
 import com.ranranx.aolie.core.datameta.dto.*;
 import com.ranranx.aolie.core.ds.dataoperator.DataOperatorFactory;
 import com.ranranx.aolie.core.ds.definition.*;
 import com.ranranx.aolie.core.exceptions.InvalidParamException;
+import com.ranranx.aolie.core.exceptions.NotExistException;
 import com.ranranx.aolie.core.handler.param.condition.Criteria;
+import com.ranranx.aolie.core.interfaces.IReferenceDataFilter;
+import com.ranranx.aolie.core.runtime.GlobalParameterService;
+import com.ranranx.aolie.core.tools.ApplicationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @Author xxl
@@ -32,30 +36,46 @@ import java.util.Map;
 @Transactional(readOnly = true)
 public class DataModelService {
 
+    public static final String KEY_REFERENCE_DATA_PREFIX = "'REFERENCE_DATA_'";
     public static final String GROUP_NAME = "SCHEMA_VERSION";
     private static final String KEY_SCHEMA_DTO = "SchemaDto";
     private static final String KEY_TABLE_DTO = "'TableDto_'+#p0+'_'+#p1";
     private static final String KEY_COLUMN_DTO = "'ColumnDto_'+#p0+'_'+#p1";
-    private static final String KEY_REFERENCE_DTO = "'ReferenceDto_'+#p0+'_'+#p1";
+    private static final String KEY_REFERENCE_DTO = "'ReferenceDto_'+#p0";
     private static final String KEY_CONSTRAINT_DTO = "'ConstraintDto_'+#p0+'_'+#p1";
     private static final String KEY_FORMULA_DTO = "'FormulaDto'+#p0+'_'+#p1";
 
-    private static final String KEY_REFERENCE = "'REFERENCE_'+#p0+'_'+#p1";
+    private static final String KEY_REFERENCE_DATA = KEY_REFERENCE_DATA_PREFIX + "+#p0+'_'+#p1";
 
 
     @Autowired
     private DataOperatorFactory factory;
 
     @Autowired
+    private CacheManager cacheManager;
+    @Autowired
     private UIService uiService;
+
+    @Autowired
+    private GlobalParameterService parameterService;
 
     @Caching(evict = {@CacheEvict(value = GROUP_NAME, key = KEY_TABLE_DTO),
             @CacheEvict(value = GROUP_NAME, key = KEY_COLUMN_DTO),
-            @CacheEvict(value = GROUP_NAME, key = KEY_REFERENCE_DTO),
             @CacheEvict(value = GROUP_NAME, key = KEY_CONSTRAINT_DTO),
             @CacheEvict(value = GROUP_NAME, key = KEY_FORMULA_DTO),
-            @CacheEvict(value = GROUP_NAME, key = KEY_REFERENCE_DTO)})
+            @CacheEvict(value = GROUP_NAME, key = KEY_REFERENCE_DATA)})
     public void clearSchemaCache(long schemaId, String version) {
+    }
+
+    @Caching(evict = {
+            @CacheEvict(value = GROUP_NAME, key = KEY_REFERENCE_DATA)})
+    public void clearReferenceData(long refId, String versionCode) {
+
+    }
+
+    @Caching(evict = {
+            @CacheEvict(value = GROUP_NAME, key = KEY_REFERENCE_DTO)})
+    public void clearSchemaCache2(String version) {
 
     }
 
@@ -92,7 +112,9 @@ public class DataModelService {
                 .select(queryParamDefinition, ColumnDto.class);
     }
 
-    public List<ReferenceDto> findSchemaReferences(String version) {
+    @Cacheable(value = GROUP_NAME,
+            key = KEY_REFERENCE_DTO)
+    public List<ReferenceDto> findAllReferences(String version) {
         QueryParamDefinition queryParamDefinition = new QueryParamDefinition();
         queryParamDefinition.setTableDtos(ReferenceDto.class);
         queryParamDefinition.appendCriteria()
@@ -150,6 +172,24 @@ public class DataModelService {
         return factory.getDefaultDataOperator().selectOne(queryParamDefinition, SchemaDto.class);
     }
 
+    private void clearPrefixCache(String prefix) {
+        Cache cache = cacheManager.getCache(GROUP_NAME);
+        Object nativeCache = cache.getNativeCache();
+        if (nativeCache instanceof Map) {
+            Map map = (Map) nativeCache;
+            List lstKey = new ArrayList();
+            Iterator iterator = map.keySet().iterator();
+            while (iterator.hasNext()) {
+                Object obj = iterator.next();
+                if (obj.toString().startsWith(prefix)) {
+                    lstKey.add(obj);
+                }
+            }
+            for (Object obj : lstKey) {
+                cache.evict(obj);
+            }
+        }
+    }
 
     /**
      * 查询引用数据
@@ -159,8 +199,12 @@ public class DataModelService {
      * @return
      */
     @Cacheable(value = (GROUP_NAME),
-            key = KEY_REFERENCE)
+            key = KEY_REFERENCE_DATA)
     public List<ReferenceData> findReferenceData(long referenceId, String version) {
+        return findReferenceDataByFilter(referenceId, version, null);
+    }
+
+    private List<ReferenceData> findReferenceDataByFilter(long referenceId, String version, Criteria extFilter) {
         Reference reference = SchemaHolder.getReference(referenceId, version);
         if (reference == null) {
             return null;
@@ -187,6 +231,9 @@ public class DataModelService {
         queryParamDefinition.setFields(lstField);
         Criteria criteria = queryParamDefinition.appendCriteria();
         criteria.andEqualTo("version_code", version);
+        if (extFilter != null) {
+            queryParamDefinition.appendCriteria(extFilter);
+        }
         FieldOrder order = new FieldOrder();
         order.setTableName(tableName);
         order.setAsc(true);
@@ -197,6 +244,62 @@ public class DataModelService {
                     .andEqualTo("common_type", reference.getReferenceDto().getCommonType());
         }
         return factory.getDefaultDataOperator().select(queryParamDefinition, ReferenceData.class);
+    }
+
+    /**
+     * 查询引用数据
+     *
+     * @param referenceId
+     * @param colId
+     * @param version
+     * @param filterValue
+     * @return
+     */
+    public List<ReferenceData> findColumnReferenceData(long referenceId, long colId,
+                                                       String version, Map<String, Object> filterValue) {
+        Column column = SchemaHolder.getColumn(colId, version);
+        if (column == null) {
+            throw new NotExistException("指定字段不存在:" + colId);
+        }
+        String filter = column.getColumnDto().getRefFilter();
+        if (CommonUtils.isEmpty(filter)) {
+            return findReferenceData(referenceId, version);
+        } else {
+            FilterExpression filterExpression = FilterExpression.getInstance(filter, version);
+            if (filterExpression.isServiceFilter()) {
+                //执行服务过滤
+                return findColumnReferenceDataByService(referenceId, colId, version,
+                        filterExpression.getServiceName(), filterValue);
+            } else {
+                return findReferenceDataByFilter(referenceId, version,
+                        filterExpression.getSqlCriteria(filterValue,
+                                parameterService.getGlobalValues(SessionUtils.getLoginUser()),
+                                null, Arrays.asList(column.getColumnDto().getTableId())));
+            }
+
+        }
+    }
+
+    private List<ReferenceData> findColumnReferenceDataByService(long referenceId, long colId,
+                                                                 String version, String serviceName,
+                                                                 Map<String, Object> filterValue) {
+        Object service = ApplicationService.getService(serviceName);
+        if (service == null) {
+            throw new NotExistException("指定的服务名不存在:" + serviceName);
+        }
+        if (!(service instanceof IReferenceDataFilter)) {
+            throw new InvalidParamException("指定的服务没有继承指定接口:" + serviceName);
+        }
+        IReferenceDataFilter filter = (IReferenceDataFilter) service;
+        List<ReferenceData> referenceData = filter.beforeQuery(referenceId, colId, filterValue);
+        //如果不为空则说明已执行查询
+        if (referenceData != null) {
+            return referenceData;
+        }
+        Criteria extFilter = filter.getExtFilter(referenceId, colId, filterValue);
+        referenceData = findReferenceDataByFilter(referenceId, version, extFilter);
+
+        return filter.afterQuery(referenceId, colId, filter, referenceData);
 
     }
 
@@ -316,6 +419,24 @@ public class DataModelService {
         return true;
     }
 
+    public String[] getAllVersionCode() {
+        List<VersionDto> lstDto = getVersions();
+        if (lstDto == null || lstDto.isEmpty()) {
+            return null;
+        }
+        String[] result = new String[lstDto.size()];
+        for (int i = 0; i < result.length; i++) {
+            result[i] = lstDto.get(i).getVersionCode();
+        }
+        return result;
+    }
+
+    public List<VersionDto> getVersions() {
+        QueryParamDefinition definition = new QueryParamDefinition();
+        definition.setTableDtos(VersionDto.class);
+        return factory.getDefaultDataOperator().select(definition, VersionDto.class);
+    }
+
     private void saveData(Schema schema) {
 
         InsertParamDefinition insertParamDefinition = new InsertParamDefinition();
@@ -356,12 +477,15 @@ public class DataModelService {
             insertParamDefinition.setObjects(lstTableDtos);
             factory.getDefaultDataOperator().insert(insertParamDefinition);
         }
-        List<ReferenceDto> lstReference = schema.getReferenceDto();
-        if (lstReference != null && !lstReference.isEmpty()) {
-            insertParamDefinition.setTableDto(ReferenceDto.class);
-            insertParamDefinition.setObjects(lstReference);
-            factory.getDefaultDataOperator().insert(insertParamDefinition);
+        if (schema.getSchemaDto().getSchemaId().equals(Constants.DEFAULT_REFERENCE_SCHEMA)) {
+            List<ReferenceDto> lstReference = schema.getReferenceDto();
+            if (lstReference != null && !lstReference.isEmpty()) {
+                insertParamDefinition.setTableDto(ReferenceDto.class);
+                insertParamDefinition.setObjects(lstReference);
+                factory.getDefaultDataOperator().insert(insertParamDefinition);
+            }
         }
+
     }
 
 
@@ -381,17 +505,18 @@ public class DataModelService {
         if (schema.getSchemaDto().getSchemaId() < 0) {
             schema.getSchemaDto().setSchemaId(IdGenerator.getNextId(Schema.class.getName()));
         }
-        List<Long[]> lstChangedColumn = new ArrayList<>();
+        Map<Long, Long> mapColChangedId = new HashMap<>();
+        Map<Long, Long> mapTableChangeId = new HashMap<>();
         if (schema.getLstTable() != null) {
             for (TableInfo table : schema.getLstTable()) {
-                List<Long[]> changedIds = table.updateColId();
+                Map<Long, Long> changedIds = table.updateColId(mapTableChangeId);
                 if (changedIds != null) {
-                    lstChangedColumn.addAll(changedIds);
+                    mapColChangedId.putAll(changedIds);
                 }
             }
-            if (!lstChangedColumn.isEmpty()) {
+            if (!mapColChangedId.isEmpty()) {
                 for (TableInfo table : schema.getLstTable()) {
-                    table.columnIdChanged(lstChangedColumn);
+                    table.columnIdChanged(mapColChangedId);
                 }
             }
         }
@@ -425,29 +550,39 @@ public class DataModelService {
                 }
             }));
         }
-        if (!lstChangedColumn.isEmpty()) {
+        if (!mapColChangedId.isEmpty()) {
             //更新约束
             if (schema.getLstConstraint() != null) {
                 for (Constraint constraint : schema.getLstConstraint()) {
-                    constraint.columnIdChanged(lstChangedColumn);
+                    constraint.columnIdChanged(mapColChangedId);
                 }
             }
             //更新关系
             List<TableColumnRelation> lstRelation = schema.getLstRelation();
             if (lstRelation != null && !lstRelation.isEmpty()) {
                 lstRelation.forEach((relation -> {
-                    relation.columnIdChanged(lstChangedColumn);
+                    relation.columnIdChanged(mapColChangedId);
                 }));
             }
             //更新公式
             List<FormulaDto> formulas = schema.getFormulaDtos();
             if (formulas != null && !formulas.isEmpty()) {
                 formulas.forEach(formulaDto -> {
-                    new Formula(formulaDto).columnIdChanged(lstChangedColumn);
+                    new Formula(formulaDto).columnIdChanged(mapColChangedId);
                 });
-
             }
-
+        }
+        if (!mapTableChangeId.isEmpty() && schema.getSchemaDto().getSchemaId().equals(Constants.DEFAULT_REFERENCE_SCHEMA)) {
+            //更新引用
+            List<ReferenceDto> lstReference = schema.getReferenceDto();
+            if (lstReference == null || lstReference.isEmpty()) {
+                return;
+            }
+            for (ReferenceDto dto : lstReference) {
+                if (mapTableChangeId.containsKey(dto.getTableId())) {
+                    dto.setTableId(mapTableChangeId.get(dto.getTableId()));
+                }
+            }
         }
     }
 

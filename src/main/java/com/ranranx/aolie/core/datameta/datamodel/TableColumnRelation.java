@@ -2,8 +2,8 @@ package com.ranranx.aolie.core.datameta.datamodel;
 
 import com.ranranx.aolie.core.datameta.dto.TableColumnRelationDto;
 
-import javax.persistence.Transient;
-import java.util.List;
+import java.beans.Transient;
+import java.util.Map;
 
 /**
  * @Author xxl
@@ -19,12 +19,10 @@ public class TableColumnRelation {
     /**
      * 起始表信息
      */
-    @Transient
     private TableInfo tableFrom;
     /**
      * 终止表信息
      */
-    @Transient
     private TableInfo tableTo;
 
     /**
@@ -32,14 +30,12 @@ public class TableColumnRelation {
      *
      * @param columnIds
      */
-    public void columnIdChanged(List<Long[]> columnIds) {
-        for (int i = 0; i < columnIds.size(); i++) {
-            Long[] ids = columnIds.get(i);
-            if (ids[0].equals(this.dto.getFieldFrom())) {
-                this.dto.setFieldFrom(ids[1]);
-            } else if (ids[0].equals(this.dto.getFieldTo())) {
-                this.dto.setFieldTo(ids[1]);
-            }
+    public void columnIdChanged(Map<Long, Long> columnIds) {
+        if (columnIds.containsKey(dto.getFieldFrom())) {
+            dto.setFieldFrom(columnIds.get(dto.getFieldFrom()));
+        }
+        if (columnIds.containsKey(dto.getFieldTo())) {
+            dto.setFieldTo(columnIds.get(dto.getFieldTo()));
         }
     }
 
@@ -51,6 +47,7 @@ public class TableColumnRelation {
         this.dto = dto;
     }
 
+    @Transient
     public TableInfo getTableFrom() {
         return tableFrom;
     }
@@ -59,6 +56,7 @@ public class TableColumnRelation {
         this.tableFrom = tableFrom;
     }
 
+    @Transient
     public TableInfo getTableTo() {
         return tableTo;
     }

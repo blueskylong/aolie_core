@@ -324,6 +324,37 @@ public class CommonUtils {
     }
 
     public static boolean isNumber(String str) {
+        if (str == null) {
+            return false;
+        }
         return NUMBER_PATTERN.matcher(str).matches();
+    }
+
+    public static boolean isNumber(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (obj instanceof Number) {
+            return true;
+        }
+        return isNumber(obj.toString());
+    }
+
+    /**
+     * 结合字串
+     *
+     * @param arr
+     * @param splitChar
+     * @return
+     */
+    public static String join(String[] arr, char splitChar) {
+        if (arr == null || arr.length == 0) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder();
+        for (String str : arr) {
+            sb.append(str).append(splitChar);
+        }
+        return sb.substring(0, sb.length() - 1);
     }
 }

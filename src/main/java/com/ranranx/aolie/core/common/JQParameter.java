@@ -9,6 +9,7 @@ import com.ranranx.aolie.core.ds.definition.FieldOrder;
 import com.ranranx.aolie.core.ds.definition.QueryParamDefinition;
 import com.ranranx.aolie.core.exceptions.InvalidParamException;
 import com.ranranx.aolie.core.handler.param.Page;
+import com.ranranx.aolie.core.handler.param.QueryParam;
 import com.ranranx.aolie.core.handler.param.condition.Criteria;
 import com.ranranx.aolie.core.interfaces.RequestParamHandler;
 import com.ranranx.aolie.core.service.DataModelService;
@@ -33,7 +34,7 @@ import java.util.Map;
  **/
 @Component
 public class JQParameter implements RequestParamHandler {
-    private Logger logger = LoggerFactory.getLogger(JQParameter.class);
+    private static Logger logger = LoggerFactory.getLogger(JQParameter.class);
 
     private String name = "name";
 
@@ -86,6 +87,43 @@ public class JQParameter implements RequestParamHandler {
 
     }
 
+    public QueryParam getQueryParam() throws Exception {
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+        Map mapParam = request.getParameterMap();
+        if (request.getMethod().equalsIgnoreCase("POST")) {
+            mapParam = (Map) JSONUtils.parse(getPostData(request));
+        }
+        String value = getParamValue("blockId", mapParam);
+        if (CommonUtils.isEmpty(value)) {
+            throw new InvalidParamException("没有指定视图ID");
+        }
+        long blockId = new Long(value);
+        BlockViewer blockViewer = SchemaHolder.getViewerInfo(blockId, SessionUtils.getLoginVersion());
+
+        boolean needConvert = blockViewer.getBlockViewDto().getFieldToCamel() != null && blockViewer.getBlockViewDto().getFieldToCamel() == 1;
+        QueryParam queryParam = new QueryParam();
+        String search = getParamValue("_search", mapParam);
+        if (CommonUtils.isEmpty(search) || search.equals("true")) {
+            parseCriteria(getParamValue("filters", mapParam), queryParam.appendCriteria(),
+                    needConvert);
+        }
+        String extFilter = getParamValue("extFilter", mapParam);
+        if (extFilter != null) {
+            System.out.println("---->" + getParamValue("extFilter", mapParam));
+            parseExtCriteria(extFilter, queryParam.appendCriteria(), needConvert);
+        }
+        queryParam.setFields(blockViewer.getFields());
+        queryParam.setTable(blockViewer.getViewTables());
+        //TODO 这里要增加表关系
+        FieldOrder order = parseOrder(mapParam, blockViewer, needConvert);
+        if (order != null) {
+            queryParam.addOrder(order);
+        }
+        queryParam.setPage(parsePage(mapParam));
+        return queryParam;
+
+    }
+
     private static String getPostData(HttpServletRequest request) {
         StringBuffer data = new StringBuffer();
         String line = null;
@@ -135,6 +173,11 @@ public class JQParameter implements RequestParamHandler {
         if (CommonUtils.isEmpty(field)) {
             return null;
         }
+        if (blockViewer.getBlockViewDto().getFieldToCamel() != null
+                && blockViewer.getBlockViewDto().getFieldToCamel() == 1) {
+            field = CommonUtils.convertToUnderline(field);
+        }
+
         FieldOrder order = new FieldOrder();
         order.setField(field);
         order.setTableName(
@@ -181,35 +224,39 @@ public class JQParameter implements RequestParamHandler {
         ObjectMapper mapper = new ObjectMapper();
         try {
             Map map = mapper.readValue(filter, Map.class);
-            Iterator iterator = map.entrySet().iterator();
-            Map.Entry entry;
-            String key;
-            String field, op;
-            Object value;
-            while (iterator.hasNext()) {
-                entry = (Map.Entry) iterator.next();
-                key = entry.getKey().toString();
-                if (key.indexOf("#") != -1) {
-                    String[] split = key.split("#");
-                    field = split[0];
-                    op = split[1];
-                } else {
-                    op = "eq";
-                    field = key;
-                }
-                if (convertToUnderLine) {
-                    field = CommonUtils.convertToUnderline(field);
-                }
-                addCriteria(criteria, field, op, entry.getValue() == null ? null : entry.getValue().toString());
-
-            }
+            genFilter(criteria, convertToUnderLine, map);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
     }
 
-    private void addCriteria(Criteria criteria, String field, String op, String value) {
+    public static void genFilter(Criteria criteria, boolean convertToUnderLine, Map map) {
+        Iterator iterator = map.entrySet().iterator();
+        Map.Entry entry;
+        String key;
+        String field, op;
+        Object value;
+        while (iterator.hasNext()) {
+            entry = (Map.Entry) iterator.next();
+            key = entry.getKey().toString();
+            if (key.indexOf("#") != -1) {
+                String[] split = key.split("#");
+                field = split[0];
+                op = split[1];
+            } else {
+                op = "eq";
+                field = key;
+            }
+            if (convertToUnderLine) {
+                field = CommonUtils.convertToUnderline(field);
+            }
+            addCriteria(criteria, field, op, entry.getValue() == null ? null : entry.getValue().toString());
+
+        }
+    }
+
+    private static void addCriteria(Criteria criteria, String field, String op, String value) {
         //如果字段是数字,表示colId,需要通过模型转换
         if (CommonUtils.isNumber(field)) {
             long fieldId = Long.parseLong(field);

@@ -40,7 +40,7 @@ public class DeleteInterceptor implements IOperInterceptor {
      */
     @Override
     public HandleResult beforeOper(Object param) throws InvalidException {
-        logger.error("--> Delete  " + getOrder() + ":beforeOper");
+        logger.info("--> Delete  " + getOrder() + ":beforeOper");
         return null;
     }
 
@@ -53,7 +53,7 @@ public class DeleteInterceptor implements IOperInterceptor {
      */
     @Override
     public HandleResult afterOper(Object param, HandleResult result) {
-        logger.error("--> Delete  " + getOrder() + ":afterOper");
+        logger.info("--> Delete  " + getOrder() + ":afterOper");
         return null;
     }
 
@@ -66,7 +66,7 @@ public class DeleteInterceptor implements IOperInterceptor {
      */
     @Override
     public HandleResult beforeReturn(Object param, HandleResult handleResult) {
-        logger.error("--> Delete  " + getOrder() + ":beforeReturn");
+        logger.info("--> Delete  " + getOrder() + ":beforeReturn");
         return null;
     }
 

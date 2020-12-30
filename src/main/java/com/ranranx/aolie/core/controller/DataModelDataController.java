@@ -1,14 +1,12 @@
 package com.ranranx.aolie.core.controller;
 
 import com.ranranx.aolie.core.common.JQParameter;
+import com.ranranx.aolie.core.common.SessionUtils;
 import com.ranranx.aolie.core.ds.dataoperator.DataOperatorFactory;
-import com.ranranx.aolie.core.ds.definition.QueryParamDefinition;
 import com.ranranx.aolie.core.handler.HandleResult;
-import com.ranranx.aolie.core.handler.param.Page;
+import com.ranranx.aolie.core.service.DmDataService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -25,25 +23,74 @@ public class DataModelDataController {
     @Autowired
     private DataOperatorFactory factory;
 
+    @Autowired
+    private DmDataService dmDataService;
+
     @RequestMapping("/findBlockData/{blockId}")
-    public HandleResult findBlockDataForJqGrid(@PathVariable Long blockId, JQParameter queryParams) throws Exception {
-        QueryParamDefinition params = queryParams.getQueryParamDefinition();
-        List<Map<String, Object>> lstData = factory.getDefaultDataOperator().select(params);
-        HandleResult result = new HandleResult();
-        result.setSuccess(true);
-        result.setLstData(lstData);
-        //如果有分页,则需要再次查询总数
-        Page page = params.getPage();
-        if (page != null) {
-            page.setTotalRecord(lstData.size());
-            result.setPage(page);
-        }
-        return result;
+    public HandleResult findBlockDataForPage(@PathVariable Long blockId, JQParameter queryParams) throws Exception {
+        return dmDataService.findBlockDataForPage(blockId, queryParams);
     }
 
     @RequestMapping("/findBlockDataNoPage/{blockId}")
     public List<Map<String, Object>> findBlockDataNoPage(@PathVariable Long blockId, JQParameter queryParams) throws Exception {
-        QueryParamDefinition params = queryParams.getQueryParamDefinition();
-        return factory.getDefaultDataOperator().select(params);
+        return dmDataService.findBlockDataNoPage(blockId, queryParams);
     }
+
+    /**
+     * 保存增加的数据
+     * 检查
+     *
+     * @param rows
+     * @param dsId
+     * @return
+     */
+    @PostMapping("/saveRows/{dsId}")
+    public HandleResult saveRows(@RequestBody List<Map<String, Object>> rows, @PathVariable Long dsId) throws Exception {
+
+//        try {
+        return dmDataService.saveRows(rows, dsId);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            HandleResult result = new HandleResult();
+//            result.setErr(e.getMessage());
+//            return result;
+//        }
+
+    }
+
+    /**
+     * 删除指定ID数据
+     *
+     * @param ids
+     * @param dsId
+     * @return
+     */
+    @PostMapping("/deleteRowByIds/{dsId}")
+    public HandleResult deleteRowByIds(@RequestBody List<Object> ids, @PathVariable Long dsId) {
+        return dmDataService.deleteRowByIds(ids, dsId);
+    }
+
+    /**
+     * 更新层次编码
+     *
+     * @param mapIdToCode
+     */
+    @PostMapping("/updateLevel/{viewId}")
+    public HandleResult updateLevel(@RequestBody Map<Long, String> mapIdToCode, @PathVariable long viewId) {
+        return dmDataService.updateLevel(mapIdToCode, viewId);
+    }
+
+    /**
+     * 查询表的单行
+     *
+     * @param dsId
+     * @param id
+     * @return
+     */
+    @RequestMapping("/findTableRow/{dsId}/{id}")
+    public HandleResult findTableRow(@PathVariable Long dsId, @PathVariable Long id) {
+        return dmDataService.findTableRow(dsId, id, SessionUtils.getLoginVersion());
+    }
+
+
 }

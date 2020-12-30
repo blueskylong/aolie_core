@@ -1,12 +1,13 @@
 package com.ranranx.aolie.core.handler;
 
-import com.ranranx.aolie.core.common.CommonUtils;
 import com.ranranx.aolie.core.common.Constants;
-import com.ranranx.aolie.core.datameta.dto.TableDto;
+import com.ranranx.aolie.core.datameta.datamodel.SchemaHolder;
+import com.ranranx.aolie.core.datameta.datamodel.TableColumnRelation;
+import com.ranranx.aolie.core.datameta.datamodel.TableInfo;
 import com.ranranx.aolie.core.ds.dataoperator.DataOperatorFactory;
 import com.ranranx.aolie.core.ds.definition.QueryParamDefinition;
+import com.ranranx.aolie.core.ds.definition.TableRelation;
 import com.ranranx.aolie.core.handler.param.QueryParam;
-import com.ranranx.aolie.core.handler.param.condition.Criteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,19 +34,68 @@ public class QueryHandler<T extends QueryParam> extends BaseHandler<T> {
      */
     private HandleResult findAllResult(QueryParam param) {
 
-        QueryParamDefinition queryParamDefinition = new QueryParamDefinition();
-        List<String> lst = new ArrayList<>();
-        lst.add(CommonUtils.getTableName(TableDto.class));
-        queryParamDefinition.setTableNames(lst);
-        Criteria criteria = queryParamDefinition.appendCriteria();
-        criteria.andEqualTo("version", "1");
-
         //TODO 这里需要将查询分解,合并
-        List<Map<String, Object>> lstData = factory.getDataOperatorByKey(null).select(queryParamDefinition);
+        List<Map<String, Object>> lstData = factory.getDataOperatorByKey(null).select(convertParam(param));
         HandleResult result = new HandleResult();
         result.setSuccess(true);
         result.setLstData(lstData);
         return result;
+    }
+
+
+    /**
+     * 转换成内部 查询参数
+     *
+     * @param param
+     * @return
+     */
+    private QueryParamDefinition convertParam(QueryParam param) {
+        QueryParamDefinition paramDefinition = new QueryParamDefinition();
+        TableInfo[] table = param.getTable();
+        List<String> lstTableName = new ArrayList<>();
+
+        Long tableId[] = new Long[table.length];
+        for (int i = 0; i < table.length; i++) {
+            lstTableName.add(table[i].getTableDto().getTableName());
+            tableId[i] = table[i].getTableDto().getTableId();
+        }
+        paramDefinition.setTableNames(lstTableName);
+        paramDefinition.setLstCriteria(param.getLstCriteria());
+        paramDefinition.setLstOrder(param.getLstOrder());
+        paramDefinition.setFields(param.getFields());
+        paramDefinition.setPage(param.getPage());
+        List<TableColumnRelation> tableRelations = SchemaHolder.getTableRelations(table[0].getTableDto().getVersionCode(), tableId);
+        paramDefinition.setLstRelation(convertRelation(tableRelations));
+        return paramDefinition;
+    }
+
+    /**
+     * 转换成内部查询的关系
+     *
+     * @param lstColRelation
+     * @return
+     */
+    private List<TableRelation> convertRelation(List<TableColumnRelation> lstColRelation) {
+        if (lstColRelation == null || lstColRelation.isEmpty()) {
+            return null;
+        }
+        String version = lstColRelation.get(0).getDto().getVersionCode();
+        TableRelation newRelation;
+        List<TableRelation> result = new ArrayList<>();
+        for (TableColumnRelation relation : lstColRelation) {
+            newRelation = new TableRelation();
+            newRelation.setFieldLeft(
+                    SchemaHolder.getColumn(relation.getDto()
+                            .getFieldFrom(), version).getColumnDto().getFieldName());
+            newRelation.setTableLeft(relation.getTableFrom().getTableDto().getTableName());
+            newRelation.setFieldRight(SchemaHolder.getColumn(relation.getDto()
+                    .getFieldTo(), version).getColumnDto().getFieldName());
+            newRelation.setTableRight(relation.getTableTo().getTableDto().getTableName());
+            newRelation.setJoinType(Constants.JoinType.INNER_JOIN);
+            result.add(newRelation);
+        }
+        return result;
+
     }
 
     /**

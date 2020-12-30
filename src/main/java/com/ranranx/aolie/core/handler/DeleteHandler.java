@@ -1,15 +1,15 @@
 package com.ranranx.aolie.core.handler;
 
 import com.ranranx.aolie.core.common.Constants;
+import com.ranranx.aolie.core.common.SessionUtils;
+import com.ranranx.aolie.core.datameta.datamodel.SchemaHolder;
 import com.ranranx.aolie.core.ds.dataoperator.DataOperatorFactory;
 import com.ranranx.aolie.core.ds.definition.DeleteParamDefinition;
+import com.ranranx.aolie.core.exceptions.InvalidParamException;
 import com.ranranx.aolie.core.handler.param.DeleteParam;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @Author xxl
@@ -21,6 +21,9 @@ import java.util.Map;
 public class DeleteHandler<T extends DeleteParam> extends BaseHandler<T> {
     @Autowired
     private DataOperatorFactory factory;
+
+    @Autowired
+    private SchemaHolder schemaHolder;
 
     /**
      * 默认可以处理的类型
@@ -34,42 +37,41 @@ public class DeleteHandler<T extends DeleteParam> extends BaseHandler<T> {
 
 
     @Override
-    protected HandleResult handle(DeleteParam deleteParam) {
+    protected  HandleResult handle(DeleteParam deleteParam) {
         HandleResult result = new HandleResult();
         try {
             DeleteParamDefinition deleteParamDefinition = new DeleteParamDefinition();
             BeanUtils.copyProperties(deleteParam, deleteParamDefinition);
-            int num = factory.getDataOperatorByKey(null).delete(
+            deleteParamDefinition.setTableName(deleteParam.getTable().getTableDto().getTableName());
+            deleteParamDefinition.setIdField(deleteParam.getTable().getKeyColumn()
+                    .get(0).getColumnDto().getFieldName());
+            int num = factory.getDataOperatorByKey(deleteParam.getTable().getDsKey()).delete(
                     deleteParamDefinition
             );
             result.setSuccess(true);
             result.setChangeNum(num);
         } catch (Exception e) {
             result.setErr(e.getMessage());
-
+            e.printStackTrace();
         }
         return result;
     }
 
-    /**
-     * 生成结构化参数
-     *
-     * @param mapParam
-     * @return
-     */
     @Override
-    protected T checkAndMakeParam(Map<String, Object> mapParam) {
-        //删除需要指定表信息
-        HashMap<String, Object> map = new HashMap<String, Object>();
-        map.put("ids", new long[]{1L});
-        DeleteParam param = new DeleteParam();
-        try {
-            org.apache.commons.beanutils.BeanUtils.populate(param, map);
-        } catch (Exception e) {
-            e.printStackTrace();
+    protected T checkAndMakeParam(Object mapParam) {
+        DeleteParam param = super.checkAndMakeParam(mapParam);
+        if (param.getTable() == null) {
+            if (param.getTableId() <= 0) {
+                throw new InvalidParamException("没有指定删除的表信息");
+            }
+            param.setTable(SchemaHolder.getTable(param.getTableId(), SessionUtils.getLoginVersion()));
         }
-
-        return null;
+        if (param.getCriteria().isEmpty()
+                && (param.getIds() == null || param.getIds().isEmpty())) {
+            //这里需要做出决定 ,是不是可以全表删除
+            throw new InvalidParamException("没有指定删除条件");
+        }
+        return (T) param;
     }
 
     public static void main(String[] args) {

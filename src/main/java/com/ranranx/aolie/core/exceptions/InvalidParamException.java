@@ -8,7 +8,7 @@ package com.ranranx.aolie.core.exceptions;
  **/
 public class InvalidParamException extends InvalidException {
     public InvalidParamException(String errorInfo) {
-        super("InvalidParameter exception," + errorInfo);
+        super("不正确的参数," + errorInfo);
     }
 
 }

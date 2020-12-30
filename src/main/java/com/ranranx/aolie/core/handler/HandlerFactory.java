@@ -39,6 +39,18 @@ public class HandlerFactory {
         throw new NotExistException("处理器类型(" + type + ")");
     }
 
+    /**
+     * 直接处理请示
+     *
+     * @param type
+     * @param params
+     * @return
+     */
+    public HandleResult handleRequest(String type, Object params) {
+        IDbHandler handler = this.getHandler(type, params);
+        return handler.doHandle(params);
+    }
+
     @PostConstruct
     public void afterInit() {
         sort();

@@ -2,7 +2,9 @@ package com.ranranx.aolie.core.datameta.datamodel;
 
 import com.ranranx.aolie.core.datameta.dto.ColumnDto;
 
+import java.beans.Transient;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author xxl
@@ -36,7 +38,7 @@ public class Column {
 
     }
 
-    public void columnIdChanged(List<Long[]> columnIds) {
+    public void columnIdChanged(Map<Long, Long> columnIds) {
         if (this.lstFormula != null) {
             for (Formula formula : this.lstFormula) {
                 formula.columnIdChanged(columnIds);
@@ -69,5 +71,14 @@ public class Column {
 
     public void setLstFormula(List<Formula> lstFormula) {
         this.lstFormula = lstFormula;
+    }
+
+    @Transient
+    public boolean isNumberColumn() {
+        String fieldType = this.columnDto.getFieldType();
+        return fieldType.equals(DmConstants.FieldType.DECIMAL)
+                || fieldType.equals(DmConstants.FieldType.INT)
+                || fieldType.equals(DmConstants.FieldType.SMALLINT);
+
     }
 }

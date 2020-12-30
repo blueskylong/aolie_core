@@ -7,7 +7,9 @@ import com.ranranx.aolie.core.common.CommonUtils;
 import com.ranranx.aolie.core.common.Constants;
 import com.ranranx.aolie.core.common.IdGenerator;
 import com.ranranx.aolie.core.common.SessionUtils;
+import com.ranranx.aolie.core.datameta.datamodel.BlockViewer;
 import com.ranranx.aolie.core.datameta.datamodel.SchemaHolder;
+import com.ranranx.aolie.core.datameta.datamodel.TableInfo;
 import com.ranranx.aolie.core.datameta.dto.BlockViewDto;
 import com.ranranx.aolie.core.datameta.dto.ReferenceDto;
 import com.ranranx.aolie.core.ds.dataoperator.DataOperatorFactory;
@@ -92,6 +94,22 @@ public class PageService {
     }
 
     /**
+     * 取得一页面的所在方案
+     *
+     * @param pageId
+     * @return
+     */
+    public long findPageSchemaId(Long pageId, String version) {
+        QueryParamDefinition queryParamDefinition = new QueryParamDefinition();
+        queryParamDefinition.setTableDtos(PageInfoDto.class);
+        queryParamDefinition.appendCriteria().andEqualTo("page_id", pageId)
+                .andEqualTo("version_code", version);
+        PageInfoDto pageInfoDto = factory.getDefaultDataOperator().selectOne(queryParamDefinition, PageInfoDto.class);
+        return pageInfoDto.getSchemaId();
+    }
+
+
+    /**
      * 增加页面
      *
      * @param pageName
@@ -126,9 +144,9 @@ public class PageService {
     private String getNextCode(Long parentId, Long schemaId) {
         String lvlParent = "";
         if (parentId != null && parentId > 0) {
-            PageInfoDto pageInfo = findPageInfo(parentId, schemaId);
+            PageInfo pageInfo = findPageInfo(parentId);
             if (pageInfo != null) {
-                lvlParent = pageInfo.getLvlCode();
+                lvlParent = pageInfo.getPageInfoDto().getLvlCode();
             }
         }
         LevelProvider provider = new LevelProvider(lvlParent);
@@ -155,14 +173,14 @@ public class PageService {
     }
 
 
-    private PageInfoDto findPageInfo(Long pageId, Long schemaId) {
-        QueryParamDefinition queryParamDefinition = new QueryParamDefinition();
-        queryParamDefinition.setTableDtos(PageInfoDto.class);
-        queryParamDefinition.appendCriteria().andEqualTo("schema_id", schemaId)
-                .andEqualTo("version_code", SessionUtils.getLoginVersion())
-                .andEqualTo("page_id", pageId);
-        return factory.getDefaultDataOperator().selectOne(queryParamDefinition, PageInfoDto.class);
-    }
+//    private PageInfoDto findPageInfo(Long pageId) {
+//        QueryParamDefinition queryParamDefinition = new QueryParamDefinition();
+//        queryParamDefinition.setTableDtos(PageInfoDto.class);
+//        queryParamDefinition.appendCriteria()
+//                .andEqualTo("version_code", SessionUtils.getLoginVersion())
+//                .andEqualTo("page_id", pageId);
+//        return factory.getDefaultDataOperator().selectOne(queryParamDefinition, PageInfoDto.class);
+//    }
 
     /**
      * 删除指定 页面信息
@@ -186,22 +204,55 @@ public class PageService {
         return null;
     }
 
-    /**
-     * 取得完整的页面信息
-     *
-     * @param pageId
-     * @param schemaId
-     * @return
-     */
-    public PageInfo findPageFullInfo(long pageId, long schemaId) {
-        PageInfoDto pageInfo = this.findPageInfo(pageId, schemaId);
-        if (pageInfo == null) {
+//    /**
+//     * 取得完整的页面信息
+//     *
+//     * @param pageId
+//     * @param schemaId
+//     * @return
+//     */
+//    public PageInfo findPageFullInfo(long pageId, long schemaId) {
+//        PageInfo pageInfo = this.findPageInfo(pageId);
+//        if (pageInfo == null) {
+//            return null;
+//        }
+//        List<PageDetailDto> pageDetail = findPageDetail(pageId);
+//        PageInfo pageFullInfo = new PageInfo();
+//        pageFullInfo.setLstPageDetail(pageDetail);
+//        return pageFullInfo;
+//    }
+
+    public List<Long> findPageRefTables(long pageId) {
+        List<PageDetailDto> lstPageDetail = findPageDetail(pageId);
+        if (lstPageDetail == null || lstPageDetail.isEmpty()) {
             return null;
         }
-        List<PageDetailDto> pageDetail = findPageDetail(pageId);
-        PageInfo pageFullInfo = new PageInfo();
-        pageFullInfo.setLstPageDetail(pageDetail);
-        return pageFullInfo;
+        List<Long> lstResult = new ArrayList();
+        for (PageDetailDto dto : lstPageDetail) {
+            if (dto.getViewType() == Constants.PageViewType.reference) {
+                continue;
+            } else if (dto.getViewType() == Constants.PageViewType.blockView) {
+                BlockViewer viewerInfo = SchemaHolder.getViewerInfo(dto.getViewId(), dto.getVersionCode());
+                TableInfo[] viewTables = viewerInfo.getViewTables();
+                for (int i = 0; i < viewTables.length; i++) {
+                    Long tableId = viewTables[i].getTableDto().getTableId();
+                    if (lstResult.indexOf(tableId) == -1) {
+                        lstResult.add(tableId);
+                    }
+                }
+            } else if (dto.getViewType() == Constants.PageViewType.page) {
+                List<Long> lstSub = findPageRefTables(dto.getViewId());
+                if (lstSub != null) {
+                    for (Long tableId : lstSub) {
+                        if (lstResult.indexOf(tableId) == -1) {
+                            lstResult.add(tableId);
+                        }
+                    }
+                }
+            }
+
+        }
+        return lstResult;
     }
 
     /**
@@ -286,8 +337,8 @@ public class PageService {
                 .andEqualTo("version_code", SessionUtils.getLoginVersion());
 
         List<PageInfoDto> lstPageDto = findPageInfos(schemaId);
-        List<ReferenceDto> referenceDtos = schemaHolder.getReferenceDtos();
-        List<BlockViewDto> blocks = uiService.getBlockViews(schemaId.toString());
+        List<ReferenceDto> referenceDtos = schemaHolder.getReferenceDtos(SessionUtils.getLoginVersion());
+        List<BlockViewDto> blocks = uiService.getBlockViews(schemaId);
         //将三个组装成树状结构
         List<Map<String, Object>> result = new ArrayList<>();
         addBlockInfo(blocks, result);

@@ -62,7 +62,7 @@ public class DataOperatorFactory {
             throw new InvalidException("指定的表不存在:" + tableId + "_" + versionCode);
 
         }
-        String key = table.getDsKey(SchemaHolder.getInstance().getSchema(table.getTableDto().getSchemaId(), versionCode));
+        String key = table.getDsKey();
         return getDataOperatorByKey(key);
 
     }

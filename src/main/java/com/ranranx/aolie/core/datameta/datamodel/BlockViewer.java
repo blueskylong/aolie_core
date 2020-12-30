@@ -23,6 +23,10 @@ public class BlockViewer {
      * 字段显示信息列表
      */
     private List<Component> lstComponent;
+    /**
+     * 树结构信息
+     */
+    private TreeInfo treeInfo = null;
 
 
     public BlockViewer(BlockViewDto blockViewDto, List<Component> lstField) {
@@ -47,6 +51,28 @@ public class BlockViewer {
                 }
             }
         }
+    }
+
+    @Transient
+    public TableInfo[] getViewTables() {
+        if (lstComponent == null) {
+            return null;
+        }
+        List<Long> tableIds = new ArrayList<>();
+        Long tableId;
+        for (Component com : lstComponent) {
+            tableId = com.getColumn().getColumnDto().getTableId();
+            if (tableIds.indexOf(tableId) != -1) {
+                continue;
+            }
+            tableIds.add(tableId);
+        }
+        TableInfo[] tableInfos = new TableInfo[tableIds.size()];
+        String versionCode = this.blockViewDto.getVersionCode();
+        for (int i = 0; i < tableIds.size(); i++) {
+            tableInfos[i] = SchemaHolder.getTable(tableIds.get(i), versionCode);
+        }
+        return tableInfos;
     }
 
     /**
@@ -124,6 +150,31 @@ public class BlockViewer {
             lstDto.add(com.getComponentDto());
         }
         return lstDto;
+    }
+
+    @Transient
+    public TreeInfo getTreeInfo() {
+        if (treeInfo != null) {
+            return treeInfo;
+        }
+        treeInfo = new TreeInfo();
+        String version = this.blockViewDto.getVersionCode();
+        for (ComponentDto dto : this.getComponentDtos()) {
+            Integer treeRole = dto.getTreeRole();
+            if (treeRole == null) {
+                continue;
+            }
+            if (treeRole == Constants.TreeRole.idField) {
+                treeInfo.setIdField(SchemaHolder.getColumn(dto.getColumnId(), version));
+            } else if (treeRole == Constants.TreeRole.codeField) {
+                treeInfo.setCodeField(SchemaHolder.getColumn(dto.getColumnId(), version));
+            } else if (treeRole == Constants.TreeRole.nameField) {
+                treeInfo.setTextField(SchemaHolder.getColumn(dto.getColumnId(), version));
+            } else if (treeRole == Constants.TreeRole.parentField) {
+                treeInfo.setParentField(SchemaHolder.getColumn(dto.getColumnId(), version));
+            }
+        }
+        return treeInfo;
     }
 
     public void setBlockViewDto(BlockViewDto blockViewDto) {

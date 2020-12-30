@@ -51,7 +51,7 @@ public class TableRelation {
         return fieldLeft;
     }
 
-    public void setFieldLeft(String[] fieldLeft) {
+    public void setFieldLeft(String... fieldLeft) {
         this.fieldLeft = fieldLeft;
     }
 
@@ -59,7 +59,7 @@ public class TableRelation {
         return fieldRight;
     }
 
-    public void setFieldRight(String[] fieldRight) {
+    public void setFieldRight(String... fieldRight) {
         this.fieldRight = fieldRight;
     }
 

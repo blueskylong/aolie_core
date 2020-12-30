@@ -130,11 +130,12 @@ public class MyBatisDataOperator implements IDataOperator {
                 ? null : queryParamDefinition.getFields(), null);
         Map<String, Object> mapParam = new HashMap<>();
         StringBuilder where = new StringBuilder();
-        if (queryParamDefinition.getCriteria() != null) {
+
             if (queryParamDefinition.hasCriteria()) {
                 List<Criteria> lstCriteria = queryParamDefinition.getCriteria();
+                int index = 1;
                 for (Criteria criteria : lstCriteria) {
-                    String aWhere = criteria.getSqlWhere(mapParam, null, 1, false);
+                    String aWhere = criteria.getSqlWhere(mapParam, null, index++, false);
                     if (!CommonUtils.isEmpty(aWhere)) {
                         where.append(criteria.getAndOr()).append("  ").append(aWhere);
                     }
@@ -145,7 +146,7 @@ public class MyBatisDataOperator implements IDataOperator {
                 }
 
             }
-        }
+
         String orderExp = "";
         if (queryParamDefinition.getLstOrder() != null && !queryParamDefinition.getLstOrder().isEmpty()) {
             List<FieldOrder> orders = queryParamDefinition.getLstOrder();
@@ -228,12 +229,14 @@ public class MyBatisDataOperator implements IDataOperator {
         }
         int count = 0;
         for (Map<String, Object> row : updateParamDefinition.getLstRows()) {
-            count += updateRow(row, updateParamDefinition.getCriteria(), updateParamDefinition.getIdField(),
+            count += updateRow(row, updateParamDefinition.getCriteria(),
+                    updateParamDefinition.getIdField(),
                     updateParamDefinition.getTableName(), updateParamDefinition.isSelective());
 
         }
         return count;
     }
+
 
     private int updateRow(Map<String, Object> row, Criteria criteria,
                           String filterFields, String tableName, boolean isSelective) {
@@ -256,7 +259,8 @@ public class MyBatisDataOperator implements IDataOperator {
 
         }
         Map<String, Object> mapParam = new HashMap<>();
-        sb.append("update ").append(tableName).append(" set ").append(genSetSql(row, mapParam, index++, isSelective, lstFilterField));
+        sb.append("update ").append(tableName).append(" set ")
+                .append(genSetSql(row, mapParam, index++, isSelective, lstFilterField));
         if (criteria != null && !criteria.isEmpty()) {
             sb.append(" where ").append(criteria.getSqlWhere(mapParam, null, index++, false));
         }

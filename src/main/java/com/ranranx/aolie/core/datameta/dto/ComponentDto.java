@@ -89,7 +89,9 @@ public class ComponentDto extends SchemaBaseDto {
 
     private String titlePosition;
     private String titleSpan;
-
+    /**
+     * 如果树状显示,在树上的角色
+     */
     private Integer treeRole;
 
     public Long getComponentId() {
