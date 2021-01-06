@@ -19,7 +19,6 @@ import java.util.*;
 @org.springframework.stereotype.Component
 public class SchemaHolder {
 
-
     private static UIService uiService;
     private static DataModelService service;
     private static SchemaHolder thas;
@@ -479,6 +478,14 @@ public class SchemaHolder {
         }
         long schemaId = SchemaHolder.getTable(tableIds[0], versionCode).getTableDto().getSchemaId();
         return SchemaHolder.getInstance().getSchema(schemaId, versionCode).getTablesRelation(tableIds);
+    }
+
+    public static TableInfo findTableByTableName(String tableName, long schemaId, String version) {
+        Schema schema = mapSchema.get(CommonUtils.makeKey(schemaId + "", version));
+        if (schema == null) {
+            return null;
+        }
+        return schema.findTableByName(tableName);
     }
 
 

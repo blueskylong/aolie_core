@@ -2,9 +2,6 @@ package com.ranranx.aolie.core.handler;
 
 import com.ranranx.aolie.core.handler.param.Page;
 
-import java.util.List;
-import java.util.Map;
-
 /**
  * @Author xxl
  * @Description
@@ -20,7 +17,7 @@ public class HandleResult {
     /**
      * 返回的数据
      */
-    private List<Map<String, Object>> lstData;
+    private Object data;
     /**
      * 错误提供信息
      */
@@ -43,13 +40,6 @@ public class HandleResult {
         this.success = success;
     }
 
-    public List<Map<String, Object>> getLstData() {
-        return lstData;
-    }
-
-    public void setLstData(List<Map<String, Object>> lstData) {
-        this.lstData = lstData;
-    }
 
     public Page getPage() {
         return page;
@@ -77,6 +67,7 @@ public class HandleResult {
 
     /**
      * 创建默认的成功返回值
+     *
      * @param number
      * @return
      */
@@ -85,5 +76,25 @@ public class HandleResult {
         result.setSuccess(true);
         result.setChangeNum(number);
         return result;
+    }
+
+    /**
+     * 创建失败结果
+     *
+     * @param err
+     * @return
+     */
+    public static HandleResult failure(String err) {
+        HandleResult result = new HandleResult();
+        result.setErr(err);
+        return result;
+    }
+
+    public Object getData() {
+        return data;
+    }
+
+    public void setData(Object data) {
+        this.data = data;
     }
 }

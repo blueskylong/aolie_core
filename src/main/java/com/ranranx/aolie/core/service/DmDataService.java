@@ -5,10 +5,7 @@ import com.ranranx.aolie.core.common.Constants;
 import com.ranranx.aolie.core.common.JQParameter;
 import com.ranranx.aolie.core.common.SessionUtils;
 import com.ranranx.aolie.core.datameta.datamodel.*;
-import com.ranranx.aolie.core.exceptions.IllegalOperatorException;
-import com.ranranx.aolie.core.exceptions.InvalidConfigException;
-import com.ranranx.aolie.core.exceptions.InvalidParamException;
-import com.ranranx.aolie.core.exceptions.NotExistException;
+import com.ranranx.aolie.core.exceptions.*;
 import com.ranranx.aolie.core.handler.HandleResult;
 import com.ranranx.aolie.core.handler.HandlerFactory;
 import com.ranranx.aolie.core.handler.param.DeleteParam;
@@ -61,12 +58,12 @@ public class DmDataService {
         QueryParam queryParam = queryParams.getQueryParam();
         queryParam.setViewId(blockId);
         HandleResult handleResult = handlerFactory.handleRequest(Constants.HandleType.TYPE_QUERY, queryParam);
-        return handleResult.getLstData();
+        return (List<Map<String, Object>>) handleResult.getData();
     }
 
     /**
-     * 保存增加的数据和修改的数据,根据是否有主键来判断
-     * 检查
+     * 保存增加的数据和修改的数据,根据是否有主键来判断检查
+     * 如果只指定了主键值,则为删除,目前为单主键配置
      *
      * @param rows
      * @param dsId
@@ -74,6 +71,9 @@ public class DmDataService {
      */
     @Transactional(readOnly = false)
     public HandleResult saveRows(List<Map<String, Object>> rows, Long dsId) {
+        if (rows == null || rows.isEmpty()) {
+            return HandleResult.success(0);
+        }
         TableInfo table = SchemaHolder.getTable(dsId, SessionUtils.getLoginVersion());
         List<Column> keyColumn = table.getKeyColumn();
 
@@ -84,47 +84,50 @@ public class DmDataService {
         String keyField = keyColumn.get(0).getColumnDto().getFieldName();
         List<Map<String, Object>> lstAdd = new ArrayList<>();
         List<Map<String, Object>> lstEdit = new ArrayList<>();
+        List<Object> lstDelele = new ArrayList<>();
         long key;
         Object keyValue;
+
         for (Map<String, Object> row : rows) {
             row.put(Constants.FixColumnName.VERSION_CODE, SessionUtils.getLoginVersion());
             keyValue = row.get(keyField);
             if (keyValue == null || !CommonUtils.isNumber(keyValue)) {
-                throw new InvalidParamException("主键值不正确,目前只支持整型类型");
+                throw new InvalidParamException("主键值不正确,目前只支持整型类型:" + keyValue);
             }
             key = Long.parseLong(keyValue.toString());
             //约定,如果主键小于0表示增加,否则表示修改
-            if (key < 0) {
+            if (row.size() == 2 && key > -1) {
+                lstDelele.add(key);
+            } else if (key < 0) {
                 lstAdd.add(row);
             } else {
                 lstEdit.add(row);
             }
         }
-        HandleResult resultAdd = null;
-        HandleResult resultEdit = null;
+        HandleResult resultAdd = HandleResult.success(0);
+        HandleResult resultEdit = HandleResult.success(0);
+        HandleResult resultDelete = HandleResult.success(0);
         if (!lstAdd.isEmpty()) {
             resultAdd = saveRowByAdd(lstAdd, dsId);
             if (!resultAdd.isSuccess()) {
-                return resultAdd;
+                throw new InvalidException(resultAdd.getErr());
             }
         }
         if (!lstEdit.isEmpty()) {
             resultEdit = saveRowByEdit(lstEdit, dsId);
             if (!resultEdit.isSuccess()) {
-                return resultEdit;
+                throw new InvalidException(resultEdit.getErr());
+            }
+        }
+        if (!lstDelele.isEmpty()) {
+            resultDelete = deleteRowByIds(lstDelele, dsId);
+            if (!resultDelete.isSuccess()) {
+                throw new InvalidException(resultDelete.getErr());
             }
         }
         //如果二个都成功;
-        if (resultAdd == null) {
-            return resultEdit;
-        }
-        if (resultEdit == null) {
-            return resultAdd;
-        }
-        resultAdd.setChangeNum(resultAdd.getChangeNum() + resultEdit.getChangeNum());
+        resultAdd.setChangeNum(resultAdd.getChangeNum() + resultDelete.getChangeNum() + resultEdit.getChangeNum());
         return resultAdd;
-
-
     }
 
     /**
@@ -135,7 +138,7 @@ public class DmDataService {
      * @param dsId
      * @return
      */
-    private HandleResult saveRowByAdd(List<Map<String, Object>> rows, Long dsId) {
+    public HandleResult saveRowByAdd(List<Map<String, Object>> rows, Long dsId) {
         if (rows == null || rows.isEmpty()) {
             return null;
         }
@@ -296,6 +299,22 @@ public class DmDataService {
         param.setTable(new TableInfo[]{table});
         param.appendCriteria().andEqualTo("version_code", versionCode)
                 .andEqualTo(keyField, id);
+        return handlerFactory.handleRequest(Constants.HandleType.TYPE_QUERY, param);
+    }
+
+    /**
+     * 查询表的多行
+     *
+     * @param dsId
+     * @return
+     */
+    public HandleResult findTableRows(Long dsId, JQParameter queryParams) {
+        String versionCode = SessionUtils.getLoginVersion();
+        TableInfo table = SchemaHolder.getTable(dsId, versionCode);
+        if (table == null) {
+            throw new NotExistException("表信息没定义:" + dsId);
+        }
+        QueryParam param = queryParams.getDsQueryParam(dsId, versionCode);
         return handlerFactory.handleRequest(Constants.HandleType.TYPE_QUERY, param);
     }
 

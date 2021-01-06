@@ -8,6 +8,7 @@ import com.ranranx.aolie.core.common.Constants;
 import com.ranranx.aolie.core.common.IdGenerator;
 import com.ranranx.aolie.core.common.SessionUtils;
 import com.ranranx.aolie.core.datameta.datamodel.BlockViewer;
+import com.ranranx.aolie.core.datameta.datamodel.DmConstants;
 import com.ranranx.aolie.core.datameta.datamodel.SchemaHolder;
 import com.ranranx.aolie.core.datameta.datamodel.TableInfo;
 import com.ranranx.aolie.core.datameta.dto.BlockViewDto;
@@ -173,15 +174,6 @@ public class PageService {
     }
 
 
-//    private PageInfoDto findPageInfo(Long pageId) {
-//        QueryParamDefinition queryParamDefinition = new QueryParamDefinition();
-//        queryParamDefinition.setTableDtos(PageInfoDto.class);
-//        queryParamDefinition.appendCriteria()
-//                .andEqualTo("version_code", SessionUtils.getLoginVersion())
-//                .andEqualTo("page_id", pageId);
-//        return factory.getDefaultDataOperator().selectOne(queryParamDefinition, PageInfoDto.class);
-//    }
-
     /**
      * 删除指定 页面信息
      *
@@ -204,24 +196,6 @@ public class PageService {
         return null;
     }
 
-//    /**
-//     * 取得完整的页面信息
-//     *
-//     * @param pageId
-//     * @param schemaId
-//     * @return
-//     */
-//    public PageInfo findPageFullInfo(long pageId, long schemaId) {
-//        PageInfo pageInfo = this.findPageInfo(pageId);
-//        if (pageInfo == null) {
-//            return null;
-//        }
-//        List<PageDetailDto> pageDetail = findPageDetail(pageId);
-//        PageInfo pageFullInfo = new PageInfo();
-//        pageFullInfo.setLstPageDetail(pageDetail);
-//        return pageFullInfo;
-//    }
-
     public List<Long> findPageRefTables(long pageId) {
         List<PageDetailDto> lstPageDetail = findPageDetail(pageId);
         if (lstPageDetail == null || lstPageDetail.isEmpty()) {
@@ -229,15 +203,21 @@ public class PageService {
         }
         List<Long> lstResult = new ArrayList();
         for (PageDetailDto dto : lstPageDetail) {
+            //如果存在自定义的界面,则不再过滤
+            if (dto.getViewId().equals(DmConstants.DispType.CUSTOM_UI_ID)) {
+                return null;
+            }
             if (dto.getViewType() == Constants.PageViewType.reference) {
                 continue;
             } else if (dto.getViewType() == Constants.PageViewType.blockView) {
                 BlockViewer viewerInfo = SchemaHolder.getViewerInfo(dto.getViewId(), dto.getVersionCode());
                 TableInfo[] viewTables = viewerInfo.getViewTables();
-                for (int i = 0; i < viewTables.length; i++) {
-                    Long tableId = viewTables[i].getTableDto().getTableId();
-                    if (lstResult.indexOf(tableId) == -1) {
-                        lstResult.add(tableId);
+                if (viewTables != null) {
+                    for (int i = 0; i < viewTables.length; i++) {
+                        Long tableId = viewTables[i].getTableDto().getTableId();
+                        if (lstResult.indexOf(tableId) == -1) {
+                            lstResult.add(tableId);
+                        }
                     }
                 }
             } else if (dto.getViewType() == Constants.PageViewType.page) {
@@ -383,6 +363,12 @@ public class PageService {
         map.put("id", 1);
         map.put("code", "001");
         map.put("name", "视图");
+        map.put("type", "1");
+        result.add(map);
+        map = new HashMap<>();
+        map.put("id", 2);
+        map.put("code", "001000");
+        map.put("name", "自定义视图");
         map.put("type", "1");
         result.add(map);
         if (lstBlockDto != null && !lstBlockDto.isEmpty()) {

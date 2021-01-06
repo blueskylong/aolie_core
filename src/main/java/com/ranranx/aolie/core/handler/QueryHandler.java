@@ -38,7 +38,7 @@ public class QueryHandler<T extends QueryParam> extends BaseHandler<T> {
         List<Map<String, Object>> lstData = factory.getDataOperatorByKey(null).select(convertParam(param));
         HandleResult result = new HandleResult();
         result.setSuccess(true);
-        result.setLstData(lstData);
+        result.setData(lstData);
         return result;
     }
 

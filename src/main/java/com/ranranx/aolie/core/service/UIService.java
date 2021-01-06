@@ -5,7 +5,9 @@ import com.ranranx.aolie.core.common.Constants;
 import com.ranranx.aolie.core.common.IdGenerator;
 import com.ranranx.aolie.core.common.SessionUtils;
 import com.ranranx.aolie.core.datameta.datamodel.*;
-import com.ranranx.aolie.core.datameta.dto.*;
+import com.ranranx.aolie.core.datameta.dto.BlockViewDto;
+import com.ranranx.aolie.core.datameta.dto.ComponentDto;
+import com.ranranx.aolie.core.datameta.dto.TableDto;
 import com.ranranx.aolie.core.ds.dataoperator.DataOperatorFactory;
 import com.ranranx.aolie.core.ds.definition.*;
 import com.ranranx.aolie.core.exceptions.NotExistException;
@@ -102,11 +104,25 @@ public class UIService {
     @Cacheable(value = GROUP_NAME,
             key = KEY_VIEWER)
     public BlockViewer getViewerInfo(Long blockViewId, String version) {
+        if (blockViewId == 2) {
+            return createCustomViewInfo();
+        }
         BlockViewDto viewerDto = findViewerDto(blockViewId, version);
         if (viewerDto == null) {
             return null;
         }
         return new BlockViewer(viewerDto, findViewerComponents(blockViewId, version));
+    }
+
+    private BlockViewer createCustomViewInfo() {
+        BlockViewDto dto = new BlockViewDto();
+        dto.setVersionCode(SessionUtils.getLoginVersion());
+        dto.setBlockViewId(DmConstants.DispType.CUSTOM_UI_ID);
+        dto.setBlockViewName("自定义视图");
+        dto.setDefaultShowType((short) DmConstants.DispType.custom);
+        BlockViewer viewer = new BlockViewer(dto, null);
+
+        return viewer;
     }
 
     /**

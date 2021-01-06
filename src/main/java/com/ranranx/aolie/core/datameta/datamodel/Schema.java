@@ -1,5 +1,6 @@
 package com.ranranx.aolie.core.datameta.datamodel;
 
+import com.ranranx.aolie.core.common.CommonUtils;
 import com.ranranx.aolie.core.common.IdGenerator;
 import com.ranranx.aolie.core.datameta.dto.*;
 import com.ranranx.aolie.core.ds.dataoperator.DataSourceUtils;
@@ -284,6 +285,29 @@ public class Schema {
             if (tableColumnRelation.getTableFrom().getTableDto().getTableId() == table2 &&
                     tableColumnRelation.getTableTo().getTableDto().getTableId() == table1) {
                 return tableColumnRelation;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 根据表名取得数据源
+     *
+     * @param tableName
+     * @return
+     */
+    @Transient
+    public TableInfo findTableByName(String tableName) {
+        if (CommonUtils.isEmpty(tableName)) {
+            return null;
+        }
+        if (this.lstTable == null || lstTable.isEmpty()) {
+            return null;
+        }
+        tableName = tableName.toLowerCase();
+        for (TableInfo info : lstTable) {
+            if (tableName.equals(info.getTableDto().getTableName().toLowerCase())) {
+                return info;
             }
         }
         return null;

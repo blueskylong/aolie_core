@@ -59,7 +59,7 @@ public class InsertHandler<T extends InsertParam> extends BaseHandler<T> {
             Map<String, Object> map = new HashMap<>();
             map.put(Constants.ConstFieldName.CHANGE_KEYS_FEILD, keys);
             lstData.add(map);
-            result.setLstData(lstData);
+            result.setData(lstData);
             if (num == param.getLstRows().size()) {
                 result.setSuccess(true);
             }

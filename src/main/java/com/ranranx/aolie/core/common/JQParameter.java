@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ranranx.aolie.core.datameta.datamodel.BlockViewer;
 import com.ranranx.aolie.core.datameta.datamodel.Column;
 import com.ranranx.aolie.core.datameta.datamodel.SchemaHolder;
+import com.ranranx.aolie.core.datameta.datamodel.TableInfo;
 import com.ranranx.aolie.core.ds.definition.FieldOrder;
 import com.ranranx.aolie.core.ds.definition.QueryParamDefinition;
 import com.ranranx.aolie.core.exceptions.InvalidParamException;
@@ -51,7 +52,7 @@ public class JQParameter implements RequestParamHandler {
     }
 
     @Override
-    public QueryParamDefinition getQueryParamDefinition() throws Exception {
+    public QueryParamDefinition getQueryParamDefinition() {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         Map mapParam = request.getParameterMap();
         if (request.getMethod().equalsIgnoreCase("POST")) {
@@ -87,7 +88,7 @@ public class JQParameter implements RequestParamHandler {
 
     }
 
-    public QueryParam getQueryParam() throws Exception {
+    public QueryParam getQueryParam() {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         Map mapParam = request.getParameterMap();
         if (request.getMethod().equalsIgnoreCase("POST")) {
@@ -118,10 +119,54 @@ public class JQParameter implements RequestParamHandler {
         FieldOrder order = parseOrder(mapParam, blockViewer, needConvert);
         if (order != null) {
             queryParam.addOrder(order);
+        } else {
+            if (queryParam.getTable().length == 1) {
+                queryParam.addOrders(blockViewer.getDefaultOrder());
+            }
         }
         queryParam.setPage(parsePage(mapParam));
         return queryParam;
 
+    }
+
+    /**
+     * 取得指定数据表的查询参数
+     *
+     * @param dsId
+     * @param versionCode
+     * @return
+     */
+    public QueryParam getDsQueryParam(long dsId, String versionCode) {
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+        Map mapParam = request.getParameterMap();
+        if (request.getMethod().equalsIgnoreCase("POST")) {
+            mapParam = (Map) JSONUtils.parse(getPostData(request));
+        }
+
+        QueryParam queryParam = new QueryParam();
+        String search = getParamValue("_search", mapParam);
+        if (CommonUtils.isEmpty(search) || search.equals("true")) {
+            parseCriteria(getParamValue("filters", mapParam), queryParam.appendCriteria(),
+                    false);
+        }
+        String extFilter = getParamValue("extFilter", mapParam);
+        if (extFilter != null) {
+            System.out.println("---->" + getParamValue("extFilter", mapParam));
+            parseExtCriteria(extFilter, queryParam.appendCriteria(), false);
+        }
+
+        queryParam.setTable(new TableInfo[]{SchemaHolder.getTable(dsId, versionCode)});
+        //TODO 这里要增加表关系
+        FieldOrder order = parseDsOrder(mapParam, dsId, versionCode);
+        if (order != null) {
+            queryParam.addOrder(order);
+        } else {
+            if (queryParam.getTable().length == 1) {
+                queryParam.addOrders(queryParam.getTable()[0].getDefaultOrder());
+            }
+        }
+        queryParam.setPage(parsePage(mapParam));
+        return queryParam;
     }
 
     private static String getPostData(HttpServletRequest request) {
@@ -173,7 +218,7 @@ public class JQParameter implements RequestParamHandler {
         if (CommonUtils.isEmpty(field)) {
             return null;
         }
-        if (blockViewer.getBlockViewDto().getFieldToCamel() != null
+        if (blockViewer != null && blockViewer.getBlockViewDto().getFieldToCamel() != null
                 && blockViewer.getBlockViewDto().getFieldToCamel() == 1) {
             field = CommonUtils.convertToUnderline(field);
         }
@@ -183,6 +228,19 @@ public class JQParameter implements RequestParamHandler {
         order.setTableName(
                 SchemaHolder.getTable(blockViewer.getComponentByFieldName(field).getColumn().getColumnDto().getTableId(),
                         blockViewer.getBlockViewDto().getVersionCode()).getTableDto().getTableName());
+        order.setAsc(getParamValue("sord", mapParam).equals("asc"));
+        return order;
+    }
+
+    private FieldOrder parseDsOrder(Map mapParam, long dsId, String versionCode) {
+        String field = getParamValue("sidx", mapParam);
+        if (CommonUtils.isEmpty(field)) {
+            return null;
+        }
+
+        FieldOrder order = new FieldOrder();
+        order.setField(field);
+        order.setTableName(SchemaHolder.getTable(dsId, versionCode).getTableDto().getTableName());
         order.setAsc(getParamValue("sord", mapParam).equals("asc"));
         return order;
     }

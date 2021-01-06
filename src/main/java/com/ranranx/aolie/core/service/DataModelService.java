@@ -378,7 +378,7 @@ public class DataModelService {
 
     private ColumnDto createColumnDto(Map<String, Object> map) {
         ColumnDto dto = new ColumnDto();
-        dto.setFieldName(CommonUtils.getStringField(map, "COLUMN_NAME"));
+        dto.setFieldName(CommonUtils.getStringField(map, "COLUMN_NAME").toLowerCase());
         dto.setFieldType(CommonUtils.getStringField(map, "DATA_TYPE"));
         dto.setLength(CommonUtils.getIntegerField(map, "CHARACTER_MAXIMUM_LENGTH"));
         dto.setNullable("YES".equals(CommonUtils.getStringField(map, "IS_NULLABLE")) ? new Byte((byte) 1) : new Byte((byte) 0));

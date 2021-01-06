@@ -6,6 +6,7 @@ import com.ranranx.aolie.core.common.SessionUtils;
 import com.ranranx.aolie.core.datameta.dto.BlockViewDto;
 import com.ranranx.aolie.core.datameta.dto.ComponentDto;
 import com.ranranx.aolie.core.ds.definition.Field;
+import com.ranranx.aolie.core.ds.definition.FieldOrder;
 
 import java.beans.Transient;
 import java.util.ArrayList;
@@ -175,6 +176,24 @@ public class BlockViewer {
             }
         }
         return treeInfo;
+    }
+
+    @Transient
+    public List<FieldOrder> getDefaultOrder() {
+        if (lstComponent == null || lstComponent.isEmpty()) {
+            return null;
+        }
+        List<FieldOrder> lstOrder = new ArrayList<>();
+        int index = 1;
+        for (Component com : lstComponent) {
+            if (com.getComponentDto().getOrderType() != null) {
+                FieldOrder order = new FieldOrder(SchemaHolder.getTable(com.getColumn().getColumnDto().getTableId(),
+                        SessionUtils.getLoginVersion()).getTableDto().getTableName(), com.getColumn().getColumnDto().getFieldName()
+                        , com.getComponentDto().getOrderType() == Constants.OrderType.ASC, index++);
+                lstOrder.add(order);
+            }
+        }
+        return lstOrder;
     }
 
     public void setBlockViewDto(BlockViewDto blockViewDto) {

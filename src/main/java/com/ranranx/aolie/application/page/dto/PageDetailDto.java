@@ -17,6 +17,8 @@ public class PageDetailDto extends SchemaBaseDto {
     private Integer viewType;
     private Integer loadOnshow;
     private Integer initState;
+    private String customUi;
+    private String customParam;
 
     public Long getPageId() {
         return pageId;
@@ -105,5 +107,21 @@ public class PageDetailDto extends SchemaBaseDto {
 
     public void setViewId(Long viewId) {
         this.viewId = viewId;
+    }
+
+    public String getCustomUi() {
+        return customUi;
+    }
+
+    public void setCustomUi(String customUi) {
+        this.customUi = customUi;
+    }
+
+    public String getCustomParam() {
+        return customParam;
+    }
+
+    public void setCustomParam(String customParam) {
+        this.customParam = customParam;
     }
 }

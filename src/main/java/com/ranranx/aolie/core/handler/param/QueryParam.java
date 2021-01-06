@@ -112,6 +112,16 @@ public class QueryParam {
         this.lstOrder.add(order);
     }
 
+    public void addOrders(List<FieldOrder> order) {
+        if (order == null || order.isEmpty()) {
+            return;
+        }
+        if (this.lstOrder == null) {
+            this.lstOrder = new ArrayList<>();
+        }
+        this.lstOrder.addAll(order);
+    }
+
     /**
      * 增加过滤条件
      * TODO  这里的条件需要支持字段的表示方式 ,比如EQUALSTO第一个参数可以用字段信息

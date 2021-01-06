@@ -8,6 +8,7 @@ import com.ranranx.aolie.core.datameta.dto.FormulaDto;
 import com.ranranx.aolie.core.datameta.dto.ReferenceDto;
 import com.ranranx.aolie.core.datameta.dto.TableDto;
 import com.ranranx.aolie.core.ds.dataoperator.DataSourceUtils;
+import com.ranranx.aolie.core.ds.definition.FieldOrder;
 import com.ranranx.aolie.core.exceptions.InvalidConfigException;
 import com.ranranx.aolie.core.exceptions.NotExistException;
 
@@ -232,6 +233,7 @@ public class TableInfo {
      *
      * @return
      */
+    @Transient
     public String getKeyField() {
         if (CommonUtils.isNotEmpty(keyFieldName)) {
             return keyFieldName;
@@ -283,6 +285,33 @@ public class TableInfo {
 
     public void setLstReference(List<ReferenceDto> lstReference) {
         this.lstReference = lstReference;
+    }
+
+    @Transient
+    public List<FieldOrder> getDefaultOrder() {
+        if (this.lstColumn == null || this.lstColumn.isEmpty()) {
+            return null;
+        }
+        List<FieldOrder> lstOrder = new ArrayList<>();
+        for (Column column : this.lstColumn) {
+            if (Constants.FixColumnName.XH.equals(column.getColumnDto().getFieldName())) {
+                FieldOrder order = new FieldOrder();
+                order.setAsc(true);
+                order.setField(Constants.FixColumnName.XH);
+                order.setTableName(this.getTableDto().getTableName());
+                lstOrder.add(order);
+                break;
+            }
+            if (Constants.FixColumnName.LVL_CODE.equals(column.getColumnDto().getFieldName())) {
+                FieldOrder order = new FieldOrder();
+                order.setAsc(true);
+                order.setField(Constants.FixColumnName.LVL_CODE);
+                order.setTableName(this.getTableDto().getTableName());
+                lstOrder.add(order);
+                break;
+            }
+        }
+        return lstOrder;
     }
 
 }

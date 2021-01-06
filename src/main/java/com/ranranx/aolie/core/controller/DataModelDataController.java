@@ -92,5 +92,16 @@ public class DataModelDataController {
         return dmDataService.findTableRow(dsId, id, SessionUtils.getLoginVersion());
     }
 
+    /**
+     * 查询表的单行
+     *
+     * @param dsId
+     * @return
+     */
+    @RequestMapping("/findTableRows/{dsId}")
+    public HandleResult findTableRows(@PathVariable Long dsId, JQParameter queryParams) {
+        return dmDataService.findTableRows(dsId, queryParams);
+    }
+
 
 }

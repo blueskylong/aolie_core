@@ -139,8 +139,15 @@ public class Constants {
     /**
      * 默认业务方案ID
      */
-    public static final Long DEFAULT_BS_SCHEMA = new Long(2);
-
+    public static final Long DEFAULT_BS_SCHEMA = new Long(3);
+    /**
+     * 默认系统方案ID
+     */
+    public static final Long DEFAULT_SYS_SCHEMA = new Long(2);
+    /**
+     * 基础方案方案
+     */
+    public static final Long DEFAULT_DM_SCHEMA = new Long(1);
     /**
      * 全局引用方案
      */
@@ -164,6 +171,8 @@ public class Constants {
     public static class FixColumnName {
         /*版本号*/
         public static final String VERSION_CODE = "version_code";
+        public static final String XH = "xh";
+        public static final String LVL_CODE = "lvl_code";
     }
 
     /**
