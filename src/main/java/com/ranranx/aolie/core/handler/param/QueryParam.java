@@ -3,8 +3,10 @@ package com.ranranx.aolie.core.handler.param;
 import com.ranranx.aolie.core.datameta.datamodel.TableInfo;
 import com.ranranx.aolie.core.ds.definition.Field;
 import com.ranranx.aolie.core.ds.definition.FieldOrder;
+import com.ranranx.aolie.core.ds.definition.SqlExp;
 import com.ranranx.aolie.core.handler.param.condition.Criteria;
 
+import java.beans.Transient;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -41,11 +43,27 @@ public class QueryParam {
      * 分页信息  综合条件
      */
     private Page page;
+
+    private Class resultClass;
+
+    @javax.persistence.Transient
     /**
      * 排序字段  综合条件
      */
     private List<FieldOrder> lstOrder;
     private List<Field> fields;
+    /**
+     * 直接语句.暂时提供在复杂语句下使用.
+     */
+    private SqlExp sqlExp;
+
+    public SqlExp getSqlExp() {
+        return sqlExp;
+    }
+
+    public void setSqlExp(SqlExp sqlExp) {
+        this.sqlExp = sqlExp;
+    }
 
     public Long getViewId() {
         return viewId;
@@ -137,11 +155,21 @@ public class QueryParam {
         return criteria;
     }
 
+
     public List<Field> getFields() {
         return fields;
     }
 
     public void setFields(List<Field> fields) {
         this.fields = fields;
+    }
+
+    @Transient
+    public Class getResultClass() {
+        return resultClass;
+    }
+
+    public void setResultClass(Class resultClass) {
+        this.resultClass = resultClass;
     }
 }

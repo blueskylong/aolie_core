@@ -1,8 +1,13 @@
 package com.ranranx.aolie.core.handler;
 
 import com.ranranx.aolie.core.common.CommonUtils;
+import com.ranranx.aolie.core.common.Constants;
 import com.ranranx.aolie.core.exceptions.InvalidParamException;
 import com.ranranx.aolie.core.exceptions.NotExistException;
+import com.ranranx.aolie.core.handler.param.DeleteParam;
+import com.ranranx.aolie.core.handler.param.InsertParam;
+import com.ranranx.aolie.core.handler.param.QueryParam;
+import com.ranranx.aolie.core.handler.param.UpdateParam;
 import com.ranranx.aolie.core.interceptor.IOperInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -50,6 +55,27 @@ public class HandlerFactory {
         IDbHandler handler = this.getHandler(type, params);
         return handler.doHandle(params);
     }
+
+    public HandleResult handleQuery(QueryParam params) {
+        IDbHandler handler = this.getHandler(Constants.HandleType.TYPE_QUERY, params);
+        return handler.doHandle(params);
+    }
+
+    public HandleResult handleDelete(DeleteParam params) {
+        IDbHandler handler = this.getHandler(Constants.HandleType.TYPE_DELETE, params);
+        return handler.doHandle(params);
+    }
+
+    public HandleResult handleInsert(InsertParam params) {
+        IDbHandler handler = this.getHandler(Constants.HandleType.TYPE_INSERT, params);
+        return handler.doHandle(params);
+    }
+
+    public HandleResult handleUpdate(UpdateParam params) {
+        IDbHandler handler = this.getHandler(Constants.HandleType.TYPE_UPDATE, params);
+        return handler.doHandle(params);
+    }
+
 
     @PostConstruct
     public void afterInit() {

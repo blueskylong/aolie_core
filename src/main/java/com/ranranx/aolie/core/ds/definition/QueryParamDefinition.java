@@ -49,9 +49,23 @@ public class QueryParamDefinition {
         return lstOrder;
     }
 
+    /**
+     * 直接语句.暂时提供在复杂语句下使用.
+     */
+    private SqlExp sqlExp;
+
+    public SqlExp getSqlExp() {
+        return sqlExp;
+    }
+
+    public void setSqlExp(SqlExp sqlExp) {
+        this.sqlExp = sqlExp;
+    }
+
     public void setLstOrder(List<FieldOrder> lstOrder) {
         this.lstOrder = lstOrder;
     }
+
 
     public void addOrder(FieldOrder order) {
         if (this.lstOrder == null) {
@@ -253,5 +267,6 @@ public class QueryParamDefinition {
     public void setPage(Page page) {
         this.page = page;
     }
+
 }
 

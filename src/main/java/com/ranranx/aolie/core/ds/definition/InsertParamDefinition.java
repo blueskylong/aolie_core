@@ -28,6 +28,19 @@ public class InsertParamDefinition {
      */
     private boolean needConvertToUnderLine = false;
 
+    /**
+     * 直接语句.暂时提供在复杂语句下使用.
+     */
+    private SqlExp sqlExp;
+
+    public SqlExp getSqlExp() {
+        return sqlExp;
+    }
+
+    public void setSqlExp(SqlExp sqlExp) {
+        this.sqlExp = sqlExp;
+    }
+
     public boolean isNeedConvertToUnderLine() {
         return needConvertToUnderLine;
     }

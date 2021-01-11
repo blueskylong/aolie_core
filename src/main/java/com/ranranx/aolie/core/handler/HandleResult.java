@@ -2,6 +2,10 @@ package com.ranranx.aolie.core.handler;
 
 import com.ranranx.aolie.core.handler.param.Page;
 
+import java.beans.Transient;
+import java.util.List;
+import java.util.Map;
+
 /**
  * @Author xxl
  * @Description
@@ -92,6 +96,14 @@ public class HandleResult {
 
     public Object getData() {
         return data;
+    }
+
+    @Transient
+    public List<Map<String, Object>> getlstData() {
+        if (this.data instanceof List) {
+            return (List<Map<String, Object>>) this.data;
+        }
+        return null;
     }
 
     public void setData(Object data) {

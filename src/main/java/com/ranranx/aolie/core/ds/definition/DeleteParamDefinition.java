@@ -32,6 +32,19 @@ public class DeleteParamDefinition {
      */
     private Criteria criteria;
 
+    /**
+     * 直接语句.暂时提供在复杂语句下使用.
+     */
+    private SqlExp sqlExp;
+
+    public SqlExp getSqlExp() {
+        return sqlExp;
+    }
+
+    public void setSqlExp(SqlExp sqlExp) {
+        this.sqlExp = sqlExp;
+    }
+
     public List<Object> getIds() {
         return ids;
     }

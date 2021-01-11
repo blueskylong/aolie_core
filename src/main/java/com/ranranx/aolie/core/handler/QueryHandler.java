@@ -1,5 +1,6 @@
 package com.ranranx.aolie.core.handler;
 
+import com.ranranx.aolie.core.common.CommonUtils;
 import com.ranranx.aolie.core.common.Constants;
 import com.ranranx.aolie.core.datameta.datamodel.SchemaHolder;
 import com.ranranx.aolie.core.datameta.datamodel.TableColumnRelation;
@@ -11,6 +12,8 @@ import com.ranranx.aolie.core.handler.param.QueryParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -36,10 +39,33 @@ public class QueryHandler<T extends QueryParam> extends BaseHandler<T> {
 
         //TODO 这里需要将查询分解,合并
         List<Map<String, Object>> lstData = factory.getDataOperatorByKey(null).select(convertParam(param));
+
+        if (param.getResultClass() != null) {
+            lstData = CommonUtils.convertCamelAndToObject(lstData, param.getResultClass());
+        }
+
+
         HandleResult result = new HandleResult();
         result.setSuccess(true);
         result.setData(lstData);
         return result;
+    }
+
+    private static Class getGenericClass(QueryParam param) {
+        Class<? extends QueryParam> aClass = param.getClass();
+        if (!(aClass.getGenericSuperclass() instanceof ParameterizedType)) {
+            return null;
+        }
+        ParameterizedType type = (ParameterizedType) aClass.getGenericSuperclass();
+        if (type == null) {
+            return null;
+        }
+        Type[] tp = type.getActualTypeArguments();
+        if (tp == null || tp.length == 0) {
+            return null;
+        }
+        return tp[0].getClass();
+
     }
 
 
@@ -51,6 +77,10 @@ public class QueryHandler<T extends QueryParam> extends BaseHandler<T> {
      */
     private QueryParamDefinition convertParam(QueryParam param) {
         QueryParamDefinition paramDefinition = new QueryParamDefinition();
+        if (param.getSqlExp() != null) {
+            paramDefinition.setSqlExp(param.getSqlExp());
+            return paramDefinition;
+        }
         TableInfo[] table = param.getTable();
         List<String> lstTableName = new ArrayList<>();
 

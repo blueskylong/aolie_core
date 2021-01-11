@@ -228,6 +228,9 @@ public class PageService {
                             lstResult.add(tableId);
                         }
                     }
+                } else {
+                    //存在自定义的情况 ,就不再过滤
+                    return null;
                 }
             }
 

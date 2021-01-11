@@ -1,6 +1,7 @@
 package com.ranranx.aolie.core.handler.param;
 
 import com.ranranx.aolie.core.datameta.datamodel.TableInfo;
+import com.ranranx.aolie.core.ds.definition.SqlExp;
 import com.ranranx.aolie.core.handler.param.condition.Criteria;
 
 import java.util.List;
@@ -30,6 +31,18 @@ public class UpdateParam {
      * 是否只更新有值的列
      */
     private boolean isSelective = false;
+    /**
+     * 直接语句.暂时提供在复杂语句下使用.
+     */
+    private SqlExp sqlExp;
+
+    public SqlExp getSqlExp() {
+        return sqlExp;
+    }
+
+    public void setSqlExp(SqlExp sqlExp) {
+        this.sqlExp = sqlExp;
+    }
 
     /**
      * 更新的列信息

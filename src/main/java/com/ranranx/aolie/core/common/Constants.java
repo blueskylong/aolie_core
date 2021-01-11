@@ -222,4 +222,28 @@ public class Constants {
         public static final long versionCode = -120;
     }
 
+    /**
+     * 固定的几个权限资源
+     */
+    public static class DefaultRsIds {
+        public static final long role = 11;
+        public static final long menu = 12;
+        public static final long menuItem = 13;
+        public static final long organization = 14;
+    }
+
+    /**
+     * 固定的权限关系类型
+     */
+    public static class DefaultRsRelationIds {
+        /**
+         * 角色对菜单
+         */
+        public static final long roleToMenu = 1;
+        /**
+         * 角色对按钮
+         */
+        public static final long roleToButton = 2;
+    }
+
 }

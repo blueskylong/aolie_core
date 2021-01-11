@@ -52,6 +52,10 @@ public class MyBatisDataOperator implements IDataOperator {
      */
     @Override
     public List<Map<String, Object>> select(QueryParamDefinition queryParamDefinition) {
+        if (queryParamDefinition.getSqlExp() != null) {
+            DynamicDataSource.setDataSource(dsKey);
+            return mapper.select(queryParamDefinition.getSqlExp().getExecuteMap());
+        }
         //分析是单表查询还是多表查询
         if (isSingleTable(queryParamDefinition)) {
             return singleTableSelect(queryParamDefinition);
@@ -131,21 +135,21 @@ public class MyBatisDataOperator implements IDataOperator {
         Map<String, Object> mapParam = new HashMap<>();
         StringBuilder where = new StringBuilder();
 
-            if (queryParamDefinition.hasCriteria()) {
-                List<Criteria> lstCriteria = queryParamDefinition.getCriteria();
-                int index = 1;
-                for (Criteria criteria : lstCriteria) {
-                    String aWhere = criteria.getSqlWhere(mapParam, null, index++, false);
-                    if (!CommonUtils.isEmpty(aWhere)) {
-                        where.append(criteria.getAndOr()).append("  ").append(aWhere);
-                    }
+        if (queryParamDefinition.hasCriteria()) {
+            List<Criteria> lstCriteria = queryParamDefinition.getCriteria();
+            int index = 1;
+            for (Criteria criteria : lstCriteria) {
+                String aWhere = criteria.getSqlWhere(mapParam, null, index++, false);
+                if (!CommonUtils.isEmpty(aWhere)) {
+                    where.append(criteria.getAndOr()).append("  ").append(aWhere);
                 }
-                if (where.length() > 0) {
-                    where.replace(0, 4, "");
-                    where.insert(0, " where ");
-                }
-
             }
+            if (where.length() > 0) {
+                where.replace(0, 4, "");
+                where.insert(0, " where ");
+            }
+
+        }
 
         String orderExp = "";
         if (queryParamDefinition.getLstOrder() != null && !queryParamDefinition.getLstOrder().isEmpty()) {
@@ -193,7 +197,10 @@ public class MyBatisDataOperator implements IDataOperator {
      */
     @Override
     public int delete(DeleteParamDefinition deleteParamDefinition) {
-
+        if (deleteParamDefinition.getSqlExp() != null) {
+            DynamicDataSource.setDataSource(dsKey);
+            return mapper.delete(deleteParamDefinition.getSqlExp().getExecuteMap());
+        }
         //根据ID字段删除优先
         StringBuilder sb = new StringBuilder();
         Map<String, Object> mapParamValue = new HashMap<>();
@@ -223,6 +230,10 @@ public class MyBatisDataOperator implements IDataOperator {
      */
     @Override
     public int update(UpdateParamDefinition updateParamDefinition) {
+        if (updateParamDefinition.getSqlExp() != null) {
+            DynamicDataSource.setDataSource(dsKey);
+            return mapper.update(updateParamDefinition.getSqlExp().getExecuteMap());
+        }
         //更新有二种情况,1是一行数据,如果带了ID字段则使用ID过滤 ,如果没有则需要指定复杂条件.
         if (updateParamDefinition.getLstRows() == null || updateParamDefinition.getLstRows().isEmpty()) {
             return -1;
@@ -323,6 +334,10 @@ public class MyBatisDataOperator implements IDataOperator {
      */
     @Override
     public int insert(InsertParamDefinition insertParamDefinition) {
+        if (insertParamDefinition.getSqlExp() != null) {
+            DynamicDataSource.setDataSource(dsKey);
+            return mapper.insert(insertParamDefinition.getSqlExp().getExecuteMap());
+        }
         List<Map<String, Object>> lstRows = insertParamDefinition.getLstRows();
         if (lstRows == null || lstRows.isEmpty()) {
             return -1;

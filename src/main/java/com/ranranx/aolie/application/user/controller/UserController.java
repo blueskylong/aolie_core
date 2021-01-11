@@ -43,4 +43,54 @@ public class UserController {
     public HandleResult saveUserRight(@PathVariable long userId, @RequestBody Map<Long, List<Long>> mapNewUserRight) {
         return service.saveUserRight(userId, SessionUtils.getLoginVersion(), mapNewUserRight);
     }
+
+    /**
+     * 查询菜单和按钮,组成一个树
+     *
+     * @return
+     */
+    @GetMapping("/findMenuAndButton")
+    public HandleResult findMenuAndButton() {
+        return service.findMenuAndButton();
+    }
+
+    /**
+     * 查询一权限关系数据
+     *
+     * @param rrId     权限关系ID
+     * @param sourceId 主权限的ID
+     * @return
+     */
+    @GetMapping("/findRightRelationDetail/{rrId}/{sourceId}")
+    public HandleResult findRightRelationDetail(@PathVariable long rrId, @PathVariable long sourceId) {
+        return service.findRightRelationDetail(rrId, sourceId, SessionUtils.getLoginVersion());
+    }
+
+    /**
+     * 查询一权限关系数据
+     *
+     * @param sourceRsId 源权限ID
+     * @param destRsId   目标权限 ID
+     * @param sourceId   源权限的ID值
+     * @return
+     */
+    @GetMapping("/findRsDetail/{sourceRsId}/{destRsId}/{sourceId}")
+    public HandleResult findRightRelationDetail(@PathVariable long sourceRsId,
+                                                @PathVariable long destRsId,
+                                                @PathVariable long sourceId) {
+        return service.findRightRelationDetail(sourceRsId, destRsId, sourceId, SessionUtils.getLoginVersion());
+    }
+
+    /**
+     * @param rsSource                主资源
+     * @param sourceId                主权限定义ID
+     * @param destNewRsIdAndDetailIds 从权限定义ID 及权限数据ID
+     * @return
+     */
+    @PostMapping("/saveRightRelationDetails/{rsSource}/{sourceId}")
+    public HandleResult saveRightRelationDetails(@PathVariable long rsSource, @PathVariable long sourceId,
+                                                 @RequestBody Map<Long, List<Long>> destNewRsIdAndDetailIds) {
+        return service.saveRightRelationDetails(rsSource, sourceId,
+                destNewRsIdAndDetailIds, SessionUtils.getLoginVersion());
+    }
 }
