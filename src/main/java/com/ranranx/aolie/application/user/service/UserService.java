@@ -2,6 +2,7 @@ package com.ranranx.aolie.application.user.service;
 
 import com.ranranx.aolie.application.user.dto.RightRelationDetailDto;
 import com.ranranx.aolie.application.user.dto.RightRelationDto;
+import com.ranranx.aolie.application.user.dto.RightSourceDto;
 import com.ranranx.aolie.core.common.CommonUtils;
 import com.ranranx.aolie.core.common.Constants;
 import com.ranranx.aolie.core.common.SessionUtils;
@@ -17,6 +18,7 @@ import com.ranranx.aolie.core.handler.HandlerFactory;
 import com.ranranx.aolie.core.handler.param.DeleteParam;
 import com.ranranx.aolie.core.handler.param.InsertParam;
 import com.ranranx.aolie.core.handler.param.QueryParam;
+import com.ranranx.aolie.core.handler.param.condition.Criteria;
 import com.ranranx.aolie.core.service.DmDataService;
 import com.ranranx.aolie.core.tools.SqlLoader;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -240,8 +242,10 @@ public class UserService {
         QueryParam param = new QueryParam();
         param.setTable(new TableInfo[]{tableInfo});
         param.setResultClass(RightRelationDetailDto.class);
-        param.appendCriteria().andEqualTo("rr_id", rrId)
-                .andEqualTo("id_source", sourceId);
+        Criteria criteria = param.appendCriteria().andEqualTo("rr_id", rrId);
+        if (sourceId >= 0) {
+            criteria.andEqualTo("id_source", sourceId);
+        }
         return handlerFactory.handleQuery(param);
     }
 
@@ -307,6 +311,67 @@ public class UserService {
                 throw new IllegalOperatorException(oneResult.getErr());
             }
             result.setChangeNum(result.getChangeNum() + oneResult.getChangeNum());
+        }
+        return result;
+    }
+
+    /**
+     * 保存权限关系
+     *
+     * @param rrId
+     * @param destNewIds
+     * @param versionCode
+     * @return
+     */
+    @Transactional(readOnly = false)
+    public HandleResult saveRightRelationDetailsByRrId(long rrId, Map<Long, List<Long>> destNewIds, String versionCode) {
+        HandleResult existDetail = findRightRelationDetail(rrId, -1, versionCode);
+        List<RightRelationDetailDto> lstDto = (List<RightRelationDetailDto>) existDetail.getData();
+        List<Object> toDelete = new ArrayList<>();
+        if (destNewIds == null) {
+            destNewIds = new HashMap<>();
+        }
+        long targetId, sourceId;
+        if (lstDto != null && !lstDto.isEmpty()) {
+            for (RightRelationDetailDto dto : lstDto) {
+                targetId = dto.getIdTarget();
+                sourceId = dto.getIdSource();
+                //如果新的不存在,则要删除
+                if (!destNewIds.containsKey(sourceId) ||
+                        (destNewIds.get(sourceId) != null && destNewIds.get(sourceId).indexOf(targetId) == -1)) {
+                    toDelete.add(dto.getRrDetailId());
+                } else if (destNewIds.containsKey(sourceId) && destNewIds.get(sourceId) != null && destNewIds.get(sourceId).indexOf(targetId) != -1) {
+                    //如果有则在列表中删除
+                    destNewIds.get(sourceId).remove(targetId);
+                }
+            }
+
+        }
+        HandleResult result = HandleResult.success(0);
+        //如果删除的不是空,则去删除
+        if (!toDelete.isEmpty()) {
+            HandleResult deleteResult = deleteRrDetail(rrId, toDelete, versionCode);
+            if (!deleteResult.isSuccess()) {
+                return deleteResult;
+            }
+            result.setChangeNum(deleteResult.getChangeNum());
+        }
+        if (!destNewIds.isEmpty()) {
+            Iterator<Map.Entry<Long, List<Long>>> iterator = destNewIds.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Map.Entry<Long, List<Long>> entry = iterator.next();
+                sourceId = entry.getKey();
+                List<Long> lstDest = entry.getValue();
+                if (lstDest == null || lstDest.isEmpty()) {
+                    continue;
+                }
+                HandleResult insertResult = insertRrDetail(rrId, sourceId, lstDest, versionCode);
+                if (!insertResult.isSuccess()) {
+                    throw new IllegalOperatorException(insertResult.getErr());
+                }
+                result.setChangeNum(result.getChangeNum() + insertResult.getChangeNum());
+            }
+
         }
         return result;
     }
@@ -387,4 +452,22 @@ public class UserService {
         param.setObjects(lstDto, Constants.DEFAULT_SYS_SCHEMA);
         return handlerFactory.handleInsert(param);
     }
+
+    /**
+     * 根据权限资源ID,查询权限资源全信息
+     *
+     * @param lstId
+     * @param versionCode
+     * @return
+     */
+    public HandleResult findRightResources(List<Long> lstId, String versionCode) {
+        if (lstId == null || lstId.isEmpty()) {
+            return null;
+        }
+        QueryParam param = new QueryParam();
+        param.setTableDtos(Constants.DEFAULT_SYS_SCHEMA, versionCode, RightSourceDto.class);
+        param.appendCriteria().andIn("rs_id", lstId);
+        return handlerFactory.handleQuery(param);
+    }
+
 }

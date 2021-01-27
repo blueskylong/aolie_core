@@ -19,6 +19,7 @@ public class PageDetailDto extends SchemaBaseDto {
     private Integer initState;
     private String customUi;
     private String customParam;
+    private Long relationDs;
 
     public Long getPageId() {
         return pageId;
@@ -123,5 +124,13 @@ public class PageDetailDto extends SchemaBaseDto {
 
     public void setCustomParam(String customParam) {
         this.customParam = customParam;
+    }
+
+    public Long getRelationDs() {
+        return relationDs;
+    }
+
+    public void setRelationDs(Long relationDs) {
+        this.relationDs = relationDs;
     }
 }

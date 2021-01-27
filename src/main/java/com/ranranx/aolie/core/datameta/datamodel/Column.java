@@ -77,8 +77,7 @@ public class Column {
     public boolean isNumberColumn() {
         String fieldType = this.columnDto.getFieldType();
         return fieldType.equals(DmConstants.FieldType.DECIMAL)
-                || fieldType.equals(DmConstants.FieldType.INT)
-                || fieldType.equals(DmConstants.FieldType.SMALLINT);
+                || fieldType.equals(DmConstants.FieldType.INT);
 
     }
 }

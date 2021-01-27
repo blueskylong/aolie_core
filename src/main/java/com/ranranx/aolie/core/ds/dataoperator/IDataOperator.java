@@ -9,6 +9,7 @@ import com.ranranx.aolie.core.ds.definition.UpdateParamDefinition;
 import com.ranranx.aolie.core.exceptions.DataInvalidException;
 import com.ranranx.aolie.core.exceptions.InvalidException;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +20,8 @@ import java.util.Map;
  * @Version V1.0
  **/
 public interface IDataOperator {
+    final Map<String, String> mapMysqlFieldTypeRelation = new HashMap<>();
+
     /**
      * 默认的语句参数的KEY(键名)
      */
@@ -137,4 +140,10 @@ public interface IDataOperator {
      */
     void setDto(DataOperatorDto dto);
 
+    /**
+     * 转换数据库类型到系统
+     * @param colType
+     * @return
+     */
+    String convertColType(String colType);
 }

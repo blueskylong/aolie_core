@@ -24,7 +24,7 @@ public class DtoGenerator {
     }
 
     public static void main(String[] args) {
-        DTOHelper dto = new DTOHelper("com.ranranx.aolie.application.user.dto", "aulie_s_user_right");
+        DTOHelper dto = new DTOHelper("com.ranranx.aolie.application.user.dto", "aolie_s_right_resource");
 
         try {
             dto.createDto();

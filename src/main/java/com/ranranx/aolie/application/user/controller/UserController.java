@@ -93,4 +93,29 @@ public class UserController {
         return service.saveRightRelationDetails(rsSource, sourceId,
                 destNewRsIdAndDetailIds, SessionUtils.getLoginVersion());
     }
+
+    /**
+     * 根据权限资源ID,查询权限资源全信息
+     *
+     * @param lstId
+     * @return
+     */
+    @PostMapping("/findRightResources")
+    public HandleResult findRightResources(@RequestBody List<Long> lstId) {
+        return service.findRightResources(lstId, SessionUtils.getLoginVersion());
+    }
+
+    /**
+     * 保存权限关系
+     *
+     * @param rrId
+     * @param destNewIds
+     * @return
+     */
+    @PostMapping("/saveRightRelationDetailsByRrId/{rrId}")
+    public HandleResult saveRightRelationDetailsByRrId(@PathVariable long rrId,
+                                                       @RequestBody Map<Long, List<Long>> destNewIds) {
+        return service.saveRightRelationDetailsByRrId(rrId, destNewIds, SessionUtils.getLoginVersion());
+    }
+
 }

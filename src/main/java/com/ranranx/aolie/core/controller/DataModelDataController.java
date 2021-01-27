@@ -46,16 +46,7 @@ public class DataModelDataController {
      */
     @PostMapping("/saveRows/{dsId}")
     public HandleResult saveRows(@RequestBody List<Map<String, Object>> rows, @PathVariable Long dsId) throws Exception {
-
-//        try {
         return dmDataService.saveRows(rows, dsId);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            HandleResult result = new HandleResult();
-//            result.setErr(e.getMessage());
-//            return result;
-//        }
-
     }
 
     /**
@@ -102,6 +93,4 @@ public class DataModelDataController {
     public HandleResult findTableRows(@PathVariable Long dsId, JQParameter queryParams) {
         return dmDataService.findTableRows(dsId, queryParams);
     }
-
-
 }

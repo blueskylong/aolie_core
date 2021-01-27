@@ -1,9 +1,12 @@
 package com.ranranx.aolie.core.handler.param;
 
+import com.ranranx.aolie.core.common.CommonUtils;
+import com.ranranx.aolie.core.datameta.datamodel.SchemaHolder;
 import com.ranranx.aolie.core.datameta.datamodel.TableInfo;
 import com.ranranx.aolie.core.ds.definition.Field;
 import com.ranranx.aolie.core.ds.definition.FieldOrder;
 import com.ranranx.aolie.core.ds.definition.SqlExp;
+import com.ranranx.aolie.core.exceptions.InvalidException;
 import com.ranranx.aolie.core.handler.param.condition.Criteria;
 
 import java.beans.Transient;
@@ -112,6 +115,25 @@ public class QueryParam {
 
     public void setTable(TableInfo[] table) {
         this.table = table;
+    }
+
+    /**
+     * 设置DTO代替表名
+     *
+     * @param lstClass
+     */
+    public void setTableDtos(Long schemaId, String version, Class... lstClass) {
+        this.table = new TableInfo[lstClass.length];
+        String tableName;
+        int index = 0;
+        for (Class clazz : lstClass) {
+            tableName = CommonUtils.getTableName(clazz);
+            if (CommonUtils.isEmpty(tableName)) {
+                throw new InvalidException("指定的类没有@Table注解");
+
+            }
+            table[index++] = SchemaHolder.findTableByTableName(tableName, schemaId, version);
+        }
     }
 
     public Page getPage() {

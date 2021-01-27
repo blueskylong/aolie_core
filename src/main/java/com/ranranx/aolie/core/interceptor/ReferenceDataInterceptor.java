@@ -55,13 +55,13 @@ public class ReferenceDataInterceptor implements IOperInterceptor {
             String versionCode;
             if (param instanceof DeleteParam) {
                 tableName = ((DeleteParam) param).getTable().getTableDto().getTableName();
-                versionCode = ((DeleteParam) param).getTable().getTableDto().getTableName();
+                versionCode = ((DeleteParam) param).getTable().getTableDto().getVersionCode();
             } else if (param instanceof InsertParam) {
                 tableName = ((InsertParam) param).getTable().getTableDto().getTableName();
-                versionCode = ((InsertParam) param).getTable().getTableDto().getTableName();
+                versionCode = ((InsertParam) param).getTable().getTableDto().getVersionCode();
             } else if (param instanceof UpdateParam) {
                 tableName = ((UpdateParam) param).getTable().getTableDto().getTableName();
-                versionCode = ((UpdateParam) param).getTable().getTableDto().getTableName();
+                versionCode = ((UpdateParam) param).getTable().getTableDto().getVersionCode();
             } else {
                 return null;
             }

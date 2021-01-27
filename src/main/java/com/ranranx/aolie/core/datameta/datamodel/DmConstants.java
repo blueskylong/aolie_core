@@ -8,13 +8,12 @@ package com.ranranx.aolie.core.datameta.datamodel;
  **/
 public class DmConstants {
     public static final class FieldType {
-        public static final String INT = "int";
-        public static final String VARCHAR = "varchar";
-        public static final String DATETIME = "datetime";
-        public static final String TEXT = "text";
-        public static final String BINARY = "binary";
-        public static final String DECIMAL = "decimal";
-        public static final String SMALLINT = "smallint";
+        public static final String INT = "2";
+        public static final String VARCHAR = "1";
+        public static final String DATETIME = "10";
+        public static final String TEXT = "20";
+        public static final String BINARY = "30";
+        public static final String DECIMAL = "4";
     }
 
     public static final class DispType {

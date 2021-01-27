@@ -11,6 +11,7 @@ import com.ranranx.aolie.core.ds.dataoperator.DataOperatorFactory;
 import com.ranranx.aolie.core.ds.definition.*;
 import com.ranranx.aolie.core.exceptions.InvalidParamException;
 import com.ranranx.aolie.core.exceptions.NotExistException;
+import com.ranranx.aolie.core.handler.HandleResult;
 import com.ranranx.aolie.core.handler.param.condition.Criteria;
 import com.ranranx.aolie.core.interfaces.IReferenceDataFilter;
 import com.ranranx.aolie.core.runtime.GlobalParameterService;
@@ -355,6 +356,8 @@ public class DataModelService {
 
     /**
      * 查询一张表的字段信息,并生成DTO
+     * <p>
+     * TODO 这里只提供了MySql的生成方式
      *
      * @param tableName
      * @return
@@ -379,7 +382,7 @@ public class DataModelService {
     private ColumnDto createColumnDto(Map<String, Object> map) {
         ColumnDto dto = new ColumnDto();
         dto.setFieldName(CommonUtils.getStringField(map, "COLUMN_NAME").toLowerCase());
-        dto.setFieldType(CommonUtils.getStringField(map, "DATA_TYPE"));
+        dto.setFieldType(factory.getDefaultDataOperator().convertColType(CommonUtils.getStringField(map, "DATA_TYPE")));
         dto.setLength(CommonUtils.getIntegerField(map, "CHARACTER_MAXIMUM_LENGTH"));
         dto.setNullable("YES".equals(CommonUtils.getStringField(map, "IS_NULLABLE")) ? new Byte((byte) 1) : new Byte((byte) 0));
         dto.setDefaultValue(CommonUtils.getStringField(map, "COLUMN_DEFAULT"));
@@ -900,5 +903,6 @@ public class DataModelService {
         deleteParamDefinition.getCriteria().andEqualTo("version_code", version);
         factory.getDefaultDataOperator().delete(deleteParamDefinition);
     }
+
 
 }

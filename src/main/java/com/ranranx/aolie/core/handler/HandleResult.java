@@ -99,7 +99,7 @@ public class HandleResult {
     }
 
     @Transient
-    public List<Map<String, Object>> getlstData() {
+    public List<Map<String, Object>> getLstData() {
         if (this.data instanceof List) {
             return (List<Map<String, Object>>) this.data;
         }

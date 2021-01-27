@@ -2,6 +2,7 @@ package com.ranranx.aolie.core.controller;
 
 import com.ranranx.aolie.core.common.CommonUtils;
 import com.ranranx.aolie.core.common.SessionUtils;
+import com.ranranx.aolie.core.datameta.datamodel.Reference;
 import com.ranranx.aolie.core.datameta.datamodel.Schema;
 import com.ranranx.aolie.core.datameta.datamodel.SchemaHolder;
 import com.ranranx.aolie.core.datameta.dto.*;
@@ -150,7 +151,11 @@ public class DataModelController {
 
     @GetMapping("/getReferenceDto/{referenceId}")
     public ReferenceDto getReferenceDto(@PathVariable Long referenceId) {
-        return SchemaHolder.getReference(referenceId, SessionUtils.getLoginVersion()).getReferenceDto();
+        Reference reference = SchemaHolder.getReference(referenceId, SessionUtils.getLoginVersion());
+        if (reference == null) {
+            return null;
+        }
+        return reference.getReferenceDto();
     }
 
     /**
@@ -163,5 +168,6 @@ public class DataModelController {
         service.saveReference(lstDto);
         return HandleResult.success(1);
     }
+
 
 }

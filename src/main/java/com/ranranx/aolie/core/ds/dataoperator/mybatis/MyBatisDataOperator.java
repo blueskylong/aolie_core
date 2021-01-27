@@ -2,6 +2,7 @@ package com.ranranx.aolie.core.ds.dataoperator.mybatis;
 
 import com.ranranx.aolie.core.common.CommonUtils;
 import com.ranranx.aolie.core.common.SqlTools;
+import com.ranranx.aolie.core.datameta.datamodel.DmConstants;
 import com.ranranx.aolie.core.datameta.dto.DataOperatorDto;
 import com.ranranx.aolie.core.ds.dataoperator.DataSourceUtils;
 import com.ranranx.aolie.core.ds.dataoperator.IDataOperator;
@@ -429,5 +430,29 @@ public class MyBatisDataOperator implements IDataOperator {
             return mapper.insert(mapParam);
         }
         return mapper.update(mapParam);
+    }
+
+
+    @Override
+    public String convertColType(String colType) {
+        if (mapMysqlFieldTypeRelation.containsKey(colType)) {
+            return mapMysqlFieldTypeRelation.get(colType);
+
+        }
+        return DmConstants.FieldType.VARCHAR;
+    }
+
+    static {
+        mapMysqlFieldTypeRelation.put("varchar", DmConstants.FieldType.VARCHAR);
+        mapMysqlFieldTypeRelation.put("char", DmConstants.FieldType.VARCHAR);
+        mapMysqlFieldTypeRelation.put("int", DmConstants.FieldType.INT);
+        mapMysqlFieldTypeRelation.put("smallint", DmConstants.FieldType.INT);
+        mapMysqlFieldTypeRelation.put("tinyint", DmConstants.FieldType.INT);
+        mapMysqlFieldTypeRelation.put("bigint", DmConstants.FieldType.INT);
+        mapMysqlFieldTypeRelation.put("decimal", DmConstants.FieldType.DECIMAL);
+        mapMysqlFieldTypeRelation.put("float", DmConstants.FieldType.DECIMAL);
+        mapMysqlFieldTypeRelation.put("datetime", DmConstants.FieldType.DATETIME);
+        mapMysqlFieldTypeRelation.put("text", DmConstants.FieldType.TEXT);
+        mapMysqlFieldTypeRelation.put("binary", DmConstants.FieldType.BINARY);
     }
 }
