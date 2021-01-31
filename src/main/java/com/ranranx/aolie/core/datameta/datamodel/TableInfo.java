@@ -3,6 +3,8 @@ package com.ranranx.aolie.core.datameta.datamodel;
 import com.ranranx.aolie.core.common.CommonUtils;
 import com.ranranx.aolie.core.common.Constants;
 import com.ranranx.aolie.core.common.IdGenerator;
+import com.ranranx.aolie.core.datameta.datamodel.validator.IValidator;
+import com.ranranx.aolie.core.datameta.datamodel.validator.ValidatorCenter;
 import com.ranranx.aolie.core.datameta.dto.ColumnDto;
 import com.ranranx.aolie.core.datameta.dto.FormulaDto;
 import com.ranranx.aolie.core.datameta.dto.ReferenceDto;
@@ -33,6 +35,10 @@ public class TableInfo {
     private List<Column> lstKeyColumn;
 
     private String keyFieldName;
+    /**
+     * 验证器
+     */
+    private ValidatorCenter validatorCenter;
 
     public TableInfo() {
 
@@ -86,6 +92,50 @@ public class TableInfo {
             }
         });
         return lstKeyColumn;
+    }
+
+    /**
+     * 根据字段标题查询字段信息,这里注意的是,字段标题不一定唯一
+     *
+     * @return
+     */
+    @Transient
+    public Column findColumnByColTitle(String title) {
+        if (CommonUtils.isEmpty(title)) {
+            return null;
+        }
+        if (this.lstColumn == null || this.lstColumn.isEmpty()) {
+            return null;
+        }
+        for (Column column : this.lstColumn) {
+            if (column.getColumnDto().getTitle().equals(title)) {
+                return column;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * 根据字段名查询字段信息
+     *
+     * @return
+     */
+    @Transient
+    public Column findColumnByName(String fieldName) {
+        if (CommonUtils.isEmpty(fieldName)) {
+            return null;
+        }
+        if (this.lstColumn == null || this.lstColumn.isEmpty()) {
+            return null;
+        }
+        for (Column column : this.lstColumn) {
+            if (column.getColumnDto().getFieldName().equals(fieldName)) {
+                return column;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -312,6 +362,16 @@ public class TableInfo {
             }
         }
         return lstOrder;
+    }
+
+    @Transient
+    public ValidatorCenter getValidatorCenter(List<IValidator> lstValidator) {
+        if (this.validatorCenter != null) {
+            return this.validatorCenter;
+        }
+        this.validatorCenter = new ValidatorCenter(this);
+        this.validatorCenter.setValidators(lstValidator);
+        return this.validatorCenter;
     }
 
 }

@@ -27,4 +27,31 @@ public class DmConstants {
         public static final int custom = 9;//自定义面板
     }
 
+
+    /**
+     * 公式元素类型
+     */
+    public static final class FormulaElementType {
+        public static final int logic = 100;//逻辑运算符,如: and  or
+        public static final int compare = 200;//比较符 如:> <
+        public static final int mathOperator = 300; //数学符号, 如 +-
+        public static final int bracket = 500;//括号
+        public static final int column = 800;//字段
+        public static final int sysparam = 900;//系统参数
+        public static final int constant = 1000;//常量,如"xxx"
+        public static final int error = 9999;//错误类型
+    }
+
+    /**
+     * 固定系统参数
+     */
+    public static final class GlobalParamsIds {
+        public static final int userId = 9991;
+        public static final int roleId = 9992;
+        public static final int version = 9995;
+        public static final int userName = 9999;
+        public static final int userBelong = 9998;
+        public static final int userAccount = 9996;
+    }
+
 }

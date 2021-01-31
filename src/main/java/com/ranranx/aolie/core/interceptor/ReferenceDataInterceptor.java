@@ -1,5 +1,6 @@
 package com.ranranx.aolie.core.interceptor;
 
+import com.ranranx.aolie.core.annotation.DbOperInterceptor;
 import com.ranranx.aolie.core.common.CommonUtils;
 import com.ranranx.aolie.core.common.Constants;
 import com.ranranx.aolie.core.datameta.datamodel.SchemaHolder;
@@ -14,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
-import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.List;
@@ -26,7 +26,7 @@ import java.util.Map;
  * @Date 2020/12/21 21:08
  * @Version V0.0.1
  **/
-@Component
+@DbOperInterceptor
 public class ReferenceDataInterceptor implements IOperInterceptor {
     @Autowired
     private CacheManager cacheManager;
@@ -44,12 +44,14 @@ public class ReferenceDataInterceptor implements IOperInterceptor {
     }
 
     @Override
-    public HandleResult beforeOper(Object param) throws InvalidException {
+    public HandleResult beforeOper(Object param, String handleType,
+                                   Map<String, Object> extendData) throws InvalidException {
         return null;
     }
 
     @Override
-    public HandleResult afterOper(Object param, HandleResult result) {
+    public HandleResult afterOper(Object param, String handleType,
+                                  Map<String, Object> extendData, HandleResult result) {
         if (result.isSuccess()) {
             String tableName;
             String versionCode;
@@ -76,7 +78,8 @@ public class ReferenceDataInterceptor implements IOperInterceptor {
     }
 
     @Override
-    public HandleResult beforeReturn(Object param, HandleResult handleResult) {
+    public HandleResult beforeReturn(Object param, String handleType,
+                                     Map<String, Object> extendData, HandleResult handleResult) {
         return null;
     }
 

@@ -177,6 +177,18 @@ public class QueryParam {
         return criteria;
     }
 
+    /**
+     * 增加过滤条件
+     *
+     * @param criteria
+     */
+    public void addCriteria(Criteria criteria) {
+        if (lstCriteria == null) {
+            lstCriteria = new ArrayList<>();
+        }
+        lstCriteria.add(criteria);
+    }
+
 
     public List<Field> getFields() {
         return fields;

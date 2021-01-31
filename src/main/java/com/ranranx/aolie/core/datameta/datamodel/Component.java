@@ -17,6 +17,14 @@ public class Component {
         this.column = column;
     }
 
+    /**
+     * 是不是数字列
+     */
+    public boolean isNumberColumn() {
+        return this.column.isNumberColumn();
+    }
+
+
     private ComponentDto componentDto;
     /**
      * 对应的列设置

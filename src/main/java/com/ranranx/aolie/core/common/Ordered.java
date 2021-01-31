@@ -7,12 +7,14 @@ package com.ranranx.aolie.core.common;
  * @Version V0.0.1
  **/
 public interface Ordered {
+    int BASE_ORDER = 3000;
+
     /**
      * 取得顺序
      *
      * @return
      */
     default int getOrder() {
-        return 3000;
+        return BASE_ORDER;
     }
 }

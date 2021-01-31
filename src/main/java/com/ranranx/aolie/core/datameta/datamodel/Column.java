@@ -1,6 +1,7 @@
 package com.ranranx.aolie.core.datameta.datamodel;
 
 import com.ranranx.aolie.core.datameta.dto.ColumnDto;
+import com.ranranx.aolie.core.ds.definition.Field;
 
 import java.beans.Transient;
 import java.util.List;
@@ -80,4 +81,5 @@ public class Column {
                 || fieldType.equals(DmConstants.FieldType.INT);
 
     }
+
 }

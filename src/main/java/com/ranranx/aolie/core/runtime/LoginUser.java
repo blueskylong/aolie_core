@@ -1,5 +1,10 @@
 package com.ranranx.aolie.core.runtime;
 
+import com.ranranx.aolie.core.common.SystemParam;
+
+import java.beans.Transient;
+import java.util.Map;
+
 /**
  * @Author xxl
  * @Description
@@ -16,6 +21,8 @@ public class LoginUser {
     private Integer userType;
     private Long belongOrg;
     private String belongOrgCode;
+
+    private Map<String, SystemParam> params;
 
     public Long getUserId() {
         return userId;
@@ -87,5 +94,14 @@ public class LoginUser {
 
     public void setBelongOrgCode(String belongOrgCode) {
         this.belongOrgCode = belongOrgCode;
+    }
+
+    @Transient
+    public Map<String, SystemParam> getParams() {
+        return params;
+    }
+
+    public void setParams(Map<String, SystemParam> params) {
+        this.params = params;
     }
 }

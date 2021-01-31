@@ -10,7 +10,9 @@ import com.ranranx.aolie.core.interfaces.SchemaMessageSendHandler;
 
 import java.beans.Transient;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author xxl
@@ -49,6 +51,15 @@ public class Schema {
      * 所有的引用信息
      */
     private List<Reference> lstReference;
+
+    /**
+     * tableId 对约束
+     */
+    private Map<String, List<Constraint>> mapTableConstraint;
+    /**
+     * colId 对约束
+     */
+    private Map<String, List<Constraint>> mapColumnConstraint;
 
     @Transient
     public List<TableDto> getTableDtos() {
@@ -311,5 +322,61 @@ public class Schema {
             }
         }
         return null;
+    }
+
+    /**
+     * 根据表名取得数据源
+     *
+     * @return
+     */
+    @Transient
+    public TableInfo findTableByTitle(String tableTitle) {
+        if (CommonUtils.isEmpty(tableTitle)) {
+            return null;
+        }
+        if (this.lstTable == null || lstTable.isEmpty()) {
+            return null;
+        }
+        for (TableInfo info : lstTable) {
+            if (tableTitle.equals(info.getTableDto().getTitle())) {
+                return info;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 取得指定列的约束
+     *
+     * @param colId
+     */
+    @Transient
+    public List<Constraint> getColumnConstraints(long colId) {
+        if (this.mapColumnConstraint == null) {
+            this.initMapConstraints();
+        }
+        return this.mapColumnConstraint.get(colId + "");
+    }
+
+    /**
+     * 只初始化表内的约束
+     */
+    private void initMapConstraints() {
+        this.mapTableConstraint = new HashMap<>();
+        this.mapColumnConstraint = new HashMap<>();
+        if (this.lstConstraint != null) {
+            for (Constraint constraint : this.lstConstraint) {
+                List<Long> lstRefTable = constraint.getLstRefTable();
+                List<Long> lstRefColumn = constraint.getLstRefColumn();
+                if (lstRefTable != null && !lstRefTable.isEmpty()) {
+                    for (Long tableId : lstRefTable) {
+                        CommonUtils.addMapListValue(this.mapTableConstraint, tableId.toString(), constraint);
+                    }
+                    for (Long columnId : lstRefColumn) {
+                        CommonUtils.addMapListValue(this.mapColumnConstraint, columnId.toString(), constraint);
+                    }
+                }
+            }
+        }
     }
 }

@@ -46,7 +46,14 @@ public class DataModelDataController {
      */
     @PostMapping("/saveRows/{dsId}")
     public HandleResult saveRows(@RequestBody List<Map<String, Object>> rows, @PathVariable Long dsId) throws Exception {
-        return dmDataService.saveRows(rows, dsId);
+
+        try {
+            HandleResult result = dmDataService.saveRows(rows, dsId);
+            return result;
+        } catch (Exception e) {
+            return HandleResult.failure(e.getMessage());
+        }
+
     }
 
     /**

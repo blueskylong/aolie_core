@@ -357,4 +357,20 @@ public class CommonUtils {
         }
         return sb.substring(0, sb.length() - 1);
     }
+
+    /**
+     * 分类增加子元素
+     *
+     * @param map
+     * @param key
+     * @param subElement
+     */
+    public static <T> void addMapListValue(Map<String, List<T>> map, String key, T subElement) {
+        List<T> lstEle = map.get(key);
+        if (lstEle == null) {
+            lstEle = new ArrayList<>();
+            map.put(key, lstEle);
+        }
+        lstEle.add(subElement);
+    }
 }

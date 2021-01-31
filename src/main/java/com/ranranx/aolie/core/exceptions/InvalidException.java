@@ -8,7 +8,7 @@ package com.ranranx.aolie.core.exceptions;
  **/
 public class InvalidException extends BaseException {
     public InvalidException(String errorInfo) {
-        super("Invalid exception," + errorInfo);
+        super("信息验证不通过," + errorInfo);
     }
 
 }

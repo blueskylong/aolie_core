@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+
 
 /**
  * @Author xxl
@@ -39,7 +41,7 @@ public class DeleteInterceptor implements IOperInterceptor {
      * @throws InvalidException
      */
     @Override
-    public HandleResult beforeOper(Object param) throws InvalidException {
+    public HandleResult beforeOper(Object param, String handelType, Map<String, Object> mapGlobalParam) throws InvalidException {
         logger.info("--> Delete  " + getOrder() + ":beforeOper");
         return null;
     }
@@ -52,7 +54,7 @@ public class DeleteInterceptor implements IOperInterceptor {
      * @return
      */
     @Override
-    public HandleResult afterOper(Object param, HandleResult result) {
+    public HandleResult afterOper(Object param, String handelType, Map<String, Object> mapGlobalParam, HandleResult result) {
         logger.info("--> Delete  " + getOrder() + ":afterOper");
         return null;
     }
@@ -65,7 +67,7 @@ public class DeleteInterceptor implements IOperInterceptor {
      * @return
      */
     @Override
-    public HandleResult beforeReturn(Object param, HandleResult handleResult) {
+    public HandleResult beforeReturn(Object param, String handelType, Map<String, Object> mapGlobalParam, HandleResult handleResult) {
         logger.info("--> Delete  " + getOrder() + ":beforeReturn");
         return null;
     }
