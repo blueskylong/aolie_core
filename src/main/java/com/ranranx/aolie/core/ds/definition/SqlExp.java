@@ -6,10 +6,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @Author xxl
- * @Description
- * @Date 2021/1/7 0007 20:05
- * @Version V0.0.1
+ * @author xxl
+ *
+ * @date 2021/1/7 0007 20:05
+ * @version V0.0.1
  **/
 public class SqlExp {
 

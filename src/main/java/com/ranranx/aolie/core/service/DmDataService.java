@@ -20,10 +20,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import java.util.*;
 
 /**
- * @Author xxl
- * @Description 进行数据操作, 增删改查
- * @Date 2020/12/14 16:34
- * @Version V0.0.1
+ * @author xxl
+ *  进行数据操作, 增删改查
+ * @date 2020/12/14 16:34
+ * @version V0.0.1
  **/
 @Service
 @Transactional(readOnly = true)

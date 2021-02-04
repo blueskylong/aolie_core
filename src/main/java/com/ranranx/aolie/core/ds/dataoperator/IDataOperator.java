@@ -14,10 +14,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @Author xxl
- * @Description 数据源上一层接口, 屏蔽具体数据库的操作 Handler只会调用对应的DataOperator来操作数据库
- * @Date 2020/8/4 13:33
- * @Version V1.0
+ * @author xxl
+ *  数据源上一层接口, 屏蔽具体数据库的操作 Handler只会调用对应的DataOperator来操作数据库
+ * @date 2020/8/4 13:33
+ * @version V1.0
  **/
 public interface IDataOperator {
     final Map<String, String> mapMysqlFieldTypeRelation = new HashMap<>();

@@ -6,10 +6,10 @@ import java.beans.Transient;
 import java.util.Map;
 
 /**
- * @Author xxl
- * @Description 表关系模型数据
- * @Date 2020/8/8 17:00
- * @Version V0.0.1
+ * @author xxl
+ *  表关系模型数据
+ * @date 2020/8/8 17:00
+ * @version V0.0.1
  **/
 public class TableColumnRelation {
     /**

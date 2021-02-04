@@ -8,10 +8,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @Author xxl
- * @Description
- * @Date 2020/8/5 17:34
- * @Version V0.0.1
+ * @author xxl
+ *
+ * @date 2020/8/5 17:34
+ * @version V0.0.1
  **/
 public class Column {
     private ColumnDto columnDto;

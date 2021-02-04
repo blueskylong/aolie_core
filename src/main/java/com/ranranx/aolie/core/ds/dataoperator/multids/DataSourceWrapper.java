@@ -6,10 +6,10 @@ import com.ranranx.aolie.core.datameta.dto.DataOperatorDto;
 import javax.sql.DataSource;
 
 /**
- * @Author xxl
- * @Description
- * @Date 2020/8/11 15:46
- * @Version V0.0.1
+ * @author xxl
+ *
+ * @date 2020/8/11 15:46
+ * @version V0.0.1
  **/
 public class DataSourceWrapper {
 

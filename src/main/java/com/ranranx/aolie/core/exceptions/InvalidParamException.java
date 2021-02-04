@@ -1,10 +1,10 @@
 package com.ranranx.aolie.core.exceptions;
 
 /**
- * @Author xxl
- * @Description
- * @Date 2020/8/6 14:32
- * @Version V0.0.1
+ * @author xxl
+ *
+ * @date 2020/8/6 14:32
+ * @version V0.0.1
  **/
 public class InvalidParamException extends InvalidException {
     public InvalidParamException(String errorInfo) {

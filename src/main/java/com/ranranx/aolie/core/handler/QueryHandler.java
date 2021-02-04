@@ -19,10 +19,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @Author xxl
- * @Description 数据查询服务
- * @Date 2020/8/4 14:33
- * @Version V0.0.1
+ * @author xxl
+ *  数据查询服务
+ * @date 2020/8/4 14:33
+ * @version V0.0.1
  **/
 @Component
 public class QueryHandler<T extends QueryParam> extends BaseHandler<T> {

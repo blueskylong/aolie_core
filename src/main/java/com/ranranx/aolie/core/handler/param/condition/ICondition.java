@@ -3,10 +3,10 @@ package com.ranranx.aolie.core.handler.param.condition;
 import java.util.Map;
 
 /**
- * @Author xxl
- * @Description 条件接口
- * @Date 2020/8/16 7:16
- * @Version V0.0.1
+ * @author xxl
+ *  条件接口
+ * @date 2020/8/16 7:16
+ * @version V0.0.1
  **/
 public interface ICondition {
     /**

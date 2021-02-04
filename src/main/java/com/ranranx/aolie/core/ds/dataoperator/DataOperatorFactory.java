@@ -11,10 +11,10 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 /**
- * @Author xxl
- * @Description
- * @Date 2020/8/10 17:38
- * @Version V0.0.1
+ * @author xxl
+ *
+ * @date 2020/8/10 17:38
+ * @version V0.0.1
  **/
 @Component("DataOperatorFactory")
 public class DataOperatorFactory {

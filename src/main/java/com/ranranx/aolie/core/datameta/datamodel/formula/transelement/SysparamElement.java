@@ -4,6 +4,7 @@ import com.ranranx.aolie.core.annotation.FormulaElementTranslator;
 import com.ranranx.aolie.core.common.SessionUtils;
 import com.ranranx.aolie.core.common.SystemParam;
 import com.ranranx.aolie.core.datameta.datamodel.DmConstants;
+import com.ranranx.aolie.core.datameta.datamodel.Formula;
 import com.ranranx.aolie.core.datameta.datamodel.Schema;
 import com.ranranx.aolie.core.datameta.datamodel.formula.FormulaTools;
 
@@ -11,10 +12,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @Author xxl
- * @Description 系统元素翻译
- * @Date 2021/1/28 15:10
- * @Version V0.0.1
+ * @author xxl
+ *  系统元素翻译
+ * @date 2021/1/28 15:10
+ * @version V0.0.1
  **/
 @FormulaElementTranslator
 public class SysparamElement implements TransElement {
@@ -77,16 +78,16 @@ public class SysparamElement implements TransElement {
     }
 
     @Override
-    public String transToValue(String curElement, Map<String, Object> rowData,
-                               Schema schema, TransCenter transcenter) {
+    public String transToValue(String curElement, long tableId, Map<String, Object> rowData,
+                               Schema schema, TransCenter transcenter, Formula formula) {
         List<String> sysParams = FormulaTools.getSysParams(curElement);
         if (sysParams != null && sysParams.size() > 0) {
             for (String paramExp : sysParams) {
                 SystemParam paramInfo = SessionUtils.getParamInfo(paramExp);
                 Object value = "";
                 if (paramInfo != null) {
-                    if (paramInfo.getDataType() != DmConstants.FieldType.INT
-                            && paramInfo.getDataType() != DmConstants.FieldType.DECIMAL) {
+                    if (!DmConstants.FieldType.INT.equals(paramInfo.getDataType())
+                            && !DmConstants.FieldType.DECIMAL.equals(paramInfo.getDataType())) {
                         value = "'" + paramInfo.getValue() + "'";
                     } else {
                         value = paramInfo.getValue();

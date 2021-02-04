@@ -12,10 +12,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @Author xxl
- * @Description
- * @Date 2020/8/19 11:16
- * @Version V0.0.1
+ * @author xxl
+ *
+ * @date 2020/8/19 11:16
+ * @version V0.0.1
  **/
 public class SqlBuilder {
     /**

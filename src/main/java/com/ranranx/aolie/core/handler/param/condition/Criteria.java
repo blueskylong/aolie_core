@@ -35,10 +35,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @Author xxl
- * @Description 此设计复制于tk.mybatis插件, 并做修改
- * @Date 2020/8/14 15:38
- * @Version V0.0.1
+ * @author xxl
+ *  此设计复制于tk.mybatis插件, 并做修改
+ * @date 2020/8/14 15:38
+ * @version V0.0.1
  **/
 public class Criteria implements ICondition {
 
@@ -273,7 +273,7 @@ public class Criteria implements ICondition {
      *
      * @param param 参数对象
      * @author Bob {@link}0haizhu0@gmail.com
-     * @Date 2015年7月17日 下午12:48:08
+     * @date 2015年7月17日 下午12:48:08
      */
     public Criteria andEqualTo(Object param) {
         if (param == null) {
@@ -413,7 +413,7 @@ public class Criteria implements ICondition {
      *
      * @param param 参数对象
      * @author Bob {@link}0haizhu0@gmail.com
-     * @Date 2015年7月17日 下午12:48:08
+     * @date 2015年7月17日 下午12:48:08
      */
     public Criteria orEqualTo(Object param) {
         MetaObject metaObject = SystemMetaObject.forObject(param);

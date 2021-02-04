@@ -3,10 +3,10 @@ package com.ranranx.aolie.core.ds.definition;
 import com.ranranx.aolie.core.common.Constants;
 
 /**
- * @Author xxl
- * @Description 用来描述二表中的相等字段信息, 其中左右表/字段在没有主表的情况下没有其它含义,只是区分.
- * @Date 2020/8/8 14:38
- * @Version V0.0.1
+ * @author xxl
+ *  用来描述二表中的相等字段信息, 其中左右表/字段在没有主表的情况下没有其它含义,只是区分.
+ * @date 2020/8/8 14:38
+ * @version V0.0.1
  **/
 public class TableRelation {
 

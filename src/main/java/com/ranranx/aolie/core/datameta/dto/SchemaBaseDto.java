@@ -3,10 +3,10 @@ package com.ranranx.aolie.core.datameta.dto;
 import com.ranranx.aolie.core.common.BaseDto;
 
 /**
- * @Author xxl
- * @Description
- * @Date 2020/9/18 16:28
- * @Version V0.0.1
+ * @author xxl
+ *
+ * @date 2020/9/18 16:28
+ * @version V0.0.1
  **/
 public class SchemaBaseDto extends BaseDto {
     private Long schemaId;

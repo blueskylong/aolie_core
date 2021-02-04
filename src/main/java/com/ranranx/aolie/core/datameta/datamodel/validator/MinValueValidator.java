@@ -9,10 +9,10 @@ import java.util.Map;
 
 
 /**
- * @Author xxl
- * @Description 最小值验证
- * @Date 2020/8/13 20:10
- * @Version V0.0.1
+ * @author xxl
+ *  最小值验证
+ * @date 2020/8/13 20:10
+ * @version V0.0.1
  **/
 @Validator
 public class MinValueValidator implements IValidator {

@@ -13,10 +13,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * @Author xxl
- * @Description 工具方法集合
- * @Date 2020/8/7 9:17
- * @Version V0.0.1
+ * @author xxl
+ *  工具方法集合
+ * @date 2020/8/7 9:17
+ * @version V0.0.1
  **/
 public class CommonUtils {
     private static final Pattern NUMBER_PATTERN = Pattern.compile("[+-]?(\\d+(\\.\\d*)?|\\.\\d+)(E\\d+)?");
@@ -365,7 +365,7 @@ public class CommonUtils {
      * @param key
      * @param subElement
      */
-    public static <T> void addMapListValue(Map<String, List<T>> map, String key, T subElement) {
+    public static <T, S> void addMapListValue(Map<S, List<T>> map, S key, T subElement) {
         List<T> lstEle = map.get(key);
         if (lstEle == null) {
             lstEle = new ArrayList<>();

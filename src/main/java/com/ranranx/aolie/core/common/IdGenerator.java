@@ -3,10 +3,10 @@ package com.ranranx.aolie.core.common;
 import org.springframework.stereotype.Component;
 
 /**
- * @Author xxl
- * @Description
- * @Date 2020/9/18 17:38
- * @Version V0.0.1
+ * @author xxl
+ *
+ * @date 2020/9/18 17:38
+ * @version V0.0.1
  **/
 @Component
 public class IdGenerator {

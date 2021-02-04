@@ -12,10 +12,10 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * @Author xxl
- * @Description
- * @Date 2020/12/10 10:55
- * @Version V0.0.1
+ * @author xxl
+ *
+ * @date 2020/12/10 10:55
+ * @version V0.0.1
  **/
 @RestController()
 @RequestMapping("/menu")

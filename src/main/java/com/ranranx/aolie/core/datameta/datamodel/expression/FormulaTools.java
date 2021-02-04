@@ -7,10 +7,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * @Author xxl
- * @Description
- * @Date 2020/12/28 0028 9:31
- * @Version V0.0.1
+ * @author xxl
+ *
+ * @date 2020/12/28 0028 9:31
+ * @version V0.0.1
  **/
 public class FormulaTools {
     static final AtomicInteger ser = new AtomicInteger(1);

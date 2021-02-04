@@ -4,10 +4,10 @@ import com.ranranx.aolie.core.common.CommonUtils;
 import com.ranranx.aolie.core.common.Ordered;
 
 /**
- * @Author xxl
- * @Description
- * @Date 2020/8/7 15:18
- * @Version V0.0.1
+ * @author xxl
+ *
+ * @date 2020/8/7 15:18
+ * @version V0.0.1
  **/
 public class FieldOrder implements Ordered {
     /**

@@ -10,10 +10,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * @Author xxl
- * @Description 公式工具类
- * @Date 2020/8/13 20:10
- * @Version V0.0.1
+ * @author xxl
+ *  公式工具类
+ * @date 2020/8/13 20:10
+ * @version V0.0.1
  **/
 public class FormulaTools {
 
@@ -116,8 +116,8 @@ public class FormulaTools {
      */
     public static String replaceColumnValueStr(String str, String toReplace,
                                                String fieldValue, String fieldType) {
-        if (CommonUtils.isEmpty(fieldType) || fieldType == DmConstants.FieldType.INT
-                || fieldType == DmConstants.FieldType.DECIMAL) {
+        if (CommonUtils.isEmpty(fieldType) || fieldType.equals(DmConstants.FieldType.INT)
+                || fieldType.equals(DmConstants.FieldType.DECIMAL)) {
             return str.replace("${" + toReplace + "}", fieldValue);
         } else {
             return str.replace("${" + toReplace + "}", "'" + fieldValue + "'");
@@ -134,8 +134,8 @@ public class FormulaTools {
      */
     public static String replaceParamValueStr(String str, String toReplace, String value, String fieldType) {
 
-        if (CommonUtils.isEmpty(fieldType) || fieldType == DmConstants.FieldType.INT
-                || fieldType == DmConstants.FieldType.DECIMAL) {
+        if (CommonUtils.isEmpty(fieldType) || fieldType.equals(DmConstants.FieldType.INT)
+                || fieldType.equals(DmConstants.FieldType.DECIMAL)) {
             return str.replace("#{" + toReplace + "}", value);
         } else {
             return str.replace("#{" + toReplace + "}", "'" + value + "'");

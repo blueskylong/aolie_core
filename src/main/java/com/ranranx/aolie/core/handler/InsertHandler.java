@@ -20,10 +20,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @Author xxl
- * @Description 数据新增或更新服务服务
- * @Date 2020/8/4 14:32
- * @Version V0.0.1
+ * @author xxl
+ *  数据新增或更新服务服务
+ * @date 2020/8/4 14:32
+ * @version V0.0.1
  **/
 @Component
 public class InsertHandler<T extends InsertParam> extends BaseHandler<T> {

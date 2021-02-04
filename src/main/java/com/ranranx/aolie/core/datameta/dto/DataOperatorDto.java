@@ -5,10 +5,10 @@ import com.ranranx.aolie.core.common.BaseDto;
 import javax.persistence.Table;
 
 /**
- * @Author xxl
- * @Description 类似于数据源的配置, TODO 这里可以扩展成分布式,读写分离等
- * @Date 2020/8/10 18:49
- * @Version V0.0.1
+ * @author xxl
+ *  类似于数据源的配置, TODO 这里可以扩展成分布式,读写分离等
+ * @date 2020/8/10 18:49
+ * @version V0.0.1
  **/
 @Table(name = "AOLIE_DM_DATAOPERATOR")
 public class DataOperatorDto extends BaseDto {

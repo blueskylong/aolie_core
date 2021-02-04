@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @Author xxl
- * @Description
- * @Date 2021/1/6 0006 15:29
- * @Version V0.0.1
+ * @author xxl
+ *
+ * @date 2021/1/6 0006 15:29
+ * @version V0.0.1
  **/
 @RestController
 @RequestMapping("/user")

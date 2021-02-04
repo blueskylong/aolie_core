@@ -6,10 +6,10 @@ import com.ranranx.aolie.core.datameta.datamodel.TableInfo;
 import java.util.Map;
 
 /**
- * @Author xxl
- * @Description 验证器接口
- * @Date 2020/8/13 20:10
- * @Version V0.0.1
+ * @author xxl
+ *  验证器接口
+ * @date 2020/8/13 20:10
+ * @version V0.0.1
  **/
 public interface IValidator {
 

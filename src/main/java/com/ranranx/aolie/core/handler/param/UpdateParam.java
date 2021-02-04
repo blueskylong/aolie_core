@@ -4,14 +4,15 @@ import com.ranranx.aolie.core.datameta.datamodel.TableInfo;
 import com.ranranx.aolie.core.ds.definition.SqlExp;
 import com.ranranx.aolie.core.handler.param.condition.Criteria;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * @Author xxl
- * @Description 更新和插入的参数载体
- * @Date 2020/8/6 14:29
- * @Version V0.0.1
+ * @author xxl
+ *  更新和插入的参数载体
+ * @date 2020/8/6 14:29
+ * @version V0.0.1
  **/
 public class UpdateParam {
     /**
@@ -35,6 +36,11 @@ public class UpdateParam {
      * 直接语句.暂时提供在复杂语句下使用.
      */
     private SqlExp sqlExp;
+
+    /**
+     * 增加控制信息,让拦截器使用
+     */
+    private Map<String, Object> mapControlParam;
 
     public SqlExp getSqlExp() {
         return sqlExp;
@@ -87,5 +93,39 @@ public class UpdateParam {
 
     public void setSelective(boolean selective) {
         isSelective = selective;
+    }
+
+    public Map<String, Object> getMapControlParam() {
+        return mapControlParam;
+    }
+
+    public void setMapControlParam(Map<String, Object> mapControlParam) {
+        this.mapControlParam = mapControlParam;
+    }
+
+    /**
+     * 增加一个控制参数
+     *
+     * @param key
+     * @param value
+     */
+    public void addControlParam(String key, Object value) {
+        if (this.mapControlParam == null) {
+            this.mapControlParam = new HashMap<>();
+        }
+        this.mapControlParam.put(key, value);
+    }
+
+    /**
+     * 取得一个控制参数
+     *
+     * @param key
+     * @return
+     */
+    public Object getControlParam(String key) {
+        if (this.mapControlParam == null) {
+            return null;
+        }
+        return this.mapControlParam.get(key);
     }
 }

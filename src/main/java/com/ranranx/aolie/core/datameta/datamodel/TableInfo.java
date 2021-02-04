@@ -21,10 +21,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @Author xxl
- * @Description
- * @Date 2020/8/5 17:34
- * @Version V0.0.1
+ * @author xxl
+ *
+ * @date 2020/8/5 17:34
+ * @version V0.0.1
  **/
 public class TableInfo {
 
@@ -372,6 +372,57 @@ public class TableInfo {
         this.validatorCenter = new ValidatorCenter(this);
         this.validatorCenter.setValidators(lstValidator);
         return this.validatorCenter;
+    }
+
+    /**
+     * 取得列所有公式 key:colId value: list of formula
+     *
+     * @return
+     */
+    @Transient
+    public Map<Long, List<Formula>> getAllColumnFormula() {
+        Map<Long, List<Formula>> mapFormula = new HashMap<>();
+        if (this.lstColumn == null || this.lstColumn.isEmpty()) {
+            return mapFormula;
+        }
+        for (Column col : this.lstColumn) {
+            if (col.getLstFormula() != null && !col.getLstFormula().isEmpty()) {
+                mapFormula.put(col.getColumnDto().getColumnId(), col.getLstFormula());
+            }
+        }
+        return mapFormula;
+    }
+
+    /**
+     * 取得列所有公式  list of formula
+     *
+     * @return
+     */
+    @Transient
+    public List<Formula> getAllFormula() {
+        List<Formula> lstFormula = new ArrayList<>();
+        if (this.lstColumn == null || this.lstColumn.isEmpty()) {
+            return lstFormula;
+        }
+        for (Column col : this.lstColumn) {
+            if (col.getLstFormula() != null && !col.getLstFormula().isEmpty()) {
+                lstFormula.addAll(col.getLstFormula());
+            }
+        }
+        return lstFormula;
+    }
+
+    @Transient
+    public Column findColumn(Long colId) {
+        if (this.lstColumn == null || this.lstColumn.isEmpty() || colId == null) {
+            return null;
+        }
+        for (Column col : this.lstColumn) {
+            if (colId.equals(col.getColumnDto().getColumnId())) {
+                return col;
+            }
+        }
+        return null;
     }
 
 }

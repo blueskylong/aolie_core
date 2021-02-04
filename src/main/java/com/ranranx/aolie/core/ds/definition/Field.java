@@ -4,10 +4,10 @@ import com.ranranx.aolie.core.common.CommonUtils;
 import com.ranranx.aolie.core.common.Constants;
 
 /**
- * @Author xxl
- * @Description 查询用的字段描述
- * @Date 2020/8/18 17:54
- * @Version V0.0.1
+ * @author xxl
+ *  查询用的字段描述
+ * @date 2020/8/18 17:54
+ * @version V0.0.1
  **/
 public class Field {
     /**

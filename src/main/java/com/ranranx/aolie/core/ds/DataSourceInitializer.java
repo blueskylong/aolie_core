@@ -20,10 +20,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @Author xxl
- * @Description 所有数据源初始化
- * @Date 2020/8/13 20:10
- * @Version V0.0.1
+ * @author xxl
+ *  所有数据源初始化
+ * @date 2020/8/13 20:10
+ * @version V0.0.1
  **/
 @Configuration
 public class DataSourceInitializer implements ApplicationContextAware {

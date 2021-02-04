@@ -4,10 +4,10 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 
 /**
- * @Author xxl
- * @Description
- * @Date 2020/7/7 15:26
- * @Version V1.0
+ * @author xxl
+ *
+ * @date 2020/7/7 15:26
+ * @version V1.0
  **/
 //@Component
 public class BeanInitPostProcesser implements BeanPostProcessor {

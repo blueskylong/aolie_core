@@ -3,10 +3,10 @@ package com.ranranx.aolie.core.datameta.dto;
 import javax.persistence.Table;
 
 /**
- * @Author xxl
- * @Description
- * @Date 2020/8/19 17:33
- * @Version V0.0.1
+ * @author xxl
+ *
+ * @date 2020/8/19 17:33
+ * @version V0.0.1
  **/
 @Table(name = "aolie_dm_layout")
 public class LayoutDto extends SchemaBaseDto {

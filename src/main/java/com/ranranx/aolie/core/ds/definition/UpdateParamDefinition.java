@@ -8,10 +8,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @Author xxl
- * @Description 如果使用复杂条件更新, 则lstRows里放置的就是需要更新的列及值, 否则, 只会根据行数据的ID更新相应的行.
- * @Date 2020/8/7 15:53
- * @Version V0.0.1
+ * @author xxl
+ *  如果使用复杂条件更新, 则lstRows里放置的就是需要更新的列及值, 否则, 只会根据行数据的ID更新相应的行.
+ * @date 2020/8/7 15:53
+ * @version V0.0.1
  **/
 public class UpdateParamDefinition {
     /**

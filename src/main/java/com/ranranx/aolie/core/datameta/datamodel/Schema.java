@@ -15,10 +15,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @Author xxl
- * @Description
- * @Date 2020/8/5 17:35
- * @Version V0.0.1
+ * @author xxl
+ *
+ * @date 2020/8/5 17:35
+ * @version V0.0.1
  **/
 public class Schema {
     public Schema() {
@@ -60,6 +60,10 @@ public class Schema {
      * colId 对约束
      */
     private Map<String, List<Constraint>> mapColumnConstraint;
+    /**
+     * 记录列所影响的公式信息,即包含这个列的所有公式,这个列变化,会影响公式的值.
+     */
+    private Map<Long, List<Formula>> mapColumnFormula;
 
     @Transient
     public List<TableDto> getTableDtos() {
@@ -283,7 +287,7 @@ public class Schema {
      * @param table2
      * @return
      */
-    private TableColumnRelation findTableRelation(long table1, long table2) {
+    public TableColumnRelation findTableRelation(long table1, long table2) {
         List<TableColumnRelation> lstRelation = this.getLstRelation();
         if (lstRelation == null || lstRelation.isEmpty()) {
             return null;
@@ -322,6 +326,48 @@ public class Schema {
             }
         }
         return null;
+    }
+
+    /**
+     * 根据表Id取得表信息
+     *
+     * @param tableId
+     * @return
+     */
+    @Transient
+    public TableInfo findTableById(Long tableId) {
+        if (tableId == null) {
+            return null;
+        }
+        if (this.lstTable == null || lstTable.isEmpty()) {
+            return null;
+        }
+        for (TableInfo info : lstTable) {
+            if (tableId.equals(info.getTableDto().getTableId())) {
+                return info;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 查找与一个表相关的所有约束
+     *
+     * @param tableId
+     * @return
+     */
+    public List<Constraint> findTableRefConstraints(Long tableId) {
+        if (this.lstConstraint == null || lstConstraint.isEmpty()) {
+            return null;
+        }
+        List<Constraint> lstResult = new ArrayList<>();
+        for (Constraint constraint : lstConstraint) {
+            List<Long> lstRefTable = constraint.getLstRefTable();
+            if (lstRefTable.indexOf(tableId) != -1) {
+                lstResult.add(constraint);
+            }
+        }
+        return lstResult;
     }
 
     /**
@@ -375,6 +421,52 @@ public class Schema {
                     for (Long columnId : lstRefColumn) {
                         CommonUtils.addMapListValue(this.mapColumnConstraint, columnId.toString(), constraint);
                     }
+                }
+            }
+        }
+    }
+
+    /**
+     * 取得列和公式关系信息  key:colid,value:相关的公式
+     *
+     * @return
+     */
+    public Map<Long, List<Formula>> findColRelationFormula() {
+        if (mapColumnFormula == null) {
+            this.initMapFormula();
+        }
+        return this.mapColumnFormula;
+    }
+
+    /**
+     * 初始化列和公式的关系数据
+     */
+    private void initMapFormula() {
+        this.mapColumnFormula = new HashMap<>();
+        if (this.lstTable == null || this.lstTable.isEmpty()) {
+            return;
+        }
+        for (TableInfo tableInfo : this.lstTable) {
+            List<Column> lstCol = tableInfo.getLstColumn();
+            if (lstCol == null || lstCol.isEmpty()) {
+                continue;
+            }
+            for (Column col : lstCol) {
+                List<Formula> lstFormula = col.getLstFormula();
+                if (lstFormula == null || lstFormula.isEmpty()) {
+                    continue;
+                }
+                for (Formula formula : lstFormula) {
+                    List<Long> allRelationCol = formula.getAllRelationCol();
+                    if (allRelationCol == null || allRelationCol.isEmpty()) {
+                        continue;
+                    }
+                    //添加到缓存中
+                    allRelationCol.forEach(colId -> {
+                        CommonUtils.addMapListValue(mapColumnFormula, colId, formula);
+                    });
+
+
                 }
             }
         }

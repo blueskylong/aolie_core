@@ -1,10 +1,10 @@
 package com.ranranx.aolie.core.common;
 
 /**
- * @Author xxl
- * @Description
- * @Date 2020/8/8 16:50
- * @Version V0.0.1
+ * @author xxl
+ *
+ * @date 2020/8/8 16:50
+ * @version V0.0.1
  **/
 public class Constants {
     /**

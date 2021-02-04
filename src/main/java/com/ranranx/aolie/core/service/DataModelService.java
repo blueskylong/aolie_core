@@ -6,12 +6,12 @@ import com.ranranx.aolie.core.common.IdGenerator;
 import com.ranranx.aolie.core.common.SessionUtils;
 import com.ranranx.aolie.core.datameta.datamodel.*;
 import com.ranranx.aolie.core.datameta.datamodel.expression.FilterExpression;
+import com.ranranx.aolie.core.datameta.datamodel.formula.FormulaParse;
 import com.ranranx.aolie.core.datameta.dto.*;
 import com.ranranx.aolie.core.ds.dataoperator.DataOperatorFactory;
 import com.ranranx.aolie.core.ds.definition.*;
 import com.ranranx.aolie.core.exceptions.InvalidParamException;
 import com.ranranx.aolie.core.exceptions.NotExistException;
-import com.ranranx.aolie.core.handler.HandleResult;
 import com.ranranx.aolie.core.handler.param.condition.Criteria;
 import com.ranranx.aolie.core.interfaces.IReferenceDataFilter;
 import com.ranranx.aolie.core.runtime.GlobalParameterService;
@@ -28,10 +28,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
 /**
- * @Author xxl
- * @Description
- * @Date 2020/8/31 16:46
- * @Version V0.0.1
+ * @author xxl
+ *
+ * @date 2020/8/31 16:46
+ * @version V0.0.1
  **/
 @Service
 @Transactional(readOnly = true)
@@ -66,6 +66,7 @@ public class DataModelService {
             @CacheEvict(value = GROUP_NAME, key = KEY_FORMULA_DTO),
             @CacheEvict(value = GROUP_NAME, key = KEY_REFERENCE_DATA)})
     public void clearSchemaCache(long schemaId, String version) {
+        FormulaParse.clearCache();
     }
 
     @Caching(evict = {

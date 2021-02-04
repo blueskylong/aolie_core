@@ -11,10 +11,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @Author xxl
- * @Description
- * @Date 2020/8/10 11:00
- * @Version V0.0.1
+ * @author xxl
+ *
+ * @date 2020/8/10 11:00
+ * @version V0.0.1
  **/
 public abstract class BaseHandler<T> implements IDbHandler {
     /**

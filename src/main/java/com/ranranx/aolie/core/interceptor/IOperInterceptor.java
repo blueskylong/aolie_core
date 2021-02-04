@@ -8,12 +8,21 @@ import com.ranranx.aolie.core.interfaces.IHandleFilter;
 import java.util.Map;
 
 /**
- * @Author xxl
- * @Description 处理拦截器, 拦截器可以直接返回结果, 如果返回结果, 则不再向下处理, 直接返回
- * @Date 2020/8/10 10:17
- * @Version V0.0.1
+ * @author xxl
+ *  处理拦截器, 拦截器可以直接返回结果, 如果返回结果, 则不再向下处理, 直接返回
+ * @date 2020/8/10 10:17
+ * @version V0.0.1
  **/
 public interface IOperInterceptor extends Ordered, IHandleFilter {
+    /**
+     * 直接操作的标记,遇到这个标记在全局参数里,可以不再进行处理
+     */
+    public static final String AFTER_FORMULA_DIRECT_OPER = "AFTER_FORMULA_DIRECT_OPER";
+
+    /**
+     * 由计算拦截器提供,记录计算了哪些表, 目前不保证是有变化的表
+     */
+    public static final String CHANGED_TABLE_ROWS = "CHANGED_TABLE_ROWS";
 
 
     /**

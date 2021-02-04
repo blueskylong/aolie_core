@@ -16,10 +16,10 @@ import javax.annotation.PostConstruct;
 import java.util.List;
 
 /**
- * @Author xxl
- * @Description
- * @Date 2020/8/9 15:34
- * @Version V0.0.1
+ * @author xxl
+ *
+ * @date 2020/8/9 15:34
+ * @version V0.0.1
  **/
 @Component
 public class HandlerFactory {

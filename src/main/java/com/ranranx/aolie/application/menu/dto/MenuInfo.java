@@ -3,10 +3,10 @@ package com.ranranx.aolie.application.menu.dto;
 import java.util.List;
 
 /**
- * @Author xxl
- * @Description
- * @Date 2020/12/10 10:10
- * @Version V0.0.1
+ * @author xxl
+ *
+ * @date 2020/12/10 10:10
+ * @version V0.0.1
  **/
 public class MenuInfo {
     private MenuDto menuDto;

@@ -5,10 +5,10 @@ import com.ranranx.aolie.core.datameta.dto.DataOperatorDto;
 import com.ranranx.aolie.core.ds.dataoperator.DataSourceUtils;
 
 /**
- * @Author xxl
- * @Description
- * @Date 2020/8/11 9:06
- * @Version V0.0.1
+ * @author xxl
+ *
+ * @date 2020/8/11 9:06
+ * @version V0.0.1
  **/
 public class DataOperatorInfo {
 

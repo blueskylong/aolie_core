@@ -9,10 +9,10 @@ import java.util.Collection;
 import java.util.Map;
 
 /**
- * @Author xxl
- * @Description
- * @Date 2020/8/14 15:39
- * @Version V0.0.1
+ * @author xxl
+ *
+ * @date 2020/8/14 15:39
+ * @version V0.0.1
  **/
 public class Criterion implements ICondition {
     private String preCondition;

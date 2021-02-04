@@ -1,10 +1,10 @@
 package com.ranranx.aolie.core.runtime;
 
 /**
- * @Author xxl
- * @Description 全局参数,
- * @Date 2020/12/28 0028 14:17
- * @Version V0.0.1
+ * @author xxl
+ *  全局参数,
+ * @date 2020/12/28 0028 14:17
+ * @version V0.0.1
  **/
 public class GlobalParam {
     /**

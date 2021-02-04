@@ -3,10 +3,10 @@ package com.ranranx.aolie.core.datameta.dto;
 import javax.persistence.Table;
 
 /**
- * @Author xxl
- * @Description 列信息
- * @Date 2020/8/4 16:33
- * @Version V0.0.1
+ * @author xxl
+ *  列信息
+ * @date 2020/8/4 16:33
+ * @version V0.0.1
  **/
 @Table(name = "aolie_dm_column")
 public class ColumnDto extends SchemaBaseDto {

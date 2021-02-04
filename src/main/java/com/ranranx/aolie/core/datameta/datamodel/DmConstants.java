@@ -1,10 +1,10 @@
 package com.ranranx.aolie.core.datameta.datamodel;
 
 /**
- * @Author xxl
- * @Description 和模型相关的常量
- * @Date 2020/12/28 0028 10:26
- * @Version V0.0.1
+ * @author xxl
+ *  和模型相关的常量
+ * @date 2020/12/28 0028 10:26
+ * @version V0.0.1
  **/
 public class DmConstants {
     public static final class FieldType {

@@ -26,10 +26,10 @@ import java.io.InputStream;
 import java.util.*;
 
 /**
- * @Author xxl
- * @Description
- * @Date 2020/8/11 13:00
- * @Version V0.0.1
+ * @author xxl
+ *
+ * @date 2020/8/11 13:00
+ * @version V0.0.1
  **/
 @Configuration
 public class MybatisDbOperatorConfig implements BeanPostProcessor, BeanDefinitionRegistryPostProcessor {

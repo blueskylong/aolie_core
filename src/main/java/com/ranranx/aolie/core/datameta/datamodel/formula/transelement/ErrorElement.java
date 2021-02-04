@@ -2,6 +2,7 @@ package com.ranranx.aolie.core.datameta.datamodel.formula.transelement;
 
 import com.ranranx.aolie.core.annotation.FormulaElementTranslator;
 import com.ranranx.aolie.core.datameta.datamodel.DmConstants;
+import com.ranranx.aolie.core.datameta.datamodel.Formula;
 import com.ranranx.aolie.core.datameta.datamodel.Schema;
 
 import java.util.Map;
@@ -52,8 +53,8 @@ public class ErrorElement implements TransElement {
     }
 
     @Override
-    public String transToValue(String curElement, Map<String, Object> rowData,
-                               Schema schema, TransCenter transcenter) {
+    public String transToValue(String curElement, long tableId, Map<String, Object> rowData,
+                               Schema schema, TransCenter transcenter, Formula formula) {
         throw new Error("[" + curElement + "]无法解析");
     }
 

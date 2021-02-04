@@ -11,10 +11,10 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * @Author xxl
- * @Description 支持多表的查询定义
- * @Date 2020/8/7 15:20
- * @Version V0.0.1
+ * @author xxl
+ *  支持多表的查询定义
+ * @date 2020/8/7 15:20
+ * @version V0.0.1
  **/
 public class QueryParamDefinition {
     /**

@@ -7,10 +7,10 @@ import com.ranranx.aolie.core.datameta.datamodel.TableInfo;
 import java.util.*;
 
 /**
- * @Author xxl
- * @Description 验证中心, 每一张表, 可以共用一个实例, 线程安全
- * @Date 2020/8/13 20:10
- * @Version V0.0.1
+ * @author xxl
+ *  验证中心, 每一张表, 可以共用一个实例, 线程安全
+ * @date 2020/8/13 20:10
+ * @version V0.0.1
  **/
 public class ValidatorCenter {
 

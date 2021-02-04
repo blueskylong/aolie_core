@@ -5,10 +5,10 @@ import com.ranranx.aolie.core.common.BaseDto;
 import javax.persistence.Table;
 
 /**
- * @Author xxl
- * @Description 引用数据
- * @Date 2020/8/4 17:46
- * @Version V0.0.1
+ * @author xxl
+ *  引用数据
+ * @date 2020/8/4 17:46
+ * @version V0.0.1
  **/
 @Table(name = "aolie_dm_reference")
 public class ReferenceDto extends BaseDto {

@@ -3,9 +3,11 @@ package com.ranranx.aolie.core.datameta.datamodel.formula.transelement;
 import com.ranranx.aolie.core.annotation.FormulaElementTranslator;
 import com.ranranx.aolie.core.common.CommonUtils;
 import com.ranranx.aolie.core.datameta.datamodel.DmConstants;
+import com.ranranx.aolie.core.datameta.datamodel.Formula;
 import com.ranranx.aolie.core.datameta.datamodel.Schema;
 
 import java.util.Map;
+
 @FormulaElementTranslator
 public class ConstParam implements TransElement {
     @Override
@@ -65,7 +67,8 @@ public class ConstParam implements TransElement {
     }
 
     @Override
-    public String transToValue(String curElement, Map<String, Object> rowData, Schema schema, TransCenter transcenter) {
+    public String transToValue(String curElement, long rowTableId, Map<String, Object> rowData,
+                               Schema schema, TransCenter transcenter, Formula formula) {
         return this.transToInner(curElement, schema, transcenter);
     }
 

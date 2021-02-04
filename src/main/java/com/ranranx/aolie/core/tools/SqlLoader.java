@@ -20,10 +20,10 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 /**
- * @Author xxl
- * @Description
- * @Date 2021/1/7 0007 20:39
- * @Version V0.0.1
+ * @author xxl
+ *
+ * @date 2021/1/7 0007 20:39
+ * @version V0.0.1
  **/
 @Component
 public class SqlLoader {

@@ -1,14 +1,15 @@
 package com.ranranx.aolie.core.datameta.datamodel.formula.transelement;
 
+import com.ranranx.aolie.core.datameta.datamodel.Formula;
 import com.ranranx.aolie.core.datameta.datamodel.Schema;
 
 import java.util.Map;
 
 /**
- * @Author xxl
- * @Description 翻译控制中心
- * @Date 2020/8/13 20:10
- * @Version V0.0.1
+ * @author xxl
+ *  翻译控制中心
+ * @date 2020/8/13 20:10
+ * @version V0.0.1
  **/
 public interface TransCenter {
     /**
@@ -31,13 +32,16 @@ public interface TransCenter {
     String transToInner(String curElement, Schema schema, TransCenter transcenter);
 
     /**
-     * 翻译成值表达式,
+     * 翻译成值表达式,支持跨表取数
      *
      * @param curElement
+     * @param rowTableId  当前rowData的表ID
      * @param rowData
      * @param schema
      * @param transcenter
+     * @param formula
      * @return
      */
-    String transToValue(String curElement, Map<String, Object> rowData, Schema schema, TransCenter transcenter);
+    String transToValue(String curElement, long rowTableId, Map<String, Object> rowData,
+                        Schema schema, TransCenter transcenter, Formula formula);
 }

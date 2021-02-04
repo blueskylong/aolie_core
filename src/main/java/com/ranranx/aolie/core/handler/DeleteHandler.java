@@ -12,10 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * @Author xxl
- * @Description 数据删除服务
- * @Date 2020/8/4 14:35
- * @Version V0.0.1
+ * @author xxl
+ *  数据删除服务
+ * @date 2020/8/4 14:35
+ * @version V0.0.1
  **/
 @Component
 public class DeleteHandler<T extends DeleteParam> extends BaseHandler<T> {

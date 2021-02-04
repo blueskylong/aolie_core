@@ -2,6 +2,7 @@ package com.ranranx.aolie.core.datameta.datamodel.formula.transelement;
 
 import com.ranranx.aolie.core.annotation.FormulaElementTranslator;
 import com.ranranx.aolie.core.datameta.datamodel.DmConstants;
+import com.ranranx.aolie.core.datameta.datamodel.Formula;
 import com.ranranx.aolie.core.datameta.datamodel.Schema;
 
 import java.util.Map;
@@ -71,18 +72,18 @@ public class Operator implements TransElement {
     }
 
     @Override
-    public String transToValue(String curElement, Map<String, Object> rowData,
-                               Schema schema, TransCenter transcenter) {
+    public String transToValue(String curElement, long tableId, Map<String, Object> rowData,
+                               Schema schema, TransCenter transcenter, Formula formula) {
         System.out.println(this.getName() + "  matched!");
         String[] strs = curElement.split(sPattern);
         if (strs.length < 2) {
             throw new Error(this.getName() + "数学运算符,需要二个操作数");
         }
-        String oper = curElement.substring(strs[0].length(), 1);
+        String oper = curElement.substring(strs[0].length(), strs[0].length()+1);
         String rightExp = curElement.substring(strs[0].length() + 1);
         //仅将式子分隔成二块,由中心处理其它
-        return transcenter.transToValue(strs[0], rowData, schema, transcenter) +
-                oper + transcenter.transToValue(rightExp, rowData, schema, transcenter);
+        return transcenter.transToValue(strs[0], tableId, rowData, schema, transcenter, formula) +
+                oper + transcenter.transToValue(rightExp, tableId, rowData, schema, transcenter, formula);
     }
 
     @Override

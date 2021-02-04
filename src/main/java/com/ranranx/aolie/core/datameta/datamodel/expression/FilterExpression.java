@@ -14,12 +14,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @Author xxl
- * @Description 过滤条件表达式
+ * @author xxl
+ *  过滤条件表达式
  * 支持二种表达式,一是服务端调用表达式,如用在引用数据上的过滤条件,形如:{{service1(param1,param2)}}
  * 一种是普通的表达式,如: ${1}==${3} and ${1} > 0 and ${4} =='#{-1}',其中1和3都是列ID,-1为系统参数,需要直接替换的
- * @Date 2020/12/22 17:14
- * @Version V0.0.1
+ * @date 2020/12/22 17:14
+ * @version V0.0.1
  **/
 public class FilterExpression {
     private String version;

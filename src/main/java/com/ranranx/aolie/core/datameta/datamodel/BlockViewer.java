@@ -13,10 +13,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @Author xxl
- * @Description
- * @Date 2020/8/5 17:35
- * @Version V0.0.1
+ * @author xxl
+ *
+ * @date 2020/8/5 17:35
+ * @version V0.0.1
  **/
 public class BlockViewer {
     private BlockViewDto blockViewDto;

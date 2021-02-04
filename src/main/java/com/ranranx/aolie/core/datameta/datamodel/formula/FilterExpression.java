@@ -15,6 +15,17 @@ import java.util.List;
  * 主要功能已迁到FormulaParse中了
  */
 
+/**
+ * @author xxl
+ *  过滤条件表达式
+ * 支持二种表达式,一是服务端调用表达式,如用在引用数据上的过滤条件,形如:{{service1(param1,param2)}}
+ * 一种是普通的表达式,如: ${1}==${3} and ${1} > 0 and ${4} =='#{-1}',
+ * 其中1和3都是列ID,-1为系统参数,需要直接替换的
+ * 主要功能已迁到FormulaParse中了
+ * @date 2020/8/13 20:10
+ * @version V0.0.1
+ **/
+
 public class FilterExpression {
     private String version;
     private String filter;

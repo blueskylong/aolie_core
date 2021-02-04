@@ -6,10 +6,10 @@ import com.ranranx.aolie.core.handler.param.condition.Criteria;
 import java.util.List;
 
 /**
- * @Author xxl
- * @Description 删除只能是单表删除
- * @Date 2020/8/7 15:20
- * @Version V0.0.1
+ * @author xxl
+ *  删除只能是单表删除
+ * @date 2020/8/7 15:20
+ * @version V0.0.1
  **/
 public class DeleteParamDefinition {
 

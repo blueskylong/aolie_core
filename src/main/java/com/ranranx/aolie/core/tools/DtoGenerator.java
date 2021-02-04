@@ -15,9 +15,9 @@ import java.util.*;
  * @author xlei @qq 251425887 @tel 13352818008\n");
  * @Email dlei0009@163.com\n");
  * modified by  xxl
- * @Description 这里是生成DTO的工具类, 做了修改
- * @Date 2020/12/9 22:18
- * @Version V0.0.1
+ *  这里是生成DTO的工具类, 做了修改
+ * @date 2020/12/9 22:18
+ * @version V0.0.1
  **/
 public class DtoGenerator {
     public DtoGenerator() {

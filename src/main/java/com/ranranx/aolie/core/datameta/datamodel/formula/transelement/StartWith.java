@@ -3,10 +3,10 @@ package com.ranranx.aolie.core.datameta.datamodel.formula.transelement;
 import com.ranranx.aolie.core.annotation.FormulaElementTranslator;
 
 /**
- * @Author xxl
- * @Description 系统元素翻译
- * @Date 2021/1/28 15:10
- * @Version V0.0.1
+ * @author xxl
+ *  系统元素翻译
+ * @date 2021/1/28 15:10
+ * @version V0.0.1
  **/
 @FormulaElementTranslator
 public class StartWith extends IncludeWith {

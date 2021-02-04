@@ -6,10 +6,10 @@ import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 
 /**
- * @Author xxl
- * @Description
- * @Date 2020/8/13 17:26
- * @Version V0.0.1
+ * @author xxl
+ *
+ * @date 2020/8/13 17:26
+ * @version V0.0.1
  **/
 public class LoaderConfiguration implements BeanFactoryPostProcessor {
 

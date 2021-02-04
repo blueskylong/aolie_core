@@ -9,10 +9,10 @@ import java.util.Map;
 
 
 /**
- * @Author xxl
- * @Description 值类型检查, 检查数字
- * @Date 2020/8/13 20:10
- * @Version V0.0.1
+ * @author xxl
+ *  值类型检查, 检查数字
+ * @date 2020/8/13 20:10
+ * @version V0.0.1
  **/
 @Validator
 public class FieldTypeValidator implements IValidator {

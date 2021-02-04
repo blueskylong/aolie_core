@@ -9,10 +9,10 @@ import java.util.Map;
 
 
 /**
- * @Author xxl
- * @Description 数值最大值验证或字符串最长
- * @Date 2020/8/13 20:10
- * @Version V0.0.1
+ * @author xxl
+ *  数值最大值验证或字符串最长
+ * @date 2020/8/13 20:10
+ * @version V0.0.1
  **/
 @Validator
 class MaxValueValidator implements IValidator {

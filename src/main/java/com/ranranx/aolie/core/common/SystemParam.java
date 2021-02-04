@@ -1,10 +1,10 @@
 package com.ranranx.aolie.core.common;
 
 /**
- * @Author xxl
- * @Description
- * @Date 2021/1/28 0028 14:36
- * @Version V0.0.1
+ * @author xxl
+ *
+ * @date 2021/1/28 0028 14:36
+ * @version V0.0.1
  **/
 public class SystemParam {
     private String name;

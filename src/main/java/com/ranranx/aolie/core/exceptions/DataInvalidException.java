@@ -1,10 +1,10 @@
 package com.ranranx.aolie.core.exceptions;
 
 /**
- * @Author xxl
- * @Description
- * @Date 2020/8/31 17:07
- * @Version V0.0.1
+ * @author xxl
+ *
+ * @date 2020/8/31 17:07
+ * @version V0.0.1
  **/
 public class DataInvalidException extends InvalidException {
     public DataInvalidException(String errorInfo) {

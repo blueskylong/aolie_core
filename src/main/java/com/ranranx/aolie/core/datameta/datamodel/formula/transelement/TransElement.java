@@ -1,10 +1,10 @@
 package com.ranranx.aolie.core.datameta.datamodel.formula.transelement;
 
 /**
- * @Author xxl
- * @Description 翻译元素接口
- * @Date 2020/8/13 20:10
- * @Version V0.0.1
+ * @author xxl
+ *  翻译元素接口
+ * @date 2020/8/13 20:10
+ * @version V0.0.1
  **/
 public interface TransElement extends TransCenter {
     /**

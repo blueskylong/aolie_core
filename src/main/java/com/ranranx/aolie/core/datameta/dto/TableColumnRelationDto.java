@@ -1,10 +1,10 @@
 package com.ranranx.aolie.core.datameta.dto;
 
 /**
- * @Author xxl
- * @Description 二张表的外键关系
- * @Date 2020/8/8 16:29
- * @Version V0.0.1
+ * @author xxl
+ *  二张表的外键关系
+ * @date 2020/8/8 16:29
+ * @version V0.0.1
  **/
 
 import javax.persistence.Table;

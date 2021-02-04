@@ -3,10 +3,10 @@ package com.ranranx.aolie.core.datameta.datamodel;
 import com.ranranx.aolie.core.common.Constants;
 
 /**
- * @Author xxl
- * @Description
- * @Date 2020/11/30 14:39
- * @Version V0.0.1
+ * @author xxl
+ *
+ * @date 2020/11/30 14:39
+ * @version V0.0.1
  **/
 public class SchemaTools {
     /**

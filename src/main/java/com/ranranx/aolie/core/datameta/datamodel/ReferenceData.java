@@ -1,10 +1,10 @@
 package com.ranranx.aolie.core.datameta.datamodel;
 
 /**
- * @Author xxl
- * @Description
- * @Date 2020/9/4 15:21
- * @Version V0.0.1
+ * @author xxl
+ *
+ * @date 2020/9/4 15:21
+ * @version V0.0.1
  **/
 public class ReferenceData {
     private String id;

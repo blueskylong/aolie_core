@@ -6,18 +6,17 @@ import com.ranranx.aolie.core.handler.HandleResult;
 import com.ranranx.aolie.core.interceptor.IOperInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
 
 /**
- * @Author xxl
- * @Description
- * @Date 2020/8/10 15:11
- * @Version V0.0.1
+ * @author xxl
+ *
+ * @date 2020/8/10 15:11
+ * @version V0.0.1
  **/
-@Component
+//@Component
 public class UpdateInterceptor implements IOperInterceptor {
     Logger logger = LoggerFactory.getLogger(UpdateInterceptor.class);
 

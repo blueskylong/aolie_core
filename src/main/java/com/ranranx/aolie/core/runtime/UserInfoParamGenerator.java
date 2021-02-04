@@ -8,10 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @Author xxl
- * @Description
- * @Date 2020/12/28 0028 15:28
- * @Version V0.0.1
+ * @author xxl
+ *
+ * @date 2020/12/28 0028 15:28
+ * @version V0.0.1
  **/
 @Component
 public class UserInfoParamGenerator implements IGlobalParamGenerator {

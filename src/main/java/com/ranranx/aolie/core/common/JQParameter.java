@@ -28,16 +28,19 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @Author xxl
- * @Description
- * @Date 2020/9/11 14:43
- * @Version V0.0.1
+ * @author xxl
+ *
+ * @date 2020/9/11 14:43
+ * @version V0.0.1
  **/
 @Component
 public class JQParameter implements RequestParamHandler {
     private static Logger logger = LoggerFactory.getLogger(JQParameter.class);
 
     private String name = "name";
+    private static final String CHECK_COL_ID = "cb";
+    private static final String OPERATE_COL_ID = "__operator__";
+    private static final String TOOLBAR_BUTTON_CLASS = "table-col-button";
 
     public String getName() {
         return name;
@@ -215,7 +218,8 @@ public class JQParameter implements RequestParamHandler {
 
     private FieldOrder parseOrder(Map mapParam, BlockViewer blockViewer, boolean convertToUnderLine) {
         String field = getParamValue("sidx", mapParam);
-        if (CommonUtils.isEmpty(field)) {
+        if (CommonUtils.isEmpty(field) || field.equals(CHECK_COL_ID)
+                || field.equals(OPERATE_COL_ID) || field.equals(TOOLBAR_BUTTON_CLASS)) {
             return null;
         }
         if (blockViewer != null && blockViewer.getBlockViewDto().getFieldToCamel() != null

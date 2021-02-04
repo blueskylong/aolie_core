@@ -3,10 +3,10 @@ package com.ranranx.aolie.core.datameta.dto;
 import javax.persistence.Table;
 
 /**
- * @Author xxl
- * @Description 复合组件信息, 视图信息, 包含面板 ,列表及树.
- * @Date 2020/8/5 10:16
- * @Version V0.0.1
+ * @author xxl
+ *  复合组件信息, 视图信息, 包含面板 ,列表及树.
+ * @date 2020/8/5 10:16
+ * @version V0.0.1
  **/
 @Table(name = "aolie_dm_blockview")
 public class BlockViewDto extends SchemaBaseDto {

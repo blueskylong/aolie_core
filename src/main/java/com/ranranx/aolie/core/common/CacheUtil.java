@@ -1,10 +1,10 @@
 package com.ranranx.aolie.core.common;
 
 /**
- * @Author xxl
- * @Description 用于缓存的管理
- * @Date 2020/8/6 12:13
- * @Version V0.0.1
+ * @author xxl
+ *  用于缓存的管理
+ * @date 2020/8/6 12:13
+ * @version V0.0.1
  **/
 public class CacheUtil {
 }

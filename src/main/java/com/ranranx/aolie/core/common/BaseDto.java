@@ -3,10 +3,10 @@ package com.ranranx.aolie.core.common;
 import java.util.Date;
 
 /**
- * @Author xxl
- * @Description 基础数据库表对象
- * @Date 2020/8/5 9:03
- * @Version V0.0.1
+ * @author xxl
+ *  基础数据库表对象
+ * @date 2020/8/5 9:03
+ * @version V0.0.1
  **/
 public class BaseDto {
     protected Date createDate;

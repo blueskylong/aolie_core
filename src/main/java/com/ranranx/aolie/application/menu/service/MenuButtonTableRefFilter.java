@@ -15,10 +15,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @Author xxl
- * @Description
- * @Date 2020/12/23 0023 14:22
- * @Version V0.0.1
+ * @author xxl
+ *
+ * @date 2020/12/23 0023 14:22
+ * @version V0.0.1
  **/
 @Component("menuButtonTableRefFilter")
 public class MenuButtonTableRefFilter implements IReferenceDataFilter {

@@ -5,7 +5,6 @@ import com.ranranx.aolie.core.common.CommonUtils;
 import com.ranranx.aolie.core.common.Constants;
 import com.ranranx.aolie.core.datameta.datamodel.SchemaHolder;
 import com.ranranx.aolie.core.datameta.dto.ReferenceDto;
-import com.ranranx.aolie.core.exceptions.InvalidException;
 import com.ranranx.aolie.core.handler.HandleResult;
 import com.ranranx.aolie.core.handler.param.DeleteParam;
 import com.ranranx.aolie.core.handler.param.InsertParam;
@@ -21,17 +20,17 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @Author xxl
- * @Description 引用数据缓存的处理, 当保存的表数据, 与引用表中的表名相同时, 则清除缓存相应的引用数据
- * @Date 2020/12/21 21:08
- * @Version V0.0.1
+ * @author xxl
+ *  引用数据缓存的处理, 当保存的表数据, 与引用表中的表名相同时, 则清除缓存相应的引用数据
+ * @date 2020/12/21 21:08
+ * @version V0.0.1
  **/
 @DbOperInterceptor
-public class ReferenceDataInterceptor implements IOperInterceptor {
+public class ReferenceClearCacheInterceptor implements IOperInterceptor {
     @Autowired
     private CacheManager cacheManager;
 
-    private Logger logger = LoggerFactory.getLogger(ReferenceDataInterceptor.class);
+    private Logger logger = LoggerFactory.getLogger(ReferenceClearCacheInterceptor.class);
 
     @Autowired
     private DataModelService dmService;
@@ -43,11 +42,6 @@ public class ReferenceDataInterceptor implements IOperInterceptor {
         return !type.equals(Constants.HandleType.TYPE_QUERY);
     }
 
-    @Override
-    public HandleResult beforeOper(Object param, String handleType,
-                                   Map<String, Object> extendData) throws InvalidException {
-        return null;
-    }
 
     @Override
     public HandleResult afterOper(Object param, String handleType,
@@ -77,11 +71,7 @@ public class ReferenceDataInterceptor implements IOperInterceptor {
         return null;
     }
 
-    @Override
-    public HandleResult beforeReturn(Object param, String handleType,
-                                     Map<String, Object> extendData, HandleResult handleResult) {
-        return null;
-    }
+
 
     private ReferenceDto findTableInReference(String tableName, String version) {
         if (this.referTables == null) {

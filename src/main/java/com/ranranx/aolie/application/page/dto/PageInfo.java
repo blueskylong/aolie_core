@@ -3,10 +3,10 @@ package com.ranranx.aolie.application.page.dto;
 import java.util.List;
 
 /**
- * @Author xxl
- * @Description
- * @Date 2020/11/4 9:29
- * @Version V0.0.1
+ * @author xxl
+ *
+ * @date 2020/11/4 9:29
+ * @version V0.0.1
  **/
 public class PageInfo {
     /**

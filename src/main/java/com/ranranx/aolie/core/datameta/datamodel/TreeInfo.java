@@ -3,10 +3,10 @@ package com.ranranx.aolie.core.datameta.datamodel;
 import com.ranranx.aolie.core.common.CommonUtils;
 
 /**
- * @Author xxl
- * @Description 树的结构信息
- * @Date 2020/12/19 22:04
- * @Version V0.0.1
+ * @author xxl
+ *  树的结构信息
+ * @date 2020/12/19 22:04
+ * @version V0.0.1
  **/
 public class TreeInfo {
     private Column idField;

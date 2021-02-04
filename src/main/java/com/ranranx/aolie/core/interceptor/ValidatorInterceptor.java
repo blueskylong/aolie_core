@@ -21,11 +21,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @Author xxl
- * @Description 数据保存前的验证, 不包含约束.此类的更新检查依赖 UpdateRowIdInterceptor起作用
+ * @author xxl
+ *  数据保存前的验证, 不包含约束.此类的更新检查依赖 UpdateRowIdInterceptor起作用
  * 由UpdateRowIdInterceptor将变动的ID都收集,这里检查这些数据的合法性
- * @Date 2021/1/29 0029 9:05
- * @Version V0.0.1
+ * @date 2021/1/29 0029 9:05
+ * @version V0.0.1
  **/
 @DbOperInterceptor
 public class ValidatorInterceptor implements IOperInterceptor {
@@ -47,15 +47,7 @@ public class ValidatorInterceptor implements IOperInterceptor {
     @Override
     public HandleResult beforeOper(Object param, String handleType,
                                    Map<String, Object> globalParamData) throws InvalidException {
-        //如果是插入,直接验证提供的数据
-        if (Constants.HandleType.TYPE_INSERT.equals(handleType) && param instanceof InsertParam) {
-            String err = validateInsert((InsertParam) param);
-            if (CommonUtils.isNotEmpty(err)) {
-                return HandleResult.failure(err);
-            }
-        }
         return null;
-
     }
 
     /**
@@ -69,6 +61,9 @@ public class ValidatorInterceptor implements IOperInterceptor {
      */
     @Override
     public HandleResult afterOper(Object param, String handleType, Map<String, Object> globalParamData, HandleResult result) {
+        if (!result.isSuccess()) {
+            return null;
+        }
         if (Constants.HandleType.TYPE_UPDATE.equals(handleType)) {
             logger.info("表单验证--->保存后验证");
             String err = validateUpdate((UpdateParam) param, globalParamData);
@@ -76,6 +71,12 @@ public class ValidatorInterceptor implements IOperInterceptor {
                 return HandleResult.failure(err);
             }
 
+        } else if (Constants.HandleType.TYPE_INSERT.equals(handleType) && param instanceof InsertParam) {
+            //如果是插入,直接验证提供的数据
+            String err = validateInsert((InsertParam) param, result);
+            if (CommonUtils.isNotEmpty(err)) {
+                return HandleResult.failure(err);
+            }
         }
         return null;
     }
@@ -83,13 +84,26 @@ public class ValidatorInterceptor implements IOperInterceptor {
     /**
      * 检查插入
      *
-     * @param param
+     * @param handleResult 执行插入和公式计算后的结果
      * @return
      */
-    private String validateInsert(InsertParam param) {
-        List<Map<String, Object>> lstData = param.getLstRows();
-        ValidatorCenter validatorCenter = param.getTable().getValidatorCenter(this.lstValidator);
+    private String validateInsert(InsertParam insertParam, HandleResult handleResult) {
+        List<Map<String, Object>> lstData = findInsertRows(insertParam, handleResult);
+        ValidatorCenter validatorCenter = insertParam.getTable().getValidatorCenter(this.lstValidator);
         return validateData(lstData, validatorCenter);
+    }
+
+    /**
+     * 查询新插入的行数据
+     *
+     * @param handleResult
+     * @return
+     */
+    private List<Map<String, Object>> findInsertRows(InsertParam param, HandleResult handleResult) {
+        //根据约定,插入成功后,传回的是插入数据的ID数据
+        List<Object> lstId = (List<Object>) handleResult.getLstData().get(0)
+                .get(Constants.ConstFieldName.CHANGE_KEYS_FEILD);
+        return queryByIds(lstId, param.getTable());
     }
 
     private String validateData(List<Map<String, Object>> lstData, ValidatorCenter validatorCenter) {
@@ -105,18 +119,45 @@ public class ValidatorInterceptor implements IOperInterceptor {
         return errs.toString();
     }
 
-    private String validateUpdate(UpdateParam param, Map<String, Object> globalParamData) {
+    /**
+     * 查询更新的行数据
+     *
+     * @param param
+     * @param globalParamData
+     * @return
+     */
+    private List<Map<String, Object>> findUpdateRows(UpdateParam param, Map<String, Object> globalParamData) {
+        List<Object> lstKey = (List<Object>) globalParamData.get(GetRowIdInterceptor.PARAM_IDS);
+        return queryByIds(lstKey, param.getTable());
+    }
 
-        List<Object> lstKey = (List<Object>) globalParamData.get(UpdateRowIdInterceptor.PARAM_IDS);
+    private List<Map<String, Object>> queryByIds(List<Object> lstKey, TableInfo tableInfo) {
         if (lstKey == null || lstKey.isEmpty()) {
             return null;
         }
         QueryParam queryParam = new QueryParam();
-        queryParam.setTable(new TableInfo[]{param.getTable()});
-        queryParam.appendCriteria().andIn(param.getTable().getKeyField(), lstKey);
+        queryParam.setTable(new TableInfo[]{tableInfo});
+        queryParam.appendCriteria().andIn(tableInfo.getKeyField(), lstKey);
         HandleResult result = handlerFactory.handleQuery(queryParam);
         if (result.isSuccess() && result.getLstData() != null) {
-            return validateData(result.getLstData(), param.getTable().getValidatorCenter(this.lstValidator));
+            return result.getLstData();
+        }
+        return null;
+    }
+
+    /**
+     * 验证更新
+     *
+     * @param param
+     * @param globalParamData
+     * @return
+     */
+    private String validateUpdate(UpdateParam param, Map<String, Object> globalParamData) {
+
+        List<Map<String, Object>> lstData = findUpdateRows(param, globalParamData);
+
+        if (lstData != null && !lstData.isEmpty()) {
+            return validateData(lstData, param.getTable().getValidatorCenter(this.lstValidator));
         }
         return null;
 

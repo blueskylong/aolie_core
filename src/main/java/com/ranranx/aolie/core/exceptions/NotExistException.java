@@ -1,10 +1,10 @@
 package com.ranranx.aolie.core.exceptions;
 
 /**
- * @Author xxl
- * @Description
- * @Date 2020/8/10 9:48
- * @Version V0.0.1
+ * @author xxl
+ *
+ * @date 2020/8/10 9:48
+ * @version V0.0.1
  **/
 public class NotExistException extends BaseException {
 
