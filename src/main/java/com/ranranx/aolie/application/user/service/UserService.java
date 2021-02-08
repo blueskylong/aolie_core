@@ -29,9 +29,8 @@ import java.util.*;
 
 /**
  * @author xxl
- *
- * @date 2021/1/6 0006 15:30
  * @version V0.0.1
+ * @date 2021/1/6 0006 15:30
  **/
 @Service
 @Transactional(readOnly = true)
@@ -260,7 +259,6 @@ public class UserService {
      */
     public HandleResult findRightRelationDetail(long sourceRsId, long destRsId, long sourceId, String versionCode) {
         //Query
-
         long rrid = findRrid(sourceRsId, destRsId, versionCode);
         if (rrid < 0) {
             return HandleResult.failure("没有查询到二个权限的关联关系");
@@ -468,6 +466,52 @@ public class UserService {
         param.setTableDtos(Constants.DEFAULT_SYS_SCHEMA, versionCode, RightSourceDto.class);
         param.appendCriteria().andIn("rs_id", lstId);
         return handlerFactory.handleQuery(param);
+    }
+
+    /**
+     * 查询角色对应的其它资源信息
+     *
+     * @return
+     */
+    public HandleResult findRoleRightOtherRelation() {
+        List<Long> lstOtherRsID = findRoleRelationOtherIds();
+        if (lstOtherRsID == null || lstOtherRsID.isEmpty()) {
+            return HandleResult.success(0);
+        }
+        QueryParam param = new QueryParam();
+        param.setTableDtos(Constants.DEFAULT_SYS_SCHEMA, SessionUtils.getLoginVersion(), RightSourceDto.class);
+        param.appendCriteria().andIn("rs_id", lstOtherRsID);
+        return handlerFactory.handleQuery(param);
+    }
+
+    /**
+     * 查询角色对应的其它资源的ID,排队了菜单和按钮的资源ID
+     *
+     * @return
+     */
+    private List<Long> findRoleRelationOtherIds() {
+        QueryParam param = new QueryParam();
+        param.setTableDtos(Constants.DEFAULT_SYS_SCHEMA, SessionUtils.getLoginVersion(), RightRelationDto.class);
+        //排除菜单和按钮资源
+        List<Long> menuAndButtonId = new ArrayList<>();
+        menuAndButtonId.add(Constants.DefaultRsIds.menu);
+        menuAndButtonId.add(Constants.DefaultRsIds.menuItem);
+        param.appendCriteria().andEqualTo("rs_id_from", Constants.DefaultRsIds.role)
+                .andNotIn("rs_id_to", menuAndButtonId);
+        param.setResultClass(RightRelationDto.class);
+        HandleResult result = handlerFactory.handleQuery(param);
+        if (result.isSuccess()) {
+            List<RightRelationDto> lstData = (List<RightRelationDto>) result.getData();
+            if (lstData == null || lstData.isEmpty()) {
+                return null;
+            }
+            List<Long> lstResult = new ArrayList<>(lstData.size());
+            for (RightRelationDto dto : lstData) {
+                lstResult.add(dto.getRsIdTo());
+            }
+            return lstResult;
+        }
+        return null;
     }
 
 }

@@ -1,17 +1,19 @@
 package com.ranranx.aolie.core.runtime;
 
 import com.ranranx.aolie.core.common.SystemParam;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 
 import java.beans.Transient;
+import java.util.Collection;
 import java.util.Map;
 
 /**
  * @author xxl
- *
- * @date 2020/12/28 0028 14:14
  * @version V0.0.1
+ * @date 2020/12/28 0028 14:14
  **/
-public class LoginUser {
+public class LoginUser extends User {
     private Long userId;
     private String accountCode;
     private String userName;
@@ -23,6 +25,16 @@ public class LoginUser {
     private String belongOrgCode;
 
     private Map<String, SystemParam> params;
+
+    public LoginUser(String username, String password, Collection<? extends GrantedAuthority> authorities, Long userId) {
+        super(username, password, authorities);
+        this.userId = userId;
+    }
+
+    public LoginUser(String username, String password, boolean enabled, boolean accountNonExpired, boolean credentialsNonExpired, boolean accountNonLocked, Collection<? extends GrantedAuthority> authorities, Long userId) {
+        super(username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
+        this.userId = userId;
+    }
 
     public Long getUserId() {
         return userId;

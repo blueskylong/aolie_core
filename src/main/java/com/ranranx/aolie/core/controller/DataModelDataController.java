@@ -18,7 +18,7 @@ import java.util.Map;
  * @version V0.0.1
  **/
 @RestController
-@RequestMapping("/data")
+@RequestMapping("/dmdata")
 public class DataModelDataController {
     @Autowired
     private DataOperatorFactory factory;

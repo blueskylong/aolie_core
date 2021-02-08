@@ -11,9 +11,8 @@ import java.util.Map;
 
 /**
  * @author xxl
- *
- * @date 2021/1/6 0006 15:29
  * @version V0.0.1
+ * @date 2021/1/6 0006 15:29
  **/
 @RestController
 @RequestMapping("/user")
@@ -117,5 +116,17 @@ public class UserController {
                                                        @RequestBody Map<Long, List<Long>> destNewIds) {
         return service.saveRightRelationDetailsByRrId(rrId, destNewIds, SessionUtils.getLoginVersion());
     }
+
+    /**
+     * 查询角色对应的其它资源信息
+     *
+     * @return
+     */
+    @GetMapping("/findRoleRightOtherRelation")
+    public HandleResult findRoleRightOtherRelation() {
+        return service.findRoleRightOtherRelation();
+    }
+
+
 
 }

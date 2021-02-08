@@ -1,6 +1,7 @@
 package com.ranranx.aolie.core.handler;
 
 import com.ranranx.aolie.core.handler.param.Page;
+import org.springframework.http.HttpStatus;
 
 import java.beans.Transient;
 import java.util.List;
@@ -8,9 +9,8 @@ import java.util.Map;
 
 /**
  * @author xxl
- *
- * @date 2020/8/8 19:58
  * @version V0.0.1
+ * @date 2020/8/8 19:58
  **/
 public class HandleResult {
 
@@ -26,6 +26,8 @@ public class HandleResult {
      * 错误提供信息
      */
     private String err;
+
+    private int code = HttpStatus.OK.value();
 
     /**
      * 数据变化记录数
@@ -108,5 +110,13 @@ public class HandleResult {
 
     public void setData(Object data) {
         this.data = data;
+    }
+
+    public int getCode() {
+        return code;
+    }
+
+    public void setCode(int code) {
+        this.code = code;
     }
 }

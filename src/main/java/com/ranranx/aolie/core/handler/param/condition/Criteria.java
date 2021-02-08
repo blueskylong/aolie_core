@@ -36,15 +36,13 @@ import java.util.Map;
 
 /**
  * @author xxl
- *  此设计复制于tk.mybatis插件, 并做修改
- * @date 2020/8/14 15:38
+ * 此设计复制于tk.mybatis插件, 并做修改
  * @version V0.0.1
+ * @date 2020/8/14 15:38
  **/
 public class Criteria implements ICondition {
 
     protected List<ICondition> lstCondition = new ArrayList<>();
-    //字段是否必须存在
-    protected boolean exists;
     //值是否不能为空
     protected boolean notNull;
     //连接条件
@@ -58,9 +56,8 @@ public class Criteria implements ICondition {
         alwaysFalse.andCondition("1=2");
     }
 
-    public Criteria(boolean exists, boolean notNull) {
+    public Criteria(boolean notNull) {
         super();
-        this.exists = exists;
         this.notNull = notNull;
         lstCondition = new ArrayList<>();
         andOr = "and";
@@ -71,7 +68,7 @@ public class Criteria implements ICondition {
     }
 
     public Criteria() {
-        this(false, false);
+        this(false);
     }
 
     public Criteria createSubOrCriteria() {

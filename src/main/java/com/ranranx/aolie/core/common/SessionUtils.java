@@ -3,6 +3,8 @@ package com.ranranx.aolie.core.common;
 import com.ranranx.aolie.core.datameta.datamodel.DmConstants;
 import com.ranranx.aolie.core.exceptions.NotExistException;
 import com.ranranx.aolie.core.runtime.LoginUser;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -10,39 +12,41 @@ import java.util.Map;
 
 /**
  * @author xxl
- *
- * @date 2020/9/11 10:34
  * @version V0.0.1
+ * @date 2020/9/11 10:34
  **/
 public class SessionUtils {
-    private static LoginUser user = new LoginUser();
+//    private static LoginUser user = new LoginUser("admin", "admin", new ArrayList<>(), 1L);
 
     public static String getLoginVersion() {
         return "000000";
     }
 
     public static LoginUser getLoginUser() {
-        return user;
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Object myUser = (auth != null) ? auth.getPrincipal() : null;
+        return (LoginUser) myUser;
     }
 
     public static Map<String, SystemParam> PARAMS;
 
-    static {
-        user.setAccountCode("999");
-        user.setUserId(1L);
-        user.setBelongOrg(1L);
-        user.setBelongOrgCode("001001");
-        user.setRoleId(1L);
-        user.setUserName("admin");
-        user.setVersionCode("000000");
-        user.setUserType(1);
-        user.setParams(getUserParam(user));
-    }
+//    static {
+//        user.setAccountCode("999");
+//        user.setUserId(1L);
+//        user.setBelongOrg(1L);
+//        user.setBelongOrgCode("001001");
+//        user.setRoleId(1L);
+//        user.setUserName("admin");
+//        user.setVersionCode("000000");
+//        user.setUserType(1);
+//        user.setParams(getUserParam(user));
+//    }
 
     /**
      * 初始化全局参数
      */
-    static Map<String, SystemParam> getUserParam(LoginUser user) {
+    static Map<String, SystemParam> getUserParam() {
+        LoginUser user =getLoginUser();
         Map<String, SystemParam> params = new HashMap<String, SystemParam>();
         //增加人员
         params.put(DmConstants.GlobalParamsIds.userId + "",
