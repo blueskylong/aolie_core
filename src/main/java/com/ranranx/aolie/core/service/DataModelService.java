@@ -14,7 +14,6 @@ import com.ranranx.aolie.core.exceptions.InvalidParamException;
 import com.ranranx.aolie.core.exceptions.NotExistException;
 import com.ranranx.aolie.core.handler.param.condition.Criteria;
 import com.ranranx.aolie.core.interfaces.IReferenceDataFilter;
-import com.ranranx.aolie.core.runtime.GlobalParameterService;
 import com.ranranx.aolie.core.tools.ApplicationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
@@ -29,9 +28,8 @@ import java.util.*;
 
 /**
  * @author xxl
- *
- * @date 2020/8/31 16:46
  * @version V0.0.1
+ * @date 2020/8/31 16:46
  **/
 @Service
 @Transactional(readOnly = true)
@@ -56,9 +54,6 @@ public class DataModelService {
     private CacheManager cacheManager;
     @Autowired
     private UIService uiService;
-
-    @Autowired
-    private GlobalParameterService parameterService;
 
     @Caching(evict = {@CacheEvict(value = GROUP_NAME, key = KEY_TABLE_DTO),
             @CacheEvict(value = GROUP_NAME, key = KEY_COLUMN_DTO),
@@ -275,7 +270,7 @@ public class DataModelService {
             } else {
                 return findReferenceDataByFilter(referenceId, version,
                         filterExpression.getSqlCriteria(filterValue,
-                                parameterService.getGlobalValues(SessionUtils.getLoginUser()),
+                                SessionUtils.getAllParams(),
                                 null, Arrays.asList(column.getColumnDto().getTableId())));
             }
 

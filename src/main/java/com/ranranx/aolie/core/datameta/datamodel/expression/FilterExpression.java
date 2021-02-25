@@ -2,10 +2,10 @@ package com.ranranx.aolie.core.datameta.datamodel.expression;
 
 import com.ranranx.aolie.core.common.CommonUtils;
 import com.ranranx.aolie.core.common.SessionUtils;
+import com.ranranx.aolie.core.common.SystemParam;
 import com.ranranx.aolie.core.datameta.datamodel.Column;
 import com.ranranx.aolie.core.datameta.datamodel.SchemaHolder;
 import com.ranranx.aolie.core.handler.param.condition.Criteria;
-import com.ranranx.aolie.core.runtime.GlobalParam;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
@@ -110,7 +110,7 @@ public class FilterExpression {
      * @param mapAlias         表ID对应的别名，如果没有提供，则直接使用字段名，不加前缀
      * @return
      */
-    public Criteria getSqlCriteria(Map<String, Object> mapValues, Map<Long, GlobalParam> globalValues,
+    public Criteria getSqlCriteria(Map<String, Object> mapValues, Map<Long, SystemParam> globalValues,
                                    Map<Long, String> mapAlias, List<Long> fullReplacedDsId) {
         Map<String, Object> values = new HashMap<>();
 
@@ -191,7 +191,7 @@ public class FilterExpression {
      * @param filter
      * @return
      */
-    private String replaceSysparams(String filter, Map<Long, GlobalParam> params, Map<String, Object> values) {
+    private String replaceSysparams(String filter, Map<Long, SystemParam> params, Map<String, Object> values) {
         List<Long> paramIds = FormulaTools.getSysParams(filter);
         if (paramIds != null && !paramIds.isEmpty()) {
             return filter;

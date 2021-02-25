@@ -496,7 +496,8 @@ public class Criteria implements ICondition {
         return tableName;
     }
 
-    public void setTableName(String tableName) {
+    public Criteria setTableName(String tableName) {
         this.tableName = tableName;
+        return this;
     }
 }

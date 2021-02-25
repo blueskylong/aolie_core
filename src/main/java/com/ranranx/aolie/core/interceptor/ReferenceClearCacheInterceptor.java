@@ -21,9 +21,9 @@ import java.util.Map;
 
 /**
  * @author xxl
- *  引用数据缓存的处理, 当保存的表数据, 与引用表中的表名相同时, 则清除缓存相应的引用数据
- * @date 2020/12/21 21:08
+ * 引用数据缓存的处理, 当保存的表数据, 与引用表中的表名相同时, 则清除缓存相应的引用数据
  * @version V0.0.1
+ * @date 2020/12/21 21:08
  **/
 @DbOperInterceptor
 public class ReferenceClearCacheInterceptor implements IOperInterceptor {
@@ -72,7 +72,6 @@ public class ReferenceClearCacheInterceptor implements IOperInterceptor {
     }
 
 
-
     private ReferenceDto findTableInReference(String tableName, String version) {
         if (this.referTables == null) {
             synchronized (tableName) {
@@ -99,6 +98,6 @@ public class ReferenceClearCacheInterceptor implements IOperInterceptor {
 
     @Override
     public int getOrder() {
-        return 3002;
+        return BASE_ORDER + 2;
     }
 }

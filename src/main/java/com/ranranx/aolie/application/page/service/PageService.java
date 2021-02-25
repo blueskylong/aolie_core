@@ -28,9 +28,8 @@ import java.util.*;
 
 /**
  * @author xxl
- *
- * @date 2020/10/31 20:08
  * @version V0.0.1
+ * @date 2020/10/31 20:08
  **/
 @Service
 @Transactional(readOnly = true)
@@ -41,8 +40,6 @@ public class PageService {
     @Autowired
     private UIService uiService;
 
-    @Autowired
-    private SchemaHolder schemaHolder;
 
     /**
      * 取得页面列表
@@ -320,7 +317,7 @@ public class PageService {
                 .andEqualTo("version_code", SessionUtils.getLoginVersion());
 
         List<PageInfoDto> lstPageDto = findPageInfos(schemaId);
-        List<ReferenceDto> referenceDtos = schemaHolder.getReferenceDtos(SessionUtils.getLoginVersion());
+        List<ReferenceDto> referenceDtos = SchemaHolder.getInstance().getReferenceDtos(SessionUtils.getLoginVersion());
         List<BlockViewDto> blocks = uiService.getBlockViews(schemaId);
         //将三个组装成树状结构
         List<Map<String, Object>> result = new ArrayList<>();

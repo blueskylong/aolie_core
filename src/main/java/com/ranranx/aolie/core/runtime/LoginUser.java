@@ -1,63 +1,91 @@
 package com.ranranx.aolie.core.runtime;
 
+import com.ranranx.aolie.application.user.dto.UserDto;
+import com.ranranx.aolie.core.common.Constants;
 import com.ranranx.aolie.core.common.SystemParam;
+import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.beans.Transient;
-import java.util.Collection;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author xxl
  * @version V0.0.1
  * @date 2020/12/28 0028 14:14
  **/
-public class LoginUser extends User {
-    private Long userId;
-    private String accountCode;
-    private String userName;
-    private String versionCode;
+public class LoginUser extends UserDto implements UserDetails, CredentialsContainer {
+    private Map<Long, SystemParam> params;
+    /**
+     * 当前登录的角色
+     */
     private Long roleId;
-    private String loginTime;
-    private Integer userType;
-    private Long belongOrg;
-    private String belongOrgCode;
 
-    private Map<String, SystemParam> params;
+    /**
+     * 所有权限信息 key 权限资源ID 参考Constants.DefaultRsIds
+     */
+    public Map<Long, Set<Long>> mapRights;
 
-    public LoginUser(String username, String password, Collection<? extends GrantedAuthority> authorities, Long userId) {
-        super(username, password, authorities);
-        this.userId = userId;
+    @Transient
+    public Map<Long, SystemParam> getParams() {
+        return params;
     }
 
-    public LoginUser(String username, String password, boolean enabled, boolean accountNonExpired, boolean credentialsNonExpired, boolean accountNonLocked, Collection<? extends GrantedAuthority> authorities, Long userId) {
-        super(username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
-        this.userId = userId;
+
+    /**
+     * 取得所有参数值
+     *
+     * @return
+     */
+    @Transient
+    public Map<Long, Object> getParamValues() {
+        Map<Long, Object> values = new HashMap<>();
+        Iterator<SystemParam> iterator = params.values().iterator();
+        while (iterator.hasNext()) {
+            SystemParam param = iterator.next();
+            values.put(param.getId(), param.getValue());
+        }
+        return values;
     }
 
-    public Long getUserId() {
-        return userId;
+    public void setParams(Map<Long, SystemParam> params) {
+        this.params = params;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    @Override
+    public void eraseCredentials() {
+        this.setPassword(null);
     }
 
-    public String getAccountCode() {
-        return accountCode;
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return null;
     }
 
-    public void setAccountCode(String accountCode) {
-        this.accountCode = accountCode;
+    @Override
+    public String getUsername() {
+        return getAccountCode();
     }
 
-    public String getUserName() {
-        return userName;
+    @Override
+    public boolean isAccountNonExpired() {
+        return this.getState() != null && this.getState().equals(Constants.UserState.expired);
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    @Override
+    public boolean isAccountNonLocked() {
+        return this.getState() != null && this.getState().equals(Constants.UserState.locked);
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return this.getState() != null && this.getState().equals(Constants.UserState.credentialsExpired);
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return this.getState() == null || this.getState().equals(Constants.UserState.normal);
     }
 
     public Long getRoleId() {
@@ -68,52 +96,32 @@ public class LoginUser extends User {
         this.roleId = roleId;
     }
 
-    public String getLoginTime() {
-        return loginTime;
+    @Override
+    public boolean equals(Object o) {
+        if (o == null) {
+            return false;
+        }
+        if (!(o instanceof LoginUser)) {
+            return false;
+        }
+        return this.getUserId().equals(((LoginUser) o).getUserId());
     }
 
-    public void setLoginTime(String loginTime) {
-        this.loginTime = loginTime;
+    @Override
+    public String toString() {
+        return this.getUserId().toString();
     }
 
-    public Integer getUserType() {
-        return userType;
+    @Override
+    public int hashCode() {
+        return this.getUserId().hashCode();
     }
 
-    public void setUserType(Integer userType) {
-        this.userType = userType;
+    public Map<Long, Set<Long>> getMapRights() {
+        return mapRights;
     }
 
-    public String getVersionCode() {
-        return versionCode;
-    }
-
-    public void setVersionCode(String versionCode) {
-        this.versionCode = versionCode;
-    }
-
-    public Long getBelongOrg() {
-        return belongOrg;
-    }
-
-    public void setBelongOrg(Long belongOrg) {
-        this.belongOrg = belongOrg;
-    }
-
-    public String getBelongOrgCode() {
-        return belongOrgCode;
-    }
-
-    public void setBelongOrgCode(String belongOrgCode) {
-        this.belongOrgCode = belongOrgCode;
-    }
-
-    @Transient
-    public Map<String, SystemParam> getParams() {
-        return params;
-    }
-
-    public void setParams(Map<String, SystemParam> params) {
-        this.params = params;
+    public void setMapRights(Map<Long, Set<Long>> mapRights) {
+        this.mapRights = mapRights;
     }
 }

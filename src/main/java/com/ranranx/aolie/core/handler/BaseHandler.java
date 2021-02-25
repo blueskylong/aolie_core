@@ -12,9 +12,8 @@ import java.util.Map;
 
 /**
  * @author xxl
- *
- * @date 2020/8/10 11:00
  * @version V0.0.1
+ * @date 2020/8/10 11:00
  **/
 public abstract class BaseHandler<T> implements IDbHandler {
     /**
@@ -62,6 +61,9 @@ public abstract class BaseHandler<T> implements IDbHandler {
         int num;
         List<IOperInterceptor> validInterceptor = findValidInterceptor(getCanHandleType(), param);
         HandleResult result = null;
+        if (validInterceptor == null || validInterceptor.isEmpty()) {
+            return result;
+        }
         for (IOperInterceptor inter : validInterceptor) {
             result = inter.beforeOper(param, this.getCanHandleType(), mapGlobalParam);
             if (result != null) {
@@ -188,6 +190,9 @@ public abstract class BaseHandler<T> implements IDbHandler {
      */
     List<IOperInterceptor> findValidInterceptor(String type, Object extParams) {
         List<IOperInterceptor> lstResult = new ArrayList<>();
+        if (lstInterceptor == null || lstInterceptor.isEmpty()) {
+            return lstResult;
+        }
         for (IOperInterceptor iOperInterceptor : lstInterceptor) {
             if (iOperInterceptor.isCanHandle(type, extParams)) {
                 lstResult.add(iOperInterceptor);

@@ -2,11 +2,15 @@ package com.ranranx.aolie.core.common;
 
 /**
  * @author xxl
- *
- * @date 2020/8/8 16:50
  * @version V0.0.1
+ * @date 2020/8/8 16=50
  **/
 public class Constants {
+    /**
+     * 默认版本
+     */
+//    public static final String DEFAULT_VERSION = "000000";
+
     /**
      * 表间关系
      */
@@ -171,8 +175,23 @@ public class Constants {
     public static class FixColumnName {
         /*版本号*/
         public static final String VERSION_CODE = "version_code";
+        /*序号*/
         public static final String XH = "xh";
+        /*级次*/
         public static final String LVL_CODE = "lvl_code";
+        /*用户账号*/
+        public static final String ACCOUNT_CODE = "account_code";
+        /*用户密码*/
+        public static final String PASSWORD = "password";
+    }
+
+    public static class UserState {
+        public static final int normal = 0;
+        public static final int disabled = -1;
+        public static final int locked = -2;
+        public static final int expired = -3;
+        public static final int credentialsExpired = -4;
+
     }
 
     /**
@@ -228,7 +247,7 @@ public class Constants {
     public static class DefaultRsIds {
         public static final long role = 11;
         public static final long menu = 12;
-        public static final long menuItem = 13;
+        public static final long menuButton = 13;
         public static final long organization = 14;
     }
 
@@ -246,4 +265,41 @@ public class Constants {
         public static final long roleToButton = 2;
     }
 
+    /**
+     * 表操作类型
+     */
+    public static class TableOperType {
+        /**
+         * 表或按钮操作类型
+         */
+        public static final Integer add = 1; //增加
+        public static final Integer delete = 2;  //删除
+        public static final Integer edit = 3;  //修改
+        public static final Integer view = 4;  //查看(刷新)
+        public static final Integer saveSingle = 5;  //保存
+        public static final Integer saveMulti = 6;   //多行保存
+        public static final Integer saveLevel = 7;  //保存级次
+        public static final Integer editMulti = 8;  //修改多行
+        public static final Integer cancel = 19;  //取消
+        public static final Integer custom1 = 101;  //自定义
+        public static final Integer custom2 = 111;  //自定义
+        public static final Integer custom3 = 121;  //自定义
+        public static final Integer custom4 = 131;  //自定义
+
+    }
+
+    /**
+     * 用户类别
+     */
+    public static class UserType {
+        //超级管理员
+        public static final Integer superAdmin = 9;
+        //管理员
+        public static final Integer admin = 8;
+        //部门领导
+        public static final Integer departManager = 5;
+        //一般雇员
+        public static final Integer employee = 1;
+
+    }
 }

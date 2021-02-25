@@ -1,6 +1,7 @@
 package com.ranranx.aolie.core.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ranranx.aolie.core.config.authentication.NamePassVersionScodeAuthenticationFilter;
 import com.ranranx.aolie.core.handler.HandleResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -35,21 +36,44 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests().antMatchers("/loginExpired").permitAll()
+        http.authorizeRequests().antMatchers("/loginExpired",
+                "/logoutSuccess").permitAll()
                 .anyRequest().authenticated()
+//                .accessDecisionManager(accessDecisionManager())
                 .and().exceptionHandling().
                 authenticationEntryPoint(point)
                 .and()
                 .formLogin()
                 .and().csrf().disable();
+        http.cors();
         http.addFilterAt(createJSONAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
         http.sessionManagement().invalidSessionUrl("/loginExpired");
+//        http.sessionManagement().maximumSessions(1).expiredUrl("/loginExpired");
+        http.logout()
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/logoutSuccess")
+                .deleteCookies("JSESSIONID")
+                .permitAll();
     }
 
-
+    /**
+     * 如果有自定义的鉴权器,则使用此代码
+     *
+     * @return
+     */
+//    @Bean
+//    public AccessDecisionManager accessDecisionManager() {
+//        List<AccessDecisionVoter<? extends Object>> decisionVoters
+//                = Arrays.asList(
+//                new WebExpressionVoter(),
+//                new RoleVoter(),
+//                new AuthenticatedVoter(),
+//                new DmAccessVoter());
+//        return new UnanimousBased(decisionVoters);
+//    }
     @Bean
-    JSONAuthenticationFilter createJSONAuthenticationFilter() throws Exception {
-        JSONAuthenticationFilter filter = new JSONAuthenticationFilter();
+    NamePassVersionScodeAuthenticationFilter createJSONAuthenticationFilter() throws Exception {
+        NamePassVersionScodeAuthenticationFilter filter = new NamePassVersionScodeAuthenticationFilter();
         filter.setAuthenticationSuccessHandler(new AuthenticationSuccessHandler() {
             @Override
             public void onAuthenticationSuccess(HttpServletRequest req, HttpServletResponse resp,
@@ -57,7 +81,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 resp.setContentType("application/json;charset=utf-8");
                 PrintWriter out = resp.getWriter();
                 HandleResult result = HandleResult.success(1);
-                out.write(new ObjectMapper().writeValueAsString("登录成功"));
+                result.setData(authentication);
+                out.write(new ObjectMapper().writeValueAsString(result));
                 out.flush();
                 out.close();
             }

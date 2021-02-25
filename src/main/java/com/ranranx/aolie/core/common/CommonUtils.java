@@ -14,9 +14,9 @@ import java.util.regex.Pattern;
 
 /**
  * @author xxl
- *  工具方法集合
- * @date 2020/8/7 9:17
+ * 工具方法集合
  * @version V0.0.1
+ * @date 2020/8/7 9:17
  **/
 public class CommonUtils {
     private static final Pattern NUMBER_PATTERN = Pattern.compile("[+-]?(\\d+(\\.\\d*)?|\\.\\d+)(E\\d+)?");
@@ -321,6 +321,20 @@ public class CommonUtils {
             return (Integer) obj;
         }
         return Integer.parseInt(obj.toString());
+    }
+
+    public static Long getLongField(Map<String, Object> map, String fieldName) {
+        if (map == null || map.isEmpty()) {
+            return null;
+        }
+        Object obj = map.get(fieldName);
+        if (obj == null) {
+            return null;
+        }
+        if (obj instanceof Long) {
+            return (Long) obj;
+        }
+        return Long.parseLong(obj.toString());
     }
 
     public static boolean isNumber(String str) {

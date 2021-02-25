@@ -13,9 +13,9 @@ import java.util.Map;
 
 /**
  * @author xxl
- *  系统元素翻译
- * @date 2021/1/28 15:10
+ * 系统元素翻译
  * @version V0.0.1
+ * @date 2021/1/28 15:10
  **/
 @FormulaElementTranslator
 public class SysparamElement implements TransElement {
@@ -67,9 +67,10 @@ public class SysparamElement implements TransElement {
     public String transToInner(String curElement, Schema schema, TransCenter transcenter) {
         System.out.println(this.getName() + "  matched!");
         List<String> sysParams = FormulaTools.getSysParams(curElement);
+        String version = schema.getSchemaDto().getVersionCode();
         if (sysParams != null && sysParams.size() > 0) {
             for (String paramName : sysParams) {
-                SystemParam paramInfo = SessionUtils.getParamInfoByName(paramName);
+                SystemParam paramInfo = SessionUtils.getParamInfoByName(paramName, version);
                 curElement = FormulaTools.replaceParamNameStr(curElement, paramName,
                         paramInfo.getId() + "");
             }

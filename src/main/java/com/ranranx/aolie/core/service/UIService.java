@@ -23,9 +23,8 @@ import java.util.*;
 
 /**
  * @author xxl
- *
- * @date 2020/10/7 11:16
  * @version V0.0.1
+ * @date 2020/10/7 11:16
  **/
 @Service
 @Transactional(readOnly = true)
@@ -36,8 +35,7 @@ public class UIService {
     @Autowired
     private DataOperatorFactory factory;
 
-    @Autowired
-    private SchemaHolder schemaHolder;
+
 
     /**
      * 查询表及其字段,用于树状显示
@@ -162,7 +160,12 @@ public class UIService {
         List<Component> lstResult = new ArrayList<>(lstDto.size());
         Component component;
         for (ComponentDto dto : lstDto) {
-            lstResult.add(new Component(dto, SchemaHolder.getColumn(dto.getColumnId(), dto.getVersionCode())));
+            Column column = SchemaHolder.getColumn(dto.getColumnId(), dto.getVersionCode());
+            if (column == null) {
+                //如果列不存在,则不返回给客户端,直接去掉
+                continue;
+            }
+            lstResult.add(new Component(dto, column));
         }
         return lstResult;
     }
@@ -240,7 +243,7 @@ public class UIService {
         queryParamDefinition.appendCriteria().andEqualTo("schema_id", schemaId)
                 .andEqualTo("version_code", versionCode);
         queryParamDefinition.addOrder(new FieldOrder(TableDto.class, "table_id", true, 0));
-        Schema schema = schemaHolder.getSchema(schemaId, versionCode);
+        Schema schema = SchemaHolder.getInstance().getSchema(schemaId, versionCode);
         return factory.getDataOperatorByKey(schema.getDsKey()).select(queryParamDefinition, TableDto.class);
     }
 

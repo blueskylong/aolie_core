@@ -17,9 +17,8 @@ import java.util.Map;
 
 /**
  * @author xxl
- *
- * @date 2020/8/29 20:59
  * @version V0.0.1
+ * @date 2020/8/29 20:59
  **/
 @RestController
 @RequestMapping("/dm")
@@ -27,8 +26,6 @@ public class DataModelController {
     @Autowired
     private DataModelService service;
 
-    @Autowired
-    private SchemaHolder schemaHolder;
 
     @GetMapping("/findSchemaFormulas/{schemaId}/{version}")
     public List<FormulaDto> findSchemaFormulas(@PathVariable Long schemaId, @PathVariable String version) {
@@ -42,7 +39,7 @@ public class DataModelController {
 
     @GetMapping("/findSchemaInfo/{schemaId}/{version}")
     public Schema findSchemaInfo(@PathVariable Long schemaId, @PathVariable String version) {
-        return schemaHolder.getSchema(schemaId, version);
+        return SchemaHolder.getInstance().getSchema(schemaId, version);
     }
 
     /**
@@ -70,12 +67,12 @@ public class DataModelController {
 
     @PostMapping("/saveSchema")
     public String saveSchema(@RequestBody Schema schema) {
-        return schemaHolder.saveSchema(schema);
+        return SchemaHolder.getInstance().saveSchema(schema);
     }
 
     @RequestMapping("/refreshCache/{schemaId}/{version}")
     public boolean refreshCache(@PathVariable long schemaId, @PathVariable String version) {
-        schemaHolder.initSchema(schemaId, version);
+        SchemaHolder.getInstance().initSchema(schemaId, version);
         return true;
     }
 
@@ -125,7 +122,7 @@ public class DataModelController {
      */
     @RequestMapping("/deleteSchema/{schemaId}")
     public HandleResult deleteSchema(@PathVariable Long schemaId) {
-        schemaHolder.deleteSchema(schemaId, SessionUtils.getLoginVersion());
+        SchemaHolder.getInstance().deleteSchema(schemaId, SessionUtils.getLoginVersion());
         return HandleResult.success(1);
     }
 
@@ -146,7 +143,7 @@ public class DataModelController {
      */
     @GetMapping("/findReferenceInfo")
     public List<ReferenceDto> findReferenceData() {
-        return schemaHolder.getReferenceDtos(SessionUtils.getLoginVersion());
+        return SchemaHolder.getInstance().getReferenceDtos(SessionUtils.getLoginVersion());
     }
 
     @GetMapping("/getReferenceDto/{referenceId}")

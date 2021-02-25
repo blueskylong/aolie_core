@@ -1,5 +1,7 @@
 package com.ranranx.aolie.application.user.controller;
 
+import com.ranranx.aolie.application.user.dto.RightRelationDto;
+import com.ranranx.aolie.application.user.dto.RightResourceDto;
 import com.ranranx.aolie.application.user.service.UserService;
 import com.ranranx.aolie.core.common.SessionUtils;
 import com.ranranx.aolie.core.handler.HandleResult;
@@ -40,7 +42,12 @@ public class UserController {
      */
     @PostMapping("/saveUserRight/{userId}")
     public HandleResult saveUserRight(@PathVariable long userId, @RequestBody Map<Long, List<Long>> mapNewUserRight) {
-        return service.saveUserRight(userId, SessionUtils.getLoginVersion(), mapNewUserRight);
+        try {
+            return service.saveUserRight(userId, SessionUtils.getLoginVersion(), mapNewUserRight);
+        } catch (Exception e) {
+            return HandleResult.failure(e.getMessage());
+        }
+
     }
 
     /**
@@ -127,6 +134,24 @@ public class UserController {
         return service.findRoleRightOtherRelation();
     }
 
+    /**
+     * 查询所有权限关系
+     *
+     * @return
+     */
+    @GetMapping("/findAllRightSourceDto/{version}")
+    public List<RightResourceDto> findAllRightSourceDto(@PathVariable String version) {
+        return service.findAllRightSourceDto(version);
+    }
 
+    /**
+     * 查询所有权限关系
+     *
+     * @return
+     */
+    @GetMapping("/findAllRelationDto/{version}")
+    public List<RightRelationDto> findAllRelationDto(@PathVariable String version) {
+        return service.findAllRelationDto(version);
+    }
 
 }

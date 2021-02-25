@@ -1,5 +1,6 @@
 userRight.findAllMenu:
-SELECT a.menu_id   AS id,
+SELECT CONCAT('x',a.menu_id)   AS id,
+       a.menu_id  as realid,
        a.lvl_code  AS code,
        a.menu_name AS name,
        1           AS type
@@ -8,6 +9,7 @@ WHERE version_code = #{versionCode}
 UNION
     ALL
 SELECT b.btn_id                       AS id,
+       b.btn_id                       AS realid,
        CONCAT(c.lvl_code, b.lvl_code) AS code,
        b.title                        AS name,
        2                              AS type

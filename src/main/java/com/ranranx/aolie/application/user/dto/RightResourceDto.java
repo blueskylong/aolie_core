@@ -10,7 +10,7 @@ import javax.persistence.Table;
  * @date 2021-01-12 15:27:57
  */
 @Table(name = "aolie_s_right_resource")
-public class RightSourceDto extends BaseDto implements java.io.Serializable {
+public class RightResourceDto extends BaseDto implements java.io.Serializable {
 
     private static final long serialVersionUID = 1L;
     private Long rsId;

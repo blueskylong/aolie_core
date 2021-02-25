@@ -12,10 +12,17 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2021/2/6 0006 21:09
  **/
 @RestController
-@ResponseStatus(HttpStatus.UNAUTHORIZED)
+
 public class LoginController {
     @RequestMapping("/loginExpired")
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public HandleResult loginExpired() {
-        return HandleResult.failure("登录过期,请重新登录");
+        HandleResult failure = HandleResult.failure("登录过期,请重新登录");
+        failure.setCode(HttpStatus.UNAUTHORIZED.value());
+        return failure;
+    }
+    @RequestMapping("/logoutSuccess")
+    public HandleResult logoutSuccess(){
+        return HandleResult.success(1);
     }
 }

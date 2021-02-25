@@ -1,8 +1,10 @@
 package com.ranranx.aolie.application.user.service;
 
+import com.ranranx.aolie.application.menu.dto.MenuButtonDto;
 import com.ranranx.aolie.application.user.dto.RightRelationDetailDto;
 import com.ranranx.aolie.application.user.dto.RightRelationDto;
-import com.ranranx.aolie.application.user.dto.RightSourceDto;
+import com.ranranx.aolie.application.user.dto.RightResourceDto;
+import com.ranranx.aolie.application.user.dto.UserRightDto;
 import com.ranranx.aolie.core.common.CommonUtils;
 import com.ranranx.aolie.core.common.Constants;
 import com.ranranx.aolie.core.common.SessionUtils;
@@ -282,7 +284,7 @@ public class UserService {
         if (lstData == null || lstData.isEmpty()) {
             return -1;
         }
-        return CommonUtils.getIntegerField(lstData.get(0), "rr_id").longValue();
+        return CommonUtils.getLongField(lstData.get(0), "rr_id");
     }
 
     /**
@@ -463,7 +465,7 @@ public class UserService {
             return null;
         }
         QueryParam param = new QueryParam();
-        param.setTableDtos(Constants.DEFAULT_SYS_SCHEMA, versionCode, RightSourceDto.class);
+        param.setTableDtos(Constants.DEFAULT_SYS_SCHEMA, versionCode, RightResourceDto.class);
         param.appendCriteria().andIn("rs_id", lstId);
         return handlerFactory.handleQuery(param);
     }
@@ -479,7 +481,7 @@ public class UserService {
             return HandleResult.success(0);
         }
         QueryParam param = new QueryParam();
-        param.setTableDtos(Constants.DEFAULT_SYS_SCHEMA, SessionUtils.getLoginVersion(), RightSourceDto.class);
+        param.setTableDtos(Constants.DEFAULT_SYS_SCHEMA, SessionUtils.getLoginVersion(), RightResourceDto.class);
         param.appendCriteria().andIn("rs_id", lstOtherRsID);
         return handlerFactory.handleQuery(param);
     }
@@ -495,7 +497,7 @@ public class UserService {
         //排除菜单和按钮资源
         List<Long> menuAndButtonId = new ArrayList<>();
         menuAndButtonId.add(Constants.DefaultRsIds.menu);
-        menuAndButtonId.add(Constants.DefaultRsIds.menuItem);
+        menuAndButtonId.add(Constants.DefaultRsIds.menuButton);
         param.appendCriteria().andEqualTo("rs_id_from", Constants.DefaultRsIds.role)
                 .andNotIn("rs_id_to", menuAndButtonId);
         param.setResultClass(RightRelationDto.class);
@@ -512,6 +514,163 @@ public class UserService {
             return lstResult;
         }
         return null;
+    }
+
+    /**
+     * 查询所有权限关系
+     *
+     * @return
+     */
+    public List<RightRelationDto> findAllRelationDto(String version) {
+        QueryParam param = new QueryParam();
+        param.setTableDtos(Constants.DEFAULT_SYS_SCHEMA, SessionUtils.getDefaultVersion(), RightRelationDto.class);
+        if (CommonUtils.isNotEmpty(version)) {
+            param.appendCriteria().andEqualTo(Constants.FixColumnName.VERSION_CODE, version);
+        } else {
+            param.setNoVersionFilter(true);
+        }
+        param.setResultClass(RightRelationDto.class);
+        HandleResult result = handlerFactory.handleQuery(param);
+        if (result.isSuccess()) {
+            return (List<RightRelationDto>) result.getData();
+        }
+        return null;
+    }
+
+    /**
+     * 查询所有权限关系
+     *
+     * @return
+     */
+    public List<RightResourceDto> findAllRightSourceDto(String version) {
+        QueryParam param = new QueryParam();
+        param.setTableDtos(Constants.DEFAULT_SYS_SCHEMA,
+                version == null ? SessionUtils.getDefaultVersion() : version, RightResourceDto.class);
+        if (CommonUtils.isNotEmpty(version)) {
+            param.appendCriteria().andEqualTo(Constants.FixColumnName.VERSION_CODE, version);
+        } else {
+            param.setNoVersionFilter(true);
+        }
+
+        param.setResultClass(RightResourceDto.class);
+        HandleResult result = handlerFactory.handleQuery(param);
+        if (result.isSuccess()) {
+            return (List<RightResourceDto>) result.getData();
+        }
+        return null;
+    }
+
+    /**
+     * 查询直接授予用户的权限
+     *
+     * @param userId      用户ID
+     * @param rsId        资源类型ID
+     * @param versionCode 版本号
+     * @return 返回权限的明细ID
+     */
+    public Set<Long> findUserDirectRights(Long userId, Long rsId, String versionCode) {
+        QueryParam param = new QueryParam();
+        param.setTableDtos(Constants.DEFAULT_SYS_SCHEMA, versionCode, UserRightDto.class);
+        param.appendCriteria().andEqualTo("user_id", userId)
+                .andEqualTo("rs_id", rsId)
+                .andEqualTo(Constants.FixColumnName.VERSION_CODE, versionCode);
+        param.setResultClass(UserRightDto.class);
+        HandleResult result = handlerFactory.handleQuery(param);
+        if (result.isSuccess() && result.getData() != null) {
+            List<UserRightDto> lstDto = (List<UserRightDto>) result.getData();
+            Set<Long> lstIDs = new HashSet<>(lstDto.size());
+            lstDto.forEach(el -> {
+                lstIDs.add(el.getRsDetailId());
+            });
+            return lstIDs;
+        }
+        return null;
+    }
+
+    /**
+     * 查询传递的权限明细
+     *
+     * @param rsFrom     开始的资源类别ID
+     * @param rsTo       结束的资源类别ID
+     * @param lstFromIds 开始资源的所有ID
+     * @return 对应结果节点的所有ID
+     */
+    public Set<Long> findNextRights(Long rsFrom, Long rsTo, Set<Long> lstFromIds, String versionCode) {
+        //查询他们的对应关系ID
+        long rrid = findRrid(rsFrom, rsTo, versionCode);
+        if (rrid < 0) {
+            //没有查询到关系
+            return null;
+        }
+        //查询明细
+        QueryParam param = new QueryParam();
+        param.setTableDtos(Constants.DEFAULT_SYS_SCHEMA, versionCode, RightRelationDetailDto.class);
+        param.appendCriteria().andEqualTo("rr_id", rrid).andIn("id_source", lstFromIds)
+                .andEqualTo(Constants.FixColumnName.VERSION_CODE, versionCode);
+        param.setResultClass(RightRelationDetailDto.class);
+        HandleResult result = handlerFactory.handleQuery(param);
+        if (result.isSuccess() && result.getData() != null) {
+            List<RightRelationDetailDto> lstDto = (List<RightRelationDetailDto>) result.getData();
+            Set<Long> lstIds = new HashSet<>(lstDto.size());
+            lstDto.forEach(el -> {
+                lstIds.add(el.getIdTarget());
+            });
+            return lstIds;
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * 查询所有的带有权限的操作按钮信息
+     * 所有存在权限设置的按钮 key:version+tableId+operId, value:此表此操作的按钮列表. 因为同一个操作,可能在不同的功能里,所以可能会出现多次.
+     * 而出现一次,就认定有权限
+     *
+     * @return
+     */
+    public Map<String, Set<Long>>[] findAllButtonsOperator() {
+        //查询所有相关数据,只需要查询删除,修改和增加的操作
+        QueryParam param = new QueryParam();
+        param.setTableDtos(Constants.DEFAULT_SYS_SCHEMA, SessionUtils.getDefaultVersion(), MenuButtonDto.class);
+        param.setNoVersionFilter(true);
+        Set<Integer> lstOper = new HashSet<>();
+        lstOper.add(Constants.TableOperType.delete);
+        lstOper.add(Constants.TableOperType.add);
+        lstOper.add(Constants.TableOperType.edit);
+        lstOper.add(Constants.TableOperType.editMulti);
+        lstOper.add(Constants.TableOperType.saveSingle);
+        lstOper.add(Constants.TableOperType.saveLevel);
+        lstOper.add(Constants.TableOperType.saveMulti);
+        param.setResultClass(MenuButtonDto.class);
+        param.appendCriteria().andIn("table_opertype", lstOper).andIsNotNull("relation_tableid");
+        HandleResult result = handlerFactory.handleQuery(param);
+        Map<String, Set<Long>> mapOperTypeToBtnId = new HashMap<>();
+        Map<String, Set<Long>> mapTableAllOperType = new HashMap<>();
+        Map<String, Set<Long>>[] arrResult = new Map[]{mapOperTypeToBtnId, mapTableAllOperType};
+        if (!result.isSuccess() || result.getData() == null) {
+            return arrResult;
+        }
+        List<MenuButtonDto> lstDto = (List<MenuButtonDto>) result.getData();
+        lstDto.forEach(el -> {
+            //将操作类型中的单行编辑和多行编辑合并成单行编辑,保存单行和多选合并成单行
+            String key = el.getVersionCode() + "_"
+                    + el.getRelationTableid() + "_";
+            String tableKey = el.getVersionCode() + "_"
+                    + el.getRelationTableid();
+            if (Constants.TableOperType.editMulti.equals(el.getTableOpertype())) {
+                key += Constants.TableOperType.edit;
+            } else if (Constants.TableOperType.saveMulti.equals(el.getTableOpertype())) {
+                key += Constants.TableOperType.saveSingle;
+            } else {
+                key += el.getTableOpertype();
+            }
+            Set<Long> lstId = mapOperTypeToBtnId.computeIfAbsent(key, (k) -> new HashSet<>());
+            lstId.add(el.getBtnId());
+            Set<Long> lstType = mapTableAllOperType.computeIfAbsent(tableKey, k -> new HashSet<>());
+            lstType.add(el.getTableOpertype().longValue());
+        });
+
+        return arrResult;
     }
 
 }

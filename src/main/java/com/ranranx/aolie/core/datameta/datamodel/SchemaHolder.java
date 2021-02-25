@@ -4,20 +4,25 @@ import com.ranranx.aolie.core.common.CommonUtils;
 import com.ranranx.aolie.core.datameta.dto.*;
 import com.ranranx.aolie.core.exceptions.InvalidParamException;
 import com.ranranx.aolie.core.exceptions.NotExistException;
+import com.ranranx.aolie.core.interfaces.ISystemIniter;
 import com.ranranx.aolie.core.service.DataModelService;
 import com.ranranx.aolie.core.service.UIService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
 
 /**
  * @author xxl
- *  暂时使用这个来手动组装, 并将过程中的数据缓存起来
- * @date 2020/8/6 10:53
+ * 暂时使用这个来手动组装, 并将过程中的数据缓存起来
  * @version V0.0.1
+ * @date 2020/8/6 10:53
  **/
 @org.springframework.stereotype.Component
 public class SchemaHolder {
+    Logger logger = LoggerFactory.getLogger(SchemaHolder.class);
 
     private static UIService uiService;
     private static DataModelService service;
@@ -59,6 +64,12 @@ public class SchemaHolder {
      * 引用信息
      */
     private static Map<String, Reference> mapReference;
+
+    /**
+     * 系统初始化器
+     */
+    @Autowired(required = false)
+    private List<ISystemIniter> lstIniter;
 
     /**
      * 版本对库
@@ -163,6 +174,7 @@ public class SchemaHolder {
      */
     @PostConstruct
     public void refresh() {
+        logger.info("---初始化方案");
         mapTables = new HashMap<>(20);
         mapFields = new HashMap<>(200);
         mapFieldToTable = new HashMap<>(200);
@@ -184,6 +196,19 @@ public class SchemaHolder {
             }
         }
         initOperator();
+        logger.info("---初始化方案完成");
+
+        if (this.lstIniter != null && !this.lstIniter.isEmpty()) {
+            logger.info("---初始化其它服务");
+            //先排序
+            lstIniter.sort((a, b) -> {
+                return a.getOrder() > b.getOrder() ? -1 : 1;
+            });
+            logger.info("---初始化其它服务完成");
+        }
+        lstIniter.forEach(el -> {
+            el.init();
+        });
     }
 
 
@@ -481,7 +506,8 @@ public class SchemaHolder {
     }
 
     public static TableInfo findTableByTableName(String tableName, long schemaId, String version) {
-        Schema schema = mapSchema.get(CommonUtils.makeKey(schemaId + "", version));
+
+        Schema schema = getInstance().getSchema(schemaId, version);
         if (schema == null) {
             return null;
         }

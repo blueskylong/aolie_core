@@ -3,10 +3,13 @@ package com.ranranx.aolie.application.menu.service;
 import com.ranranx.aolie.application.menu.dto.MenuButtonDto;
 import com.ranranx.aolie.application.menu.dto.MenuDto;
 import com.ranranx.aolie.application.menu.dto.MenuInfo;
+import com.ranranx.aolie.core.common.Constants;
 import com.ranranx.aolie.core.common.SessionUtils;
 import com.ranranx.aolie.core.ds.dataoperator.DataOperatorFactory;
 import com.ranranx.aolie.core.ds.definition.QueryParamDefinition;
 import com.ranranx.aolie.core.exceptions.NotExistException;
+import com.ranranx.aolie.core.handler.HandlerFactory;
+import com.ranranx.aolie.core.handler.param.QueryParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,15 +18,17 @@ import java.util.List;
 
 /**
  * @author xxl
- *
- * @date 2020/12/10 10:12
  * @version V0.0.1
+ * @date 2020/12/10 10:12
  **/
 @Service
 @Transactional(readOnly = true)
 public class MenuService {
     @Autowired
     private DataOperatorFactory factory;
+
+    @Autowired
+    private HandlerFactory handlerFactory;
 
     /**
      * 查询菜单的详细信息
@@ -55,10 +60,10 @@ public class MenuService {
      * @return
      */
     public List<MenuDto> findUserMenu() {
-        QueryParamDefinition definition = new QueryParamDefinition();
-        definition.setTableDtos(MenuDto.class);
+        QueryParam definition = new QueryParam();
+        definition.setTableDtos(Constants.DEFAULT_SYS_SCHEMA, SessionUtils.getLoginVersion(), MenuDto.class);
         definition.appendCriteria().andEqualTo("version_code", SessionUtils.getLoginVersion());
-        //TODO 增加权限过滤
-        return factory.getDefaultDataOperator().select(definition, MenuDto.class);
+        definition.setResultClass(MenuDto.class);
+        return (List<MenuDto>) handlerFactory.handleQuery(definition).getData();
     }
 }

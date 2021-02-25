@@ -13,18 +13,14 @@ import org.springframework.stereotype.Component;
 
 /**
  * @author xxl
- *  数据删除服务
- * @date 2020/8/4 14:35
+ * 数据删除服务
  * @version V0.0.1
+ * @date 2020/8/4 14:35
  **/
 @Component
 public class DeleteHandler<T extends DeleteParam> extends BaseHandler<T> {
     @Autowired
     private DataOperatorFactory factory;
-
-    @Autowired
-    private SchemaHolder schemaHolder;
-
     /**
      * 默认可以处理的类型
      *
@@ -37,7 +33,7 @@ public class DeleteHandler<T extends DeleteParam> extends BaseHandler<T> {
 
 
     @Override
-    protected  HandleResult handle(DeleteParam deleteParam) {
+    protected HandleResult handle(DeleteParam deleteParam) {
         HandleResult result = new HandleResult();
         try {
             DeleteParamDefinition deleteParamDefinition = new DeleteParamDefinition();

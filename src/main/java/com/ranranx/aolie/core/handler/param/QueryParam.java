@@ -17,9 +17,9 @@ import java.util.Map;
 
 /**
  * @author xxl
- *  查询参数载体, 可以是多种组合, 如果是单表, 则可以使用table和mapFilter组合, 如果使用视图则需要根据视图的设定拆分
- * @date 2020/8/6 14:28
+ * 查询参数载体, 可以是多种组合, 如果是单表, 则可以使用table和mapFilter组合, 如果使用视图则需要根据视图的设定拆分
  * @version V0.0.1
+ * @date 2020/8/6 14:28
  **/
 public class QueryParam {
     /**
@@ -49,11 +49,15 @@ public class QueryParam {
     private Page page;
 
     private Class resultClass;
+    /**
+     * 是否不需要系统添加版本过滤条件
+     */
+    private boolean noVersionFilter = false;
 
-    @javax.persistence.Transient
     /**
      * 排序字段  综合条件
      */
+    @javax.persistence.Transient
     private List<FieldOrder> lstOrder;
     private List<Field> fields;
 
@@ -245,5 +249,14 @@ public class QueryParam {
             return null;
         }
         return this.mapControlParam.get(key);
+    }
+
+
+    public boolean isNoVersionFilter() {
+        return noVersionFilter;
+    }
+
+    public void setNoVersionFilter(boolean noVersionFilter) {
+        this.noVersionFilter = noVersionFilter;
     }
 }
