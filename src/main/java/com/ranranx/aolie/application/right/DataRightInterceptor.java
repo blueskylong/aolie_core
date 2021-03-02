@@ -71,7 +71,8 @@ public class DataRightInterceptor implements IOperInterceptor, ApplicationListen
     public HandleResult beforeOper(Object param, String handleType, Map<String, Object> globalParamData)
             throws InvalidException {
         LoginUser user = SessionUtils.getLoginUser();
-        if (user == null) {
+        //没有登录的和超级管理员不做数据权限过滤
+        if (user == null || Constants.UserType.superAdmin.equals(user.getUserType())) {
             return null;
         }
         if (Constants.HandleType.TYPE_QUERY.equalsIgnoreCase(handleType)) {
@@ -112,19 +113,22 @@ public class DataRightInterceptor implements IOperInterceptor, ApplicationListen
         for (int i = 0; i < tables.length; i++) {
             TableInfo tableInfo = tables[i];
             //检查是不是权限表,如果是权限表,则直接添加条件
-            String info = this.getRightTableInfo(tableInfo.getTableDto().getTableName(),
-                    tableInfo.getTableDto().getVersionCode());
-            //如果有值,则说明此表是权限数据来源表
-            if (info != null) {
-                //info格式是 idfield:rsid
-                String[] infos = info.split(":");
-                Set<Long> ids = SessionUtils.getLoginUser().getMapRights().get(infos[1]);
-                //如果没有权限数据,则直接返回空值
-                if (ids == null || ids.isEmpty()) {
-                    return HandleResult.success(0);
+            //这里需要放弃 公共选项表,此表需要额外的条件进行过滤,所以暂时不处理
+            if (!Constants.DefaultTableName.commonSelection.equalsIgnoreCase(tableInfo.getTableDto().getTableName())) {
+                String info = this.getRightTableInfo(tableInfo.getTableDto().getTableName(),
+                        tableInfo.getTableDto().getVersionCode());
+                //如果有值,则说明此表是权限数据来源表
+                if (info != null) {
+                    //info格式是 idfield:rsid
+                    String[] infos = info.split(":");
+                    Set<Long> ids = SessionUtils.getLoginUser().getMapRights().get(Long.parseLong(infos[1]));
+                    //如果没有权限数据,则直接返回空值
+                    if (ids == null || ids.isEmpty()) {
+                        return HandleResult.success(0);
+                    }
+                    param.appendCriteria().setTableName(tableInfo.getTableDto().getTableName())
+                            .andIn(infos[0], ids);
                 }
-                param.appendCriteria().setTableName(tableInfo.getTableDto().getTableName())
-                        .andIn(infos[0], ids);
             }
             List<Column> lstColumn = findTableRightCols(tableInfo);
             if (lstColumn != null && !lstColumn.isEmpty()) {

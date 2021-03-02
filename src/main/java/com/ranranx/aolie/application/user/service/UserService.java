@@ -588,6 +588,32 @@ public class UserService {
     }
 
     /**
+     * 查询直接授予用户的所有权限
+     *
+     * @param userId      用户ID
+     * @param versionCode 版本号
+     * @return 返回权限的明细ID
+     */
+    public Map<Long, Set<Long>> findUserDirectAllRights(Long userId, String versionCode) {
+        QueryParam param = new QueryParam();
+        param.setTableDtos(Constants.DEFAULT_SYS_SCHEMA, versionCode, UserRightDto.class);
+        param.appendCriteria().andEqualTo("user_id", userId)
+                .andEqualTo(Constants.FixColumnName.VERSION_CODE, versionCode);
+        param.setResultClass(UserRightDto.class);
+        HandleResult result = handlerFactory.handleQuery(param);
+        if (result.isSuccess() && result.getData() != null) {
+            List<UserRightDto> lstDto = (List<UserRightDto>) result.getData();
+            Map<Long, Set<Long>> mapRight = new HashMap<>();
+            lstDto.forEach(el -> {
+                Set<Long> lstId = mapRight.computeIfAbsent(el.getRsId(), key -> new HashSet<>());
+                lstId.add(el.getRsDetailId());
+            });
+            return mapRight;
+        }
+        return new HashMap<>();
+    }
+
+    /**
      * 查询传递的权限明细
      *
      * @param rsFrom     开始的资源类别ID
@@ -597,6 +623,9 @@ public class UserService {
      */
     public Set<Long> findNextRights(Long rsFrom, Long rsTo, Set<Long> lstFromIds, String versionCode) {
         //查询他们的对应关系ID
+        if (lstFromIds == null || lstFromIds.isEmpty()) {
+            return null;
+        }
         long rrid = findRrid(rsFrom, rsTo, versionCode);
         if (rrid < 0) {
             //没有查询到关系

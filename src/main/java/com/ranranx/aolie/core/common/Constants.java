@@ -302,4 +302,11 @@ public class Constants {
         public static final Integer employee = 1;
 
     }
+
+    /**
+     * 系统固定的表名
+     */
+    public static class DefaultTableName {
+        public static final String commonSelection = "aolie_s_common_selection";
+    }
 }

@@ -4,9 +4,9 @@ import javax.persistence.Table;
 
 /**
  * @author xxl
- *  复合组件信息, 视图信息, 包含面板 ,列表及树.
- * @date 2020/8/5 10:16
+ * 复合组件信息, 视图信息, 包含面板 ,列表及树.
  * @version V0.0.1
+ * @date 2020/8/5 10:16
  **/
 @Table(name = "aolie_dm_blockview")
 public class BlockViewDto extends SchemaBaseDto {
@@ -40,6 +40,8 @@ public class BlockViewDto extends SchemaBaseDto {
     private Integer rowSpan;
     private String title;
     private Integer showHead;
+
+    private Integer layoutType;
 
     public Long getBlockViewId() {
         return blockViewId;
@@ -128,5 +130,13 @@ public class BlockViewDto extends SchemaBaseDto {
 
     public void setLvlCode(String lvlCode) {
         this.lvlCode = lvlCode;
+    }
+
+    public Integer getLayoutType() {
+        return layoutType;
+    }
+
+    public void setLayoutType(Integer layoutType) {
+        this.layoutType = layoutType;
     }
 }

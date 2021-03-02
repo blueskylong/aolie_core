@@ -82,7 +82,11 @@ public class CommonUtils {
     }
 
     public static <T> List<T> convertCamelAndToObject(List<Map<String, Object>> lst, Class<T> clazz) {
-        List<T> lstResult = new ArrayList<>();
+
+        List lstResult = new ArrayList<>();
+        if (lst == null) {
+            return lstResult;
+        }
         try {
             if (lst != null && !lst.isEmpty()) {
                 for (Map<String, Object> map : lst) {
@@ -94,7 +98,9 @@ public class CommonUtils {
             e.printStackTrace();
             throw new InvalidException("生成对象失败:" + e.getMessage());
         }
-        return lstResult;
+        lst.clear();
+        lst.addAll(lstResult);
+        return (List<T>) lst;
     }
 
     /**

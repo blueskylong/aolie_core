@@ -6,8 +6,9 @@ import com.ranranx.aolie.application.menu.dto.MenuInfo;
 import com.ranranx.aolie.core.common.Constants;
 import com.ranranx.aolie.core.common.SessionUtils;
 import com.ranranx.aolie.core.ds.dataoperator.DataOperatorFactory;
-import com.ranranx.aolie.core.ds.definition.QueryParamDefinition;
+import com.ranranx.aolie.core.ds.definition.FieldOrder;
 import com.ranranx.aolie.core.exceptions.NotExistException;
+import com.ranranx.aolie.core.handler.HandleResult;
 import com.ranranx.aolie.core.handler.HandlerFactory;
 import com.ranranx.aolie.core.handler.param.QueryParam;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,19 +39,23 @@ public class MenuService {
      * @return
      */
     public MenuInfo findMenuInfo(Long menuId, String version) {
-        QueryParamDefinition definition = new QueryParamDefinition();
-        definition.setTableDtos(MenuDto.class);
-        definition.appendCriteria().andEqualTo("menu_id", menuId).andEqualTo("version_code", version);
-        MenuDto menuDto = factory.getDefaultDataOperator().selectOne(definition, MenuDto.class);
-        if (menuDto == null) {
+        QueryParam param = new QueryParam();
+        param.setTableDtos(Constants.DEFAULT_SYS_SCHEMA, SessionUtils.getLoginVersion(), MenuDto.class);
+        param.appendCriteria().andEqualTo("menu_id", menuId).andEqualTo("version_code", version);
+        param.setResultClass(MenuDto.class);
+        HandleResult result = handlerFactory.handleQuery(param);
+        List<MenuDto> lstMenuDto = (List<MenuDto>) result.getData();
+        if (result == null || !result.isSuccess() || lstMenuDto == null || lstMenuDto.isEmpty()) {
             throw new NotExistException("指定的菜单不存在");
         }
-        definition.setTableDtos(MenuButtonDto.class);
-        definition.addOrderField("lvl_code");
-        List<MenuButtonDto> lstButtons = factory.getDefaultDataOperator().select(definition, MenuButtonDto.class);
+        MenuDto menuDto = lstMenuDto.get(0);
+        param.setTableDtos(Constants.DEFAULT_SYS_SCHEMA, SessionUtils.getLoginVersion(), MenuButtonDto.class);
+        param.addOrder(new FieldOrder(MenuButtonDto.class, "lvl_code", true, 1));
+        param.setResultClass(MenuButtonDto.class);
+        result = handlerFactory.handleQuery(param);
         MenuInfo info = new MenuInfo();
         info.setMenuDto(menuDto);
-        info.setLstBtns(lstButtons);
+        info.setLstBtns((List<MenuButtonDto>) result.getData());
         return info;
     }
 

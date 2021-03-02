@@ -76,8 +76,8 @@ public class OperatorRightInterceptor implements IOperInterceptor, ICacheRefTabl
                                    Map<String, Object> globalParamData) throws InvalidException {
         //判断此用户有没有授予此权限
         LoginUser loginUser = SessionUtils.getLoginUser();
-        //未登录的,不处理
-        if (loginUser == null) {
+        //没有登录的和超级管理员不做数据权限过滤
+        if (loginUser == null || Constants.UserType.superAdmin.equals(loginUser.getUserType())) {
             return null;
         }
         String[] keys = getOperatorRightKey(param, handleType);

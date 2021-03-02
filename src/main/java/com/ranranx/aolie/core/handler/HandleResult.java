@@ -110,6 +110,14 @@ public class HandleResult {
 
     public void setData(Object data) {
         this.data = data;
+        if (this.data instanceof com.github.pagehelper.Page) {
+            com.github.pagehelper.Page resultPage = (com.github.pagehelper.Page) this.data;
+            this.page = new Page();
+            page.setTotalRecord(resultPage.getTotal());
+            page.setCurrentPage(resultPage.getPageNum());
+            page.setPageSize(resultPage.getPageSize());
+            page.setTotalPage(resultPage.getPages());
+        }
     }
 
     public int getCode() {

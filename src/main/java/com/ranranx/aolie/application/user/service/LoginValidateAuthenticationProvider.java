@@ -19,9 +19,13 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Component
+
 public class LoginValidateAuthenticationProvider implements AuthenticationProvider {
 
     @Autowired
@@ -73,6 +77,7 @@ public class LoginValidateAuthenticationProvider implements AuthenticationProvid
         }
 
         initUserRight(user);
+
         initUserParams(user);
         return new NamePassVersionScodeAuthenticationToken(user, rawPassword, user.getAuthorities());
     }
@@ -102,20 +107,16 @@ public class LoginValidateAuthenticationProvider implements AuthenticationProvid
      * @return key: rsId,value:array of ids
      */
     private Map<Long, Set<Long>> populateNodeStruct(RightNode root, LoginUser user) {
-        Map<Long, Set<Long>> mapResult = new HashMap<>();
+        Map<Long, Set<Long>> mapResult = userService.findUserDirectAllRights(user.getUserId(), user.getVersionCode());
         List<RightNode> lstSub = root.getLstSub();
         if (lstSub == null || lstSub.isEmpty()) {
             return mapResult;
         }
+        if (mapResult == null || mapResult.isEmpty()) {
+            return mapResult;
+        }
 
         lstSub.forEach(el -> {
-            //第一层子节点,是没有对应关系传递的
-            Set<Long> rights = findRight(root, el, null, user);
-            //如果此节点用户没有被授权,则下级关系不再处理
-            if (rights == null || rights.isEmpty()) {
-                return;
-            }
-            mapResult.put(el.getRightId(), rights);
             //如果有下级,则处理下级
             //这里使用了深度优先的方式,如果采用广度优先的方式,一定情况下会理有效率
             List<RightNode> subNodes = el.getLstSub();
@@ -137,14 +138,14 @@ public class LoginValidateAuthenticationProvider implements AuthenticationProvid
      */
     private void findSubRights(RightNode fromNode, RightNode toNode, Map<Long, Set<Long>> mapRights, LoginUser user) {
         Set<Long> rights = findRight(fromNode, toNode, mapRights.get(fromNode.getRightId()), user);
-        if (rights == null || rights.isEmpty()) {
-            return;
-        }
         Set<Long> lstExists = mapRights.computeIfAbsent(toNode.getRightId(), key -> {
             return new HashSet<Long>();
         });
         //添加到结果集中
-        lstExists.addAll(rights);
+        if (rights != null) {
+            lstExists.addAll(rights);
+        }
+
         //检查下级
         List<RightNode> lstSub = toNode.getLstSub();
         if (lstSub != null && !lstSub.isEmpty()) {
@@ -155,16 +156,11 @@ public class LoginValidateAuthenticationProvider implements AuthenticationProvid
         }
     }
 
+
     private Set<Long> findRight(RightNode fromNode, RightNode toNode, Set<Long> lstFormIds, LoginUser user) {
-        //如果是根节点,则查询用户对资源表
+        //如果是根节点,则不再查询,因前面已统一查询用户的直接权限
         if (fromNode.getLstParent().isEmpty()) {
-            try {
-                return userService.findUserDirectRights(user.getUserId(),
-                        toNode.getRightId(), user.getVersionCode());
-            }catch (Exception e){
-                e.printStackTrace();
-                return null;
-            }
+            return null;
         } else {
             //否则查询资源关联表
             return userService.findNextRights(fromNode.getRightId(),

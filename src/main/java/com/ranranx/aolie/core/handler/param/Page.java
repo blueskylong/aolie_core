@@ -2,13 +2,12 @@ package com.ranranx.aolie.core.handler.param;
 
 /**
  * @author xxl
- *
- * @date 2020/8/8 20:02
  * @version V0.0.1
+ * @date 2020/8/8 20:02
  **/
 public class Page {
     private int currentPage;
-    private int totalRecord;
+    private long totalRecord;
     private int pageSize;
     private int totalPage;
 
@@ -31,11 +30,11 @@ public class Page {
         this.currentPage = currentPage;
     }
 
-    public int getTotalRecord() {
+    public long getTotalRecord() {
         return totalRecord;
     }
 
-    public void setTotalRecord(int totalRecord) {
+    public void setTotalRecord(long totalRecord) {
         this.totalRecord = totalRecord;
     }
 

@@ -122,6 +122,10 @@ public class LoginUser extends UserDto implements UserDetails, CredentialsContai
     }
 
     public void setMapRights(Map<Long, Set<Long>> mapRights) {
+        if (mapRights == null) {
+            mapRights = new HashMap<>();
+        }
         this.mapRights = mapRights;
+
     }
 }

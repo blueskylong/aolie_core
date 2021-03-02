@@ -215,6 +215,7 @@ public class SysConfigService implements ISystemParamGenerator, ISystemIniter {
             } else {
                 //如果没有你节点,则直接挂接到根节点
                 root.addSubNode(node);
+                node.addParentNode(root);
             }
         }
         return root;

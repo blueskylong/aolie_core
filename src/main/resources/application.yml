@@ -5,3 +5,10 @@ mybatis:
 logging:
   pattern:
     console: "%C:%L %m%n"
+#pagehelper.
+pagehelper:
+  autoDialect: true
+  closeConn: true
+  hello: \u4F60\u597D
+  nihao: Hello
+  offset-as-page-num: false

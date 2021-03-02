@@ -4,9 +4,9 @@ import javax.persistence.Table;
 
 /**
  * @author xxl
- *  视图列信息
- * @date 2020/8/4 17:39
+ * 视图列信息
  * @version V0.0.1
+ * @date 2020/8/4 17:39
  **/
 @Table(name = "aolie_dm_component")
 public class ComponentDto extends SchemaBaseDto {
@@ -89,6 +89,9 @@ public class ComponentDto extends SchemaBaseDto {
 
     private String titlePosition;
     private String titleSpan;
+
+    private Integer posTop;
+    private Integer posLeft;
     /**
      * 如果树状显示,在树上的角色
      */
@@ -269,5 +272,21 @@ public class ComponentDto extends SchemaBaseDto {
 
     public void setTreeRole(Integer treeRole) {
         this.treeRole = treeRole;
+    }
+
+    public Integer getPosTop() {
+        return posTop;
+    }
+
+    public void setPosTop(Integer posTop) {
+        this.posTop = posTop;
+    }
+
+    public Integer getPosLeft() {
+        return posLeft;
+    }
+
+    public void setPosLeft(Integer posLeft) {
+        this.posLeft = posLeft;
     }
 }
