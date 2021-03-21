@@ -4,6 +4,7 @@ import com.ranranx.aolie.core.common.Constants;
 import com.ranranx.aolie.core.common.IdGenerator;
 import com.ranranx.aolie.core.common.SessionUtils;
 import com.ranranx.aolie.core.datameta.dto.BlockViewDto;
+import com.ranranx.aolie.core.datameta.dto.ColumnDto;
 import com.ranranx.aolie.core.datameta.dto.ComponentDto;
 import com.ranranx.aolie.core.ds.definition.Field;
 import com.ranranx.aolie.core.ds.definition.FieldOrder;
@@ -14,9 +15,8 @@ import java.util.List;
 
 /**
  * @author xxl
- *
- * @date 2020/8/5 17:35
  * @version V0.0.1
+ * @date 2020/8/5 17:35
  **/
 public class BlockViewer {
     private BlockViewDto blockViewDto;
@@ -28,6 +28,11 @@ public class BlockViewer {
      * 树结构信息
      */
     private TreeInfo treeInfo = null;
+
+    /**
+     * 缓存查询字段,会在设计字段的基础上,增加ID字段,如果原来不存在的话
+     */
+    private List<Field> lstSelectFields = null;
 
 
     public BlockViewer(BlockViewDto blockViewDto, List<Component> lstField) {
@@ -139,6 +144,77 @@ public class BlockViewer {
             lstField.add(field);
         }
         return lstField;
+    }
+
+    @Transient
+    public List<Field> getSelectFields() {
+        if (lstSelectFields != null) {
+            return lstSelectFields;
+        }
+        boolean hasGroup = false;
+        List<String> lstFields = new ArrayList<>();
+        TableInfo[] lstTable = getViewTables();
+        List<Field> lstField = new ArrayList<>(lstComponent.size());
+        String version = this.getBlockViewDto().getVersionCode();
+        Field field;
+        for (Component com : lstComponent) {
+            field = toField(com, version, true);
+            lstFields.add(field.getFieldName());
+            if (field.isGroupType()) {
+                hasGroup = true;
+            }
+            lstField.add(field);
+
+        }
+        //检查并默认增加
+        if (!hasGroup) {
+            for (int i = 0; i < lstTable.length; i++) {
+                TableInfo tableInfo = lstTable[i];
+                List<Column> keyColumn = tableInfo.getKeyColumn();
+                keyColumn.forEach(column -> {
+                    if (lstFields.indexOf(column.getColumnDto().getFieldName()) == -1
+                            && !Constants.FixColumnName.VERSION_CODE.equals(column.getColumnDto().getFieldName())) {
+                        Field field1 = toField(column.getColumnDto(), version, false);
+                        lstField.add(field1);
+                        lstFields.add(field1.getFieldName());
+                    }
+                });
+            }
+
+        }
+        return lstField;
+    }
+
+    @Transient
+    private Field toField(Component com, String version, boolean isShow) {
+        Field field = new Field();
+        ColumnDto dto = com.getColumn().getColumnDto();
+        TableInfo tableInfo = SchemaHolder.getTable(dto.getTableId(),
+                version);
+
+        field.setFieldName(dto.getFieldName());
+        field.setTableName(tableInfo.getTableDto().getTableName());
+        Short groupType = com.getComponentDto().getGroupType();
+        Short orderType = com.getComponentDto().getOrderType();
+        if (groupType != null) {
+            field.setGroupType(groupType);
+        }
+        if (orderType != null) {
+            field.setOrderType(orderType);
+        }
+        field.setShow(isShow);
+        return field;
+    }
+
+    @Transient
+    private Field toField(ColumnDto dto, String version, boolean isShow) {
+        Field field = new Field();
+        TableInfo tableInfo = SchemaHolder.getTable(dto.getTableId(),
+                version);
+        field.setFieldName(dto.getFieldName());
+        field.setTableName(tableInfo.getTableDto().getTableName());
+        field.setShow(isShow);
+        return field;
     }
 
     @Transient

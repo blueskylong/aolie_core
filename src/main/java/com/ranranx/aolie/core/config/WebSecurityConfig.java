@@ -43,9 +43,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and().exceptionHandling().
                 authenticationEntryPoint(point)
                 .and()
-                .formLogin()
-                .and().csrf().disable();
-        http.cors();
+                .formLogin();
+        http.cors().disable();
+        http.csrf().disable();
         http.addFilterAt(createJSONAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
         http.sessionManagement().invalidSessionUrl("/loginExpired");
 //        http.sessionManagement().maximumSessions(1).expiredUrl("/loginExpired");

@@ -144,7 +144,7 @@ public class FormulaInterceptor implements IOperInterceptor {
         QueryParam queryParam = new QueryParam();
         TableInfo tableInfo = SchemaHolder.getTable(tableId, version);
         queryParam.setTable(new TableInfo[]{tableInfo});
-        queryParam.appendCriteria().andIn(tableInfo.getKeyField(), ids);
+        queryParam.appendCriteria().andIn(null, tableInfo.getKeyField(), ids);
         HandleResult result = handlerFactory.handleQuery(queryParam);
         if (result.isSuccess()) {
             return result.getLstData();

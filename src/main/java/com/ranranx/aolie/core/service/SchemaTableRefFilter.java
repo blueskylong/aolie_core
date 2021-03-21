@@ -4,6 +4,7 @@ import com.ranranx.aolie.application.menu.service.MenuService;
 import com.ranranx.aolie.application.page.service.PageService;
 import com.ranranx.aolie.core.common.CommonUtils;
 import com.ranranx.aolie.core.common.SessionUtils;
+import com.ranranx.aolie.core.datameta.datamodel.Column;
 import com.ranranx.aolie.core.datameta.datamodel.SchemaHolder;
 import com.ranranx.aolie.core.exceptions.InvalidException;
 import com.ranranx.aolie.core.handler.param.condition.Criteria;
@@ -15,9 +16,8 @@ import java.util.Map;
 
 /**
  * @author xxl
- *
- * @date 2020/12/23 0023 14:22
  * @version V0.0.1
+ * @date 2020/12/23 0023 14:22
  **/
 @Component("SchemaTableRefFilter")
 public class SchemaTableRefFilter implements IReferenceDataFilter {
@@ -43,9 +43,11 @@ public class SchemaTableRefFilter implements IReferenceDataFilter {
         //values里必须要有MenuId字段.
         try {
             Long menuColId = Long.parseLong(values.keySet().iterator().next());
-            if (!SchemaHolder.getColumn(menuColId, SessionUtils.getLoginVersion()).getColumnDto().getFieldName().equals(schemaIDField)) {
+            Column column = SchemaHolder.getColumn(menuColId, SessionUtils.getLoginVersion());
+            if (!column.getColumnDto().getFieldName().equals(schemaIDField)) {
                 return null;
             }
+
         } catch (Exception e) {
             return null;
         }
@@ -57,7 +59,7 @@ public class SchemaTableRefFilter implements IReferenceDataFilter {
         }
 
         Criteria criteria = new Criteria();
-        criteria.andEqualTo("schema_id", schemaId);
+        criteria.andEqualTo(null, "schema_id", schemaId);
         return criteria;
     }
 

@@ -9,9 +9,9 @@ import java.util.Map;
 
 /**
  * @author xxl
- *  如果使用复杂条件更新, 则lstRows里放置的就是需要更新的列及值, 否则, 只会根据行数据的ID更新相应的行.
- * @date 2020/8/7 15:53
+ * 如果使用复杂条件更新, 则lstRows里放置的就是需要更新的列及值, 否则, 只会根据行数据的ID更新相应的行.
  * @version V0.0.1
+ * @date 2020/8/7 15:53
  **/
 public class UpdateParamDefinition {
     /**
@@ -40,16 +40,18 @@ public class UpdateParamDefinition {
         return tableName;
     }
 
-    public void setTableName(String tableName) {
+    public UpdateParamDefinition setTableName(String tableName) {
         this.tableName = tableName;
+        return this;
     }
 
     public Criteria getCriteria() {
         return criteria;
     }
 
-    public void setCriteria(Criteria criteria) {
+    public UpdateParamDefinition setCriteria(Criteria criteria) {
         this.criteria = criteria;
+        return this;
     }
 
     public List<Map<String, Object>> getLstRows() {
@@ -65,14 +67,15 @@ public class UpdateParamDefinition {
         return sqlExp;
     }
 
-    public void setSqlExp(SqlExp sqlExp) {
+    public UpdateParamDefinition setSqlExp(SqlExp sqlExp) {
         this.sqlExp = sqlExp;
+        return this;
     }
 
-    public void setObjects(List<?> lstObj, boolean needConvert) {
+    public UpdateParamDefinition setObjects(List<?> lstObj, boolean needConvert) {
         if (lstObj == null || lstObj.isEmpty()) {
             this.lstRows = null;
-            return;
+            return this;
         }
         if (CommonUtils.isEmpty(this.tableName)) {
             this.tableName = CommonUtils.getTableName(lstObj.get(0).getClass());
@@ -81,30 +84,34 @@ public class UpdateParamDefinition {
         for (Object obj : lstObj) {
             CommonUtils.toMap(obj, needConvert);
         }
-
+        return this;
     }
 
-    public void setLstRows(List<Map<String, Object>> lstRows) {
+    public UpdateParamDefinition setLstRows(List<Map<String, Object>> lstRows) {
         this.lstRows = lstRows;
+        return this;
     }
 
     public boolean isSelective() {
         return isSelective;
     }
 
-    public void setTableNameByDto(Class clazz) {
+    public UpdateParamDefinition setTableNameByDto(Class clazz) {
         this.tableName = CommonUtils.getTableName(clazz);
+        return this;
     }
 
-    public void setSelective(boolean selective) {
+    public UpdateParamDefinition setSelective(boolean selective) {
         isSelective = selective;
+        return this;
     }
 
     public String getIdField() {
         return idField;
     }
 
-    public void setIdField(String idField) {
+    public UpdateParamDefinition setIdField(String idField) {
         this.idField = idField;
+        return this;
     }
 }

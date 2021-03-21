@@ -17,13 +17,13 @@ import java.util.*;
 
 /**
  * @author xxl
- *  公式计算器, 目前的设计是一切合法的JS 表达式,业务上要求是 +_*\\/括号运算
+ * 公式计算器, 目前的设计是一切合法的JS 表达式,业务上要求是 +_*\\/括号运算
  * * 计算的思想:
  * * 一张表一张表的计算,计算完成后,要更新表数据
  * * 记录本表变化影响的其它表(公式),并提供对应的行数据.
  * * 直到所有表都计算完成
- * @date 2020/8/13 20:10
  * @version V0.0.1
+ * @date 2020/8/13 20:10
  **/
 public class FormulaCalculator {
     Logger logger = LoggerFactory.getLogger(FormulaCalculator.class);
@@ -361,7 +361,7 @@ public class FormulaCalculator {
             throw new InvalidParamException("查询主表值不存在:" + colFrom.getColumnDto().getTitle() + "["
                     + colFrom.getColumnDto().getFieldName() + "]");
         }
-        queryParam.appendCriteria().andEqualTo(colTo.getColumnDto().getFieldName(),
+        queryParam.appendCriteria().andEqualTo(null, colTo.getColumnDto().getFieldName(),
                 objFilterValue);
         HandleResult result = handlerFactory.handleQuery(queryParam);
         if (result.isSuccess()) {

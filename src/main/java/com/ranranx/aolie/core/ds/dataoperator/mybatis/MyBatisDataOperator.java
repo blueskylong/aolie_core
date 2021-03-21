@@ -16,9 +16,8 @@ import java.util.*;
 
 /**
  * @author xxl
- *
- * @date 2020/8/11 10:12
  * @version V0.0.1
+ * @date 2020/8/11 10:12
  **/
 
 
@@ -78,50 +77,9 @@ public class MyBatisDataOperator implements IDataOperator {
      */
     private List<Map<String, Object>> multiTableSelect(QueryParamDefinition queryParamDefinition) {
         DynamicDataSource.setDataSource(this.getKey());
-        return select(genSelectParams(queryParamDefinition));
+        return select(SqlBuilder.genSelectParams(queryParamDefinition, null).getExecuteMap());
     }
 
-    public static Map<String, Object> genSelectParams(QueryParamDefinition queryParamDefinition) {
-        Map<String, String> mapAlias = genTableAlias(queryParamDefinition.getTableNames());
-        Map<String, Object> mapParamValue = new HashMap<>();
-        String sField = SqlBuilder.buildFields(queryParamDefinition.getFields(), mapAlias);
-        String sTable = SqlBuilder.buildTables(queryParamDefinition.getLstRelation(),
-                mapAlias, queryParamDefinition.getTableNames());
-        String sWhere = SqlBuilder.getWhere(mapAlias, queryParamDefinition.getLstCriteria(), mapParamValue);
-        String sGroup = "";
-        if (queryParamDefinition.isHasGroup()) {
-            sGroup = SqlBuilder.genGroupBy(mapAlias, queryParamDefinition.getFields());
-        }
-        String sOrder = SqlBuilder.genOrder(mapAlias, queryParamDefinition.getLstOrder());
-        StringBuilder sql = new StringBuilder();
-        sql.append("select ").append(sField).append(" from ").append(sTable);
-        if (CommonUtils.isNotEmpty(sWhere)) {
-            sql.append(" where ").append(sWhere);
-        }
-        sql.append(sGroup);
-        sql.append(" ").append(sOrder);
-        mapParamValue.put(SQL_PARAM_NAME, sql.toString());
-        return mapParamValue;
-    }
-
-
-    /**
-     * 生成多表的别名
-     *
-     * @param tableNames
-     * @return
-     */
-    private static Map<String, String> genTableAlias(List<String> tableNames) {
-        Map<String, String> map = new HashMap<>();
-        for (int i = 0; i < tableNames.size(); i++) {
-            map.put(tableNames.get(i), makeTableAliasString(i));
-        }
-        return map;
-    }
-
-    private static String makeTableAliasString(int index) {
-        return "table" + UUID.randomUUID().toString().replace("-", "");
-    }
 
     /**
      * 单表查询
@@ -263,9 +221,9 @@ public class MyBatisDataOperator implements IDataOperator {
             }
             for (String field : lstFilterField) {
                 if (CommonUtils.isEmpty(row.get(field))) {
-                    criteria.andIsNull(field);
+                    criteria.andIsNull(null, field);
                 } else {
-                    criteria.andEqualTo(field, row.remove(field));
+                    criteria.andEqualTo(null, field, row.remove(field));
                 }
             }
 

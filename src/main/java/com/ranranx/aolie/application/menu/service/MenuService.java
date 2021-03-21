@@ -41,7 +41,7 @@ public class MenuService {
     public MenuInfo findMenuInfo(Long menuId, String version) {
         QueryParam param = new QueryParam();
         param.setTableDtos(Constants.DEFAULT_SYS_SCHEMA, SessionUtils.getLoginVersion(), MenuDto.class);
-        param.appendCriteria().andEqualTo("menu_id", menuId).andEqualTo("version_code", version);
+        param.appendCriteria().andEqualTo(null, "menu_id", menuId);
         param.setResultClass(MenuDto.class);
         HandleResult result = handlerFactory.handleQuery(param);
         List<MenuDto> lstMenuDto = (List<MenuDto>) result.getData();
@@ -67,7 +67,6 @@ public class MenuService {
     public List<MenuDto> findUserMenu() {
         QueryParam definition = new QueryParam();
         definition.setTableDtos(Constants.DEFAULT_SYS_SCHEMA, SessionUtils.getLoginVersion(), MenuDto.class);
-        definition.appendCriteria().andEqualTo("version_code", SessionUtils.getLoginVersion());
         definition.setResultClass(MenuDto.class);
         return (List<MenuDto>) handlerFactory.handleQuery(definition).getData();
     }

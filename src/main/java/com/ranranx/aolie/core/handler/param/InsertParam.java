@@ -6,15 +6,15 @@ import com.ranranx.aolie.core.datameta.datamodel.SchemaHolder;
 import com.ranranx.aolie.core.datameta.datamodel.TableInfo;
 import com.ranranx.aolie.core.ds.definition.SqlExp;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
  * @author xxl
- *
- * @date 2020/8/8 14:00
  * @version V0.0.1
+ * @date 2020/8/8 14:00
  **/
 public class InsertParam {
 
@@ -69,6 +69,27 @@ public class InsertParam {
             }
         }
         this.lstRows = CommonUtils.toMapAndConvertToUnderLine(lstObj);
+    }
+
+    /**
+     * 设置插入的DTO
+     *
+     * @param dto
+     * @param schemaId
+     */
+    public void setObject(Object dto, long schemaId) {
+        setObjects(Arrays.asList(dto), schemaId);
+    }
+
+    /**
+     * 设置插入表的类,表从类的注解中取得
+     *
+     * @param schemaId
+     * @param clazz
+     */
+    public void setTableDto(Long schemaId, Class clazz) {
+        this.table = SchemaHolder.findTableByTableName(CommonUtils.getTableName(clazz),
+                schemaId, SessionUtils.getLoginVersion());
     }
 
     public Map<String, Object> getMapControlParam() {

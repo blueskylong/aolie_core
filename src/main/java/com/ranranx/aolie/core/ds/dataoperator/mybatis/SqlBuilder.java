@@ -1,21 +1,17 @@
 package com.ranranx.aolie.core.ds.dataoperator.mybatis;
 
+import com.ranranx.aolie.core.common.CommonUtils;
 import com.ranranx.aolie.core.common.Constants;
 import com.ranranx.aolie.core.common.SqlTools;
-import com.ranranx.aolie.core.ds.definition.Field;
-import com.ranranx.aolie.core.ds.definition.FieldOrder;
-import com.ranranx.aolie.core.ds.definition.TableRelation;
+import com.ranranx.aolie.core.ds.definition.*;
 import com.ranranx.aolie.core.handler.param.condition.Criteria;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author xxl
- *
- * @date 2020/8/19 11:16
  * @version V0.0.1
+ * @date 2020/8/19 11:16
  **/
 public class SqlBuilder {
     /**
@@ -263,7 +259,7 @@ public class SqlBuilder {
         StringBuilder sb = new StringBuilder();
         int index = 1;
         for (Criteria criteria : lstCriteria) {
-            sb.append(criteria.getSqlWhere(paramValues, tableAlias.get(criteria.getTableName()), index++, criteria != lstCriteria.get(0)));
+            sb.append(criteria.getSqlWhere(paramValues, tableAlias, index++, criteria != lstCriteria.get(0)));
         }
         return sb.toString();
     }
@@ -307,5 +303,64 @@ public class SqlBuilder {
             sb.append(order.getOrderExp(tableAlias.get(order.getTableName()))).append(",");
         }
         return " order by " + sb.substring(0, sb.length() - 1);
+    }
+
+
+    /**
+     * 生成查询信息
+     *
+     * @param queryParamDefinition
+     * @param outTableAlias        如果是子查询,则传入的外部表的别名,根据关联关系增加条件
+     * @return
+     */
+    public static SqlExp genSelectParams(QueryParamDefinition queryParamDefinition, Map<String, String> outTableAlias) {
+        Map<String, String> mapAlias = genTableAlias(queryParamDefinition.getTableNames());
+        if (outTableAlias != null) {
+            //为了不影响外部数据,这里要克隆数据
+            Map<String, String> map = new HashMap<>();
+            //以最近的表为准
+            map.putAll(outTableAlias);
+            map.putAll(mapAlias);
+            mapAlias = map;
+        }
+        Map<String, Object> mapParamValue = new HashMap<>();
+        String sField = SqlBuilder.buildFields(queryParamDefinition.getFields(), mapAlias);
+        String sTable = SqlBuilder.buildTables(queryParamDefinition.getLstRelation(),
+                mapAlias, queryParamDefinition.getTableNames());
+        String sWhere = SqlBuilder.getWhere(mapAlias, queryParamDefinition.getLstCriteria(), mapParamValue);
+        String sGroup = "";
+        if (queryParamDefinition.isHasGroup()) {
+            sGroup = SqlBuilder.genGroupBy(mapAlias, queryParamDefinition.getFields());
+        }
+        String sOrder = SqlBuilder.genOrder(mapAlias, queryParamDefinition.getLstOrder());
+        StringBuilder sql = new StringBuilder();
+        sql.append("select ").append(sField).append(" from ").append(sTable);
+        if (CommonUtils.isNotEmpty(sWhere)) {
+            sql.append(" where ").append(sWhere);
+        }
+        sql.append(sGroup);
+        sql.append(" ").append(sOrder);
+        SqlExp sqlExp = new SqlExp();
+        sqlExp.setSql(sql.toString());
+        sqlExp.setParamValues(mapParamValue);
+        return sqlExp;
+    }
+
+    /**
+     * 生成多表的别名
+     *
+     * @param tableNames
+     * @return
+     */
+    private static Map<String, String> genTableAlias(List<String> tableNames) {
+        Map<String, String> map = new HashMap<>();
+        for (int i = 0; i < tableNames.size(); i++) {
+            map.put(tableNames.get(i), makeTableAliasString(i));
+        }
+        return map;
+    }
+
+    private static String makeTableAliasString(int index) {
+        return "table" + UUID.randomUUID().toString().replace("-", "");
     }
 }

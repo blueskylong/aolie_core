@@ -35,6 +35,11 @@ import java.util.*;
 @Transactional(readOnly = true)
 public class DataModelService {
 
+    /**
+     * 需要排除的表前缀
+     */
+    public static final String[] EXCLUDE_TABLE_PREFIX = new String[]{"flw", "act"};
+
     public static final String KEY_REFERENCE_DATA_PREFIX = "'REFERENCE_DATA_'";
     public static final String GROUP_NAME = "SCHEMA_VERSION";
     private static final String KEY_SCHEMA_DTO = "SchemaDto";
@@ -80,8 +85,8 @@ public class DataModelService {
     public List<TableDto> findSchemaTables(Long schemaId, String version) {
         QueryParamDefinition queryParamDefinition = new QueryParamDefinition();
         queryParamDefinition.setTableDtos(TableDto.class);
-        queryParamDefinition.appendCriteria().andEqualTo("schema_id", schemaId)
-                .andEqualTo("version_code", version);
+        queryParamDefinition.appendCriteria().andEqualTo(null,
+                "schema_id", schemaId);
         return factory.getDefaultDataOperator()
                 .select(queryParamDefinition, TableDto.class);
     }
@@ -90,8 +95,9 @@ public class DataModelService {
     public List<FormulaDto> findSchemaFormula(Long schemaId, String version) {
         QueryParamDefinition queryParamDefinition = new QueryParamDefinition();
         queryParamDefinition.setTableDtos(FormulaDto.class);
-        queryParamDefinition.appendCriteria().andEqualTo("schema_id", schemaId)
-                .andEqualTo("version_code", version);
+        queryParamDefinition.appendCriteria()
+                .andEqualTo(null, "schema_id", schemaId)
+        ;
         queryParamDefinition.addOrder(new FieldOrder((String) null, "order_num", true, 0));
         return factory.getDefaultDataOperator()
                 .select(queryParamDefinition, FormulaDto.class);
@@ -102,8 +108,9 @@ public class DataModelService {
     public List<ColumnDto> findSchemaColumns(Long schemaId, String version) {
         QueryParamDefinition queryParamDefinition = new QueryParamDefinition();
         queryParamDefinition.setTableDtos(ColumnDto.class);
-        queryParamDefinition.appendCriteria().andEqualTo("schema_id", schemaId)
-                .andEqualTo("version_code", version);
+        queryParamDefinition.appendCriteria()
+                .andEqualTo(null, "schema_id", schemaId)
+        ;
         queryParamDefinition.addOrder(new FieldOrder((String) null, "field_index", true, 0));
         return factory.getDefaultDataOperator()
                 .select(queryParamDefinition, ColumnDto.class);
@@ -114,8 +121,6 @@ public class DataModelService {
     public List<ReferenceDto> findAllReferences(String version) {
         QueryParamDefinition queryParamDefinition = new QueryParamDefinition();
         queryParamDefinition.setTableDtos(ReferenceDto.class);
-        queryParamDefinition.appendCriteria()
-                .andEqualTo("version_code", version);
         queryParamDefinition.addOrder(new FieldOrder(ReferenceDto.class, "xh", true, 1));
         return factory.getDefaultDataOperator()
                 .select(queryParamDefinition, ReferenceDto.class);
@@ -126,8 +131,9 @@ public class DataModelService {
     public List<ConstraintDto> findSchemaConstraints(Long schemaId, String version) {
         QueryParamDefinition queryParamDefinition = new QueryParamDefinition();
         queryParamDefinition.setTableDtos(ConstraintDto.class);
-        queryParamDefinition.appendCriteria().andEqualTo("schema_id", schemaId)
-                .andEqualTo("version_code", version);
+        queryParamDefinition.appendCriteria()
+                .andEqualTo(null, "schema_id", schemaId)
+        ;
         queryParamDefinition.addOrder(new FieldOrder((String) null, "order_num", true, 0));
         return factory.getDefaultDataOperator()
                 .select(queryParamDefinition, ConstraintDto.class);
@@ -143,10 +149,9 @@ public class DataModelService {
     public List<SchemaDto> findAllSchemaDto(boolean isOnlyEnabled) {
         QueryParamDefinition queryParamDefinition = new QueryParamDefinition();
         queryParamDefinition.setTableDtos(SchemaDto.class);
-        Criteria criteria = queryParamDefinition.appendCriteria().andEqualTo("version_code",
-                SessionUtils.getLoginVersion());
+        Criteria criteria = queryParamDefinition.appendCriteria();
         if (isOnlyEnabled) {
-            criteria.andEqualTo("enabled", 1);
+            criteria.andEqualTo(null, "enabled", 1);
         }
         queryParamDefinition.addOrder(new FieldOrder(SchemaDto.class, "schema_id", true, 1));
         return factory.getDefaultDataOperator()
@@ -163,9 +168,9 @@ public class DataModelService {
     public SchemaDto findSchemaDto(Long schemaId, String version) {
         QueryParamDefinition queryParamDefinition = new QueryParamDefinition();
         queryParamDefinition.setTableDtos(SchemaDto.class);
-        queryParamDefinition.appendCriteria().andEqualTo("schema_id", schemaId)
-                .andEqualTo("version_code", version);
-        queryParamDefinition.appendCriteria().andEqualTo("enabled", 1);
+        queryParamDefinition.appendCriteria().andEqualTo(null, "schema_id", schemaId)
+        ;
+        queryParamDefinition.appendCriteria().andEqualTo(null, "enabled", 1);
         return factory.getDefaultDataOperator().selectOne(queryParamDefinition, SchemaDto.class);
     }
 
@@ -227,7 +232,6 @@ public class DataModelService {
         lstField.add(field);
         queryParamDefinition.setFields(lstField);
         Criteria criteria = queryParamDefinition.appendCriteria();
-        criteria.andEqualTo("version_code", version);
         if (extFilter != null) {
             queryParamDefinition.appendCriteria(extFilter);
         }
@@ -238,7 +242,7 @@ public class DataModelService {
         queryParamDefinition.addOrder(order);
         if (CommonUtils.isNotEmpty(reference.getReferenceDto().getCommonType())) {
             criteria
-                    .andEqualTo("common_type", reference.getReferenceDto().getCommonType());
+                    .andEqualTo(null, "common_type", reference.getReferenceDto().getCommonType());
         }
         return factory.getDefaultDataOperator().select(queryParamDefinition, ReferenceData.class);
     }
@@ -318,10 +322,15 @@ public class DataModelService {
         definition.setFields(lstField);
         List<String> schemaTableNames = findSchemaTableNames(schemaId, version);
         if (!schemaTableNames.isEmpty()) {
-            definition.getSingleCriteria().andNotIn("table_name", findSchemaTables(schemaId, version));
+            definition.getSingleCriteria().andNotIn("information_schema.tables", "table_name", schemaTableNames);
         }
-        definition.getSingleCriteria()
-                .andCondition("TABLE_SCHEMA=(select database())");
+        Criteria criteria = definition.getSingleCriteria()
+                .andCustomCondition(null, null, "TABLE_SCHEMA=(select database())");
+        if (EXCLUDE_TABLE_PREFIX != null) {
+            for (int i = 0; i < EXCLUDE_TABLE_PREFIX.length; i++) {
+                criteria.andNotStartWith("information_schema.tables", "table_name", EXCLUDE_TABLE_PREFIX[i]);
+            }
+        }
 
 
         List<Map<String, Object>> lstData = factory.getDataOperatorBySchema(schemaId, version).select(definition);
@@ -362,8 +371,8 @@ public class DataModelService {
 
         QueryParamDefinition definition = new QueryParamDefinition();
         definition.setTableNames("information_schema.COLUMNS");
-        definition.appendCriteria().andEqualTo("table_name", tableName)
-                .andCondition("TABLE_SCHEMA=(select database())");
+        definition.appendCriteria().andEqualTo("information_schema.COLUMNS", "table_name", tableName)
+                .andCustomCondition(null, null, "TABLE_SCHEMA=(select database())");
         List<Map<String, Object>> lstResult = factory.getDefaultDataOperator().select(definition);
         List<ColumnDto> lstDto = new ArrayList<>();
 
@@ -604,8 +613,8 @@ public class DataModelService {
         //方案表
         DeleteParamDefinition deleteParamDefinition = new DeleteParamDefinition();
         deleteParamDefinition.setTableDto(SchemaDto.class);
-        deleteParamDefinition.getCriteria().andEqualTo("schema_id", schemaId)
-                .andEqualTo("version_code", version);
+        deleteParamDefinition.getCriteria().andEqualTo(null, "schema_id", schemaId)
+        ;
         factory.getDefaultDataOperator().delete(deleteParamDefinition);
 
         deleteParamDefinition.setTableDto(TableDto.class);
@@ -627,7 +636,6 @@ public class DataModelService {
         if (SchemaTools.isReferenceSchema(schemaId)) {
             deleteParamDefinition = new DeleteParamDefinition();
             deleteParamDefinition.setTableDto(ReferenceDto.class);
-            deleteParamDefinition.getCriteria().andEqualTo("version_code", version);
             factory.getDefaultDataOperator().delete(deleteParamDefinition);
         }
     }
@@ -654,8 +662,9 @@ public class DataModelService {
     public List<TableColumnRelationDto> findRelationDto(Long schemaId, String version) {
         QueryParamDefinition definition = new QueryParamDefinition();
         definition.setTableDtos(TableColumnRelationDto.class);
-        definition.appendCriteria().andEqualTo("schema_id", schemaId)
-                .andEqualTo("version_code", version);
+        definition.appendCriteria()
+                .andEqualTo(null, "schema_id", schemaId)
+        ;
         return factory.getDefaultDataOperator().select(definition, TableColumnRelationDto.class);
     }
 
@@ -781,7 +790,6 @@ public class DataModelService {
         deleteParamDefinition.setTableDto(ColumnDto.class);
         deleteParamDefinition.setIdField("column_id");
         deleteParamDefinition.setIds(lstId);
-        deleteParamDefinition.getCriteria().andEqualTo("version_code", version);
         factory.getDefaultDataOperator().delete(deleteParamDefinition);
         // 删除关联的公式约束等,控件等.
         //删除控件
@@ -796,7 +804,7 @@ public class DataModelService {
     private void deleteColFormula(List<Object> lstColId, String version) {
         DeleteParamDefinition definition = new DeleteParamDefinition();
         definition.setTableDto(FormulaDto.class);
-        definition.getCriteria().andIn("column_id", lstColId).andEqualTo("version_code", version);
+        definition.getCriteria().andIn(CommonUtils.getTableName(FormulaDto.class), "column_id", lstColId);
         factory.getDefaultDataOperator().delete(definition);
     }
 
@@ -896,7 +904,6 @@ public class DataModelService {
     private void deleteReference(String version) {
         DeleteParamDefinition deleteParamDefinition = new DeleteParamDefinition();
         deleteParamDefinition.setTableDto(ReferenceDto.class);
-        deleteParamDefinition.getCriteria().andEqualTo("version_code", version);
         factory.getDefaultDataOperator().delete(deleteParamDefinition);
     }
 

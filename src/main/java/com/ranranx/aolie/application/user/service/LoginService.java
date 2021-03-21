@@ -33,8 +33,8 @@ public class LoginService implements ILoginService {
         }
         QueryParam param = new QueryParam();
         param.setTableDtos(Constants.DEFAULT_SYS_SCHEMA, version, UserDto.class);
-        param.appendCriteria().andEqualTo(Constants.FixColumnName.ACCOUNT_CODE, username)
-                .andEqualTo(Constants.FixColumnName.VERSION_CODE, version);
+        param.appendCriteria().andEqualTo(null,
+                Constants.FixColumnName.ACCOUNT_CODE, username);
         param.setResultClass(LoginUser.class);
 
         HandleResult result = factory.handleQuery(param);

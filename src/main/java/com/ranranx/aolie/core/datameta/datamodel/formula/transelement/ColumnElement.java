@@ -245,7 +245,7 @@ public class ColumnElement implements TransElement {
         } else {
             columnFilter = SchemaHolder.getColumn(relation.getDto().getFieldTo(), version);
         }
-        queryParam.appendCriteria().andEqualTo(columnFilter.getColumnDto().getFieldName(), id);
+        queryParam.appendCriteria().andEqualTo(null,columnFilter.getColumnDto().getFieldName(), id);
         HandleResult result = handlerFactory.handleQuery(queryParam);
         if (result.isSuccess()) {
             List<Map<String, Object>> lstData = result.getLstData();

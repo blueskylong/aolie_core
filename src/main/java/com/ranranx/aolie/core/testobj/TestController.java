@@ -15,9 +15,8 @@ import java.util.Map;
 
 /**
  * @author xxl
- *
- * @date 2020/8/11 13:10
  * @version V0.0.1
+ * @date 2020/8/11 13:10
  **/
 //@RestController
 public class TestController {
@@ -39,8 +38,7 @@ public class TestController {
         lstTableName.add(subTable);
         definition.setTableNames(lstTableName);
         Criteria criteria = definition.appendCriteria();
-        criteria.setTableName(mainTable);
-        criteria.andEqualTo("table_id", 1);
+        criteria.andEqualTo(mainTable, "table_id", 1);
         List<Field> fields = new ArrayList<>();
         Field field = new Field();
         field.setFieldName("table_id");
@@ -118,7 +116,7 @@ public class TestController {
         List<String> lstTableName = new ArrayList<>();
         lstTableName.add("aolie_dm_table");
         queryParamDefinition.setTableNames(lstTableName);
-        queryParamDefinition.appendCriteria().andEqualTo("table_id", 2);
+        queryParamDefinition.appendCriteria().andEqualTo(null, "table_id", 2);
 
         List<Map<String, Object>> lst = factory.getDefaultDataOperator().select(queryParamDefinition);
         System.out.println(lst);

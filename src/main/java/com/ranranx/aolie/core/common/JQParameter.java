@@ -23,18 +23,26 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 /**
  * @author xxl
- *
- * @date 2020/9/11 14:43
  * @version V0.0.1
+ * @date 2020/9/11 14:43
  **/
 @Component
 public class JQParameter implements RequestParamHandler {
+    /*插件条件*/
+    public static final String PLUG_FILTER_PREFIX = "PLUG_COLUMN_";
+    public static final String SEARCH = "_search";
+    public static final String FILTERS = "filters";
+    /*扩展条件*/
+    public static final String EXT_FILTER = "extFilter";
+    /*插件条件*/
+    public static final String PLUG_FILTER = "plugFilter";
     private static Logger logger = LoggerFactory.getLogger(JQParameter.class);
 
     private String name = "name";
@@ -70,17 +78,17 @@ public class JQParameter implements RequestParamHandler {
 
         boolean needConvert = blockViewer.getBlockViewDto().getFieldToCamel() != null && blockViewer.getBlockViewDto().getFieldToCamel() == 1;
         QueryParamDefinition queryParamDefinition = new QueryParamDefinition();
-        String search = getParamValue("_search", mapParam);
+        String search = getParamValue(SEARCH, mapParam);
         if (CommonUtils.isEmpty(search) || search.equals("true")) {
-            parseCriteria(getParamValue("filters", mapParam), queryParamDefinition.appendCriteria(),
+            parseCriteria(getParamValue(FILTERS, mapParam), queryParamDefinition.appendCriteria(),
                     needConvert);
         }
-        String extFilter = getParamValue("extFilter", mapParam);
+        String extFilter = getParamValue(EXT_FILTER, mapParam);
         if (extFilter != null) {
-            System.out.println("---->" + getParamValue("extFilter", mapParam));
+            System.out.println("---->" + getParamValue(EXT_FILTER, mapParam));
             parseExtCriteria(extFilter, queryParamDefinition.appendCriteria(), needConvert);
         }
-        queryParamDefinition.setFields(blockViewer.getFields());
+        queryParamDefinition.setFields(blockViewer.getSelectFields());
         //TODO 这里要增加表关系
         FieldOrder order = parseOrder(mapParam, blockViewer, needConvert);
         if (order != null) {
@@ -106,17 +114,21 @@ public class JQParameter implements RequestParamHandler {
 
         boolean needConvert = blockViewer.getBlockViewDto().getFieldToCamel() != null && blockViewer.getBlockViewDto().getFieldToCamel() == 1;
         QueryParam queryParam = new QueryParam();
-        String search = getParamValue("_search", mapParam);
+        String search = getParamValue(SEARCH, mapParam);
         if (CommonUtils.isEmpty(search) || search.equals("true")) {
-            parseCriteria(getParamValue("filters", mapParam), queryParam.appendCriteria(),
+            Map<String, Object> mapPlugFilter = parseCriteria(getParamValue(FILTERS, mapParam), queryParam.appendCriteria(),
                     needConvert);
+            if (mapPlugFilter != null && !mapPlugFilter.isEmpty()) {
+                queryParam.setPlugFilter(mapPlugFilter);
+            }
         }
-        String extFilter = getParamValue("extFilter", mapParam);
+
+        String extFilter = getParamValue(EXT_FILTER, mapParam);
         if (extFilter != null) {
-            System.out.println("---->" + getParamValue("extFilter", mapParam));
+            System.out.println("---->" + getParamValue(EXT_FILTER, mapParam));
             parseExtCriteria(extFilter, queryParam.appendCriteria(), needConvert);
         }
-        queryParam.setFields(blockViewer.getFields());
+        queryParam.setFields(blockViewer.getSelectFields());
         queryParam.setTable(blockViewer.getViewTables());
         //TODO 这里要增加表关系
         FieldOrder order = parseOrder(mapParam, blockViewer, needConvert);
@@ -129,6 +141,11 @@ public class JQParameter implements RequestParamHandler {
         }
         queryParam.setPage(parsePage(mapParam));
         return queryParam;
+
+    }
+
+
+    private void seperatePlugParams() {
 
     }
 
@@ -147,14 +164,14 @@ public class JQParameter implements RequestParamHandler {
         }
 
         QueryParam queryParam = new QueryParam();
-        String search = getParamValue("_search", mapParam);
+        String search = getParamValue(SEARCH, mapParam);
         if (CommonUtils.isEmpty(search) || search.equals("true")) {
-            parseCriteria(getParamValue("filters", mapParam), queryParam.appendCriteria(),
+            parseCriteria(getParamValue(FILTERS, mapParam), queryParam.appendCriteria(),
                     false);
         }
-        String extFilter = getParamValue("extFilter", mapParam);
+        String extFilter = getParamValue(EXT_FILTER, mapParam);
         if (extFilter != null) {
-            System.out.println("---->" + getParamValue("extFilter", mapParam));
+            System.out.println("---->" + getParamValue(EXT_FILTER, mapParam));
             parseExtCriteria(extFilter, queryParam.appendCriteria(), false);
         }
 
@@ -250,10 +267,11 @@ public class JQParameter implements RequestParamHandler {
     }
 
 
-    private void parseCriteria(String filter, Criteria criteria, boolean convertToUnderLine) {
+    private Map<String, Object> parseCriteria(String filter, Criteria criteria, boolean convertToUnderLine) {
         if (CommonUtils.isEmpty(filter)) {
-            return;
+            return null;
         }
+        Map<String, Object> mapPlugFilter = new HashMap<>();
         ObjectMapper mapper = new ObjectMapper();
         try {
             Map map = mapper.readValue(filter, Map.class);
@@ -262,6 +280,11 @@ public class JQParameter implements RequestParamHandler {
                 String field = CommonUtils.getStringField(mapRule, "field");
                 String op = CommonUtils.getStringField(mapRule, "op");
                 String value = CommonUtils.getStringField(mapRule, "data");
+                //如果要插件条件,这里就不处理
+                if (field.startsWith(PLUG_FILTER_PREFIX)) {
+                    mapPlugFilter.put(field.substring(PLUG_FILTER_PREFIX.length()), value);
+                    continue;
+                }
                 if (convertToUnderLine) {
                     field = CommonUtils.convertToUnderline(field);
                 }
@@ -270,6 +293,7 @@ public class JQParameter implements RequestParamHandler {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return mapPlugFilter;
 
     }
 
@@ -320,6 +344,7 @@ public class JQParameter implements RequestParamHandler {
 
     private static void addCriteria(Criteria criteria, String field, String op, String value) {
         //如果字段是数字,表示colId,需要通过模型转换
+        String tableName = "";
         if (CommonUtils.isNumber(field)) {
             long fieldId = Long.parseLong(field);
             Column column = SchemaHolder.getColumn(fieldId, SessionUtils.getLoginVersion());
@@ -328,24 +353,26 @@ public class JQParameter implements RequestParamHandler {
                 return;
             }
             field = column.getColumnDto().getFieldName();
+            tableName = SchemaHolder.getTable(column.getColumnDto().getTableId(), SessionUtils.getLoginVersion())
+                    .getTableDto().getTableName();
         }
         if (value == null) {
-            criteria.andIsNull(field);
+            criteria.andIsNull(tableName, field);
         } else if (op.equals("bw")) {
-            criteria.andLike(field, value);
+            criteria.andInclude(tableName, field, value);
         } else if (op.equals("eq")) {
-            criteria.andEqualTo(field, value);
+            criteria.andEqualTo(tableName, field, value);
         } else if (op.equals("ne")) {
-            criteria.andNotEqualTo(field, value);
+            criteria.andNotEqualTo(tableName, field, value);
 
         } else if (op.equals("le")) {
-            criteria.andLessThanOrEqualTo(field, value);
+            criteria.andLessThanOrEqualTo(tableName, field, value);
         } else if (op.equals("lt")) {
-            criteria.andLessThan(field, value);
+            criteria.andLessThan(tableName, field, value);
         } else if (op.equals("gt")) {
-            criteria.andGreaterThan(field, value);
+            criteria.andGreaterThan(tableName, field, value);
         } else if (op.equals("ge")) {
-            criteria.andGreaterThanOrEqualTo(field, value);
+            criteria.andGreaterThanOrEqualTo(tableName, field, value);
         }
     }
 }

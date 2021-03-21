@@ -60,7 +60,7 @@ public class SysConfigService implements ISystemParamGenerator, ISystemIniter {
         param.setTableDtos(Constants.DEFAULT_SYS_SCHEMA, SessionUtils.getDefaultVersion()
                 , SysConfigDto.class);
         if (CommonUtils.isNotEmpty(versionCode)) {
-            param.appendCriteria().andEqualTo(Constants.FixColumnName.VERSION_CODE, versionCode);
+            param.appendCriteria().andEqualTo(null, Constants.FixColumnName.VERSION_CODE, versionCode);
         }
         HandleResult result = factory.handleQuery(param);
         if (result.isSuccess()) {
@@ -124,7 +124,7 @@ public class SysConfigService implements ISystemParamGenerator, ISystemIniter {
     private String findDefaultVersion() {
         QueryParamDefinition queryParamDefinition = new QueryParamDefinition();
         queryParamDefinition.setTableDtos(VersionDto.class);
-        queryParamDefinition.appendCriteria().andEqualTo("is_default", 1);
+        queryParamDefinition.appendCriteria().andEqualTo(null, "is_default", 1);
         VersionDto dto = operatorFactory.getDefaultDataOperator().selectOne(queryParamDefinition, VersionDto.class);
         if (dto == null) {
             logger.error("没有指定默认版本号");

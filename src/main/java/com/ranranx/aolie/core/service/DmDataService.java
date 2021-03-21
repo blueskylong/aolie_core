@@ -21,9 +21,9 @@ import java.util.*;
 
 /**
  * @author xxl
- *  进行数据操作, 增删改查
- * @date 2020/12/14 16:34
+ * 进行数据操作, 增删改查
  * @version V0.0.1
+ * @date 2020/12/14 16:34
  **/
 @Service
 @Transactional(readOnly = true)
@@ -297,8 +297,8 @@ public class DmDataService {
         String keyField = table.getKeyField();
         QueryParam param = new QueryParam();
         param.setTable(new TableInfo[]{table});
-        param.appendCriteria().andEqualTo("version_code", versionCode)
-                .andEqualTo(keyField, id);
+        param.appendCriteria()
+                .andEqualTo(null, keyField, id);
         return handlerFactory.handleRequest(Constants.HandleType.TYPE_QUERY, param);
     }
 

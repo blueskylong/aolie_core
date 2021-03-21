@@ -36,7 +36,6 @@ public class UIService {
     private DataOperatorFactory factory;
 
 
-
     /**
      * 查询表及其字段,用于树状显示
      *
@@ -94,8 +93,9 @@ public class UIService {
     public List<BlockViewDto> getBlockViews(Long schemaId) {
         QueryParamDefinition queryParamDefinition = new QueryParamDefinition();
         queryParamDefinition.setTableDtos(BlockViewDto.class);
-        queryParamDefinition.appendCriteria().andEqualTo("schema_id", schemaId)
-                .andEqualTo("version_code", SessionUtils.getLoginVersion());
+        queryParamDefinition.appendCriteria()
+                .andEqualTo(null, "schema_id", schemaId)
+        ;
         return factory.getDefaultDataOperator().select(queryParamDefinition, BlockViewDto.class);
     }
 
@@ -133,8 +133,9 @@ public class UIService {
     private BlockViewDto findViewerDto(Long blockViewId, String version) {
         QueryParamDefinition queryParamDefinition = new QueryParamDefinition();
         queryParamDefinition.setTableDtos(BlockViewDto.class);
-        queryParamDefinition.appendCriteria().andEqualTo("block_view_id", blockViewId)
-                .andEqualTo("version_code", version);
+        queryParamDefinition.appendCriteria()
+                .andEqualTo(null, "block_view_id", blockViewId)
+        ;
         return factory.getDefaultDataOperator().selectOne(queryParamDefinition, BlockViewDto.class);
     }
 
@@ -148,8 +149,8 @@ public class UIService {
     private List<Component> findViewerComponents(Long blockViewId, String version) {
         QueryParamDefinition queryParamDefinition = new QueryParamDefinition();
         queryParamDefinition.setTableDtos(ComponentDto.class);
-        queryParamDefinition.appendCriteria().andEqualTo("block_view_id", blockViewId)
-                .andEqualTo("version_code", version);
+        queryParamDefinition.appendCriteria()
+                .andEqualTo(null, "block_view_id", blockViewId);
         queryParamDefinition
                 .addOrder(new FieldOrder(CommonUtils.getTableName(ComponentDto.class), "lvl_code", true, 1));
         List<ComponentDto> lstDto = factory.getDefaultDataOperator().select(queryParamDefinition, ComponentDto.class);
@@ -202,7 +203,8 @@ public class UIService {
     public int deleteBlockView(long blockViewId) {
         DeleteParamDefinition deleteParam = new DeleteParamDefinition();
         deleteParam.setTableDto(BlockViewDto.class);
-        deleteParam.getCriteria().andEqualTo("block_view_id", blockViewId).andEqualTo("version_code", SessionUtils.getLoginVersion());
+        deleteParam.getCriteria().andEqualTo(null,
+                "block_view_id", blockViewId);
         int number = factory.getDefaultDataOperator().delete(deleteParam);
         deleteParam.setTableDto(ComponentDto.class);
         factory.getDefaultDataOperator().delete(deleteParam);
@@ -240,8 +242,8 @@ public class UIService {
     public List<TableDto> findAllTableInfo(long schemaId, String versionCode) {
         QueryParamDefinition queryParamDefinition = new QueryParamDefinition();
         queryParamDefinition.setTableDtos(TableDto.class);
-        queryParamDefinition.appendCriteria().andEqualTo("schema_id", schemaId)
-                .andEqualTo("version_code", versionCode);
+        queryParamDefinition.appendCriteria().andEqualTo(null, "schema_id", schemaId)
+        ;
         queryParamDefinition.addOrder(new FieldOrder(TableDto.class, "table_id", true, 0));
         Schema schema = SchemaHolder.getInstance().getSchema(schemaId, versionCode);
         return factory.getDataOperatorByKey(schema.getDsKey()).select(queryParamDefinition, TableDto.class);
@@ -306,8 +308,8 @@ public class UIService {
      */
     public void deleteColComponent(List<Object> lstColId, String version) {
         DeleteParamDefinition definition = new DeleteParamDefinition();
-        definition.setTableDto(ComponentDto.class).getCriteria().andIn("column_id", lstColId)
-                .andEqualTo("version_code", version);
+        definition.setTableDto(ComponentDto.class).getCriteria().andIn(null, "column_id", lstColId)
+        ;
         factory.getDefaultDataOperator().delete(definition);
     }
 

@@ -73,7 +73,7 @@ public class UserService {
         QueryParam param = new QueryParam();
         param.setTable(new TableInfo[]{table});
         param.setLstOrder(table.getDefaultOrder());
-        param.appendCriteria().andEqualTo("user_id", userId).andEqualTo("version_code", versionCode);
+        param.appendCriteria().andEqualTo(null, "user_id", userId);
         return handlerFactory.handleQuery(param);
 
     }
@@ -243,9 +243,9 @@ public class UserService {
         QueryParam param = new QueryParam();
         param.setTable(new TableInfo[]{tableInfo});
         param.setResultClass(RightRelationDetailDto.class);
-        Criteria criteria = param.appendCriteria().andEqualTo("rr_id", rrId);
+        Criteria criteria = param.appendCriteria().andEqualTo(null, "rr_id", rrId);
         if (sourceId >= 0) {
-            criteria.andEqualTo("id_source", sourceId);
+            criteria.andEqualTo(null, "id_source", sourceId);
         }
         return handlerFactory.handleQuery(param);
     }
@@ -274,8 +274,8 @@ public class UserService {
                 CommonUtils.getTableName(RightRelationDto.class),
                 Constants.DEFAULT_SYS_SCHEMA, versionCode);
         param.setTable(new TableInfo[]{info});
-        param.appendCriteria().andEqualTo("rs_id_from", sourceRsId)
-                .andEqualTo("rs_id_to", destRsId);
+        param.appendCriteria().andEqualTo(null, "rs_id_from", sourceRsId)
+                .andEqualTo(null, "rs_id_to", destRsId);
         HandleResult result = handlerFactory.handleQuery(param);
         if (!result.isSuccess() || result.getData() == null) {
             return -1;
@@ -466,7 +466,8 @@ public class UserService {
         }
         QueryParam param = new QueryParam();
         param.setTableDtos(Constants.DEFAULT_SYS_SCHEMA, versionCode, RightResourceDto.class);
-        param.appendCriteria().andIn("rs_id", lstId);
+
+        param.appendCriteria().andIn(CommonUtils.getTableName(RightResourceDto.class), "rs_id", lstId);
         return handlerFactory.handleQuery(param);
     }
 
@@ -482,7 +483,7 @@ public class UserService {
         }
         QueryParam param = new QueryParam();
         param.setTableDtos(Constants.DEFAULT_SYS_SCHEMA, SessionUtils.getLoginVersion(), RightResourceDto.class);
-        param.appendCriteria().andIn("rs_id", lstOtherRsID);
+        param.appendCriteria().andIn(CommonUtils.getTableName(RightResourceDto.class), "rs_id", lstOtherRsID);
         return handlerFactory.handleQuery(param);
     }
 
@@ -498,8 +499,8 @@ public class UserService {
         List<Long> menuAndButtonId = new ArrayList<>();
         menuAndButtonId.add(Constants.DefaultRsIds.menu);
         menuAndButtonId.add(Constants.DefaultRsIds.menuButton);
-        param.appendCriteria().andEqualTo("rs_id_from", Constants.DefaultRsIds.role)
-                .andNotIn("rs_id_to", menuAndButtonId);
+        param.appendCriteria().andEqualTo(null, "rs_id_from", Constants.DefaultRsIds.role)
+                .andNotIn(null, "rs_id_to", menuAndButtonId);
         param.setResultClass(RightRelationDto.class);
         HandleResult result = handlerFactory.handleQuery(param);
         if (result.isSuccess()) {
@@ -525,7 +526,6 @@ public class UserService {
         QueryParam param = new QueryParam();
         param.setTableDtos(Constants.DEFAULT_SYS_SCHEMA, SessionUtils.getDefaultVersion(), RightRelationDto.class);
         if (CommonUtils.isNotEmpty(version)) {
-            param.appendCriteria().andEqualTo(Constants.FixColumnName.VERSION_CODE, version);
         } else {
             param.setNoVersionFilter(true);
         }
@@ -547,7 +547,6 @@ public class UserService {
         param.setTableDtos(Constants.DEFAULT_SYS_SCHEMA,
                 version == null ? SessionUtils.getDefaultVersion() : version, RightResourceDto.class);
         if (CommonUtils.isNotEmpty(version)) {
-            param.appendCriteria().andEqualTo(Constants.FixColumnName.VERSION_CODE, version);
         } else {
             param.setNoVersionFilter(true);
         }
@@ -571,9 +570,9 @@ public class UserService {
     public Set<Long> findUserDirectRights(Long userId, Long rsId, String versionCode) {
         QueryParam param = new QueryParam();
         param.setTableDtos(Constants.DEFAULT_SYS_SCHEMA, versionCode, UserRightDto.class);
-        param.appendCriteria().andEqualTo("user_id", userId)
-                .andEqualTo("rs_id", rsId)
-                .andEqualTo(Constants.FixColumnName.VERSION_CODE, versionCode);
+
+        param.appendCriteria().andEqualTo(null, "user_id", userId)
+                .andEqualTo(null, "rs_id", rsId);
         param.setResultClass(UserRightDto.class);
         HandleResult result = handlerFactory.handleQuery(param);
         if (result.isSuccess() && result.getData() != null) {
@@ -597,8 +596,8 @@ public class UserService {
     public Map<Long, Set<Long>> findUserDirectAllRights(Long userId, String versionCode) {
         QueryParam param = new QueryParam();
         param.setTableDtos(Constants.DEFAULT_SYS_SCHEMA, versionCode, UserRightDto.class);
-        param.appendCriteria().andEqualTo("user_id", userId)
-                .andEqualTo(Constants.FixColumnName.VERSION_CODE, versionCode);
+
+        param.appendCriteria().andEqualTo(null, "user_id", userId);
         param.setResultClass(UserRightDto.class);
         HandleResult result = handlerFactory.handleQuery(param);
         if (result.isSuccess() && result.getData() != null) {
@@ -634,8 +633,9 @@ public class UserService {
         //查询明细
         QueryParam param = new QueryParam();
         param.setTableDtos(Constants.DEFAULT_SYS_SCHEMA, versionCode, RightRelationDetailDto.class);
-        param.appendCriteria().andEqualTo("rr_id", rrid).andIn("id_source", lstFromIds)
-                .andEqualTo(Constants.FixColumnName.VERSION_CODE, versionCode);
+
+        param.appendCriteria().andEqualTo(null, "rr_id", rrid).andIn(null, "id_source",
+                CommonUtils.toList(lstFromIds));
         param.setResultClass(RightRelationDetailDto.class);
         HandleResult result = handlerFactory.handleQuery(param);
         if (result.isSuccess() && result.getData() != null) {
@@ -671,7 +671,9 @@ public class UserService {
         lstOper.add(Constants.TableOperType.saveLevel);
         lstOper.add(Constants.TableOperType.saveMulti);
         param.setResultClass(MenuButtonDto.class);
-        param.appendCriteria().andIn("table_opertype", lstOper).andIsNotNull("relation_tableid");
+        String tableName = CommonUtils.getTableName(MenuButtonDto.class);
+        param.appendCriteria().andIn(tableName, "table_opertype", CommonUtils.toList(lstOper))
+                .andIsNotNull(tableName, "relation_tableid");
         HandleResult result = handlerFactory.handleQuery(param);
         Map<String, Set<Long>> mapOperTypeToBtnId = new HashMap<>();
         Map<String, Set<Long>> mapTableAllOperType = new HashMap<>();

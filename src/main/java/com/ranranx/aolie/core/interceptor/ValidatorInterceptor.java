@@ -22,10 +22,10 @@ import java.util.Map;
 
 /**
  * @author xxl
- *  数据保存前的验证, 不包含约束.此类的更新检查依赖 UpdateRowIdInterceptor起作用
+ * 数据保存前的验证, 不包含约束.此类的更新检查依赖 UpdateRowIdInterceptor起作用
  * 由UpdateRowIdInterceptor将变动的ID都收集,这里检查这些数据的合法性
- * @date 2021/1/29 0029 9:05
  * @version V0.0.1
+ * @date 2021/1/29 0029 9:05
  **/
 @DbOperInterceptor
 public class ValidatorInterceptor implements IOperInterceptor {
@@ -101,7 +101,7 @@ public class ValidatorInterceptor implements IOperInterceptor {
      */
     private List<Map<String, Object>> findInsertRows(InsertParam param, HandleResult handleResult) {
         //根据约定,插入成功后,传回的是插入数据的ID数据
-        List<Object> lstId = (List<Object>) handleResult.getLstData().get(0)
+        List<Object> lstId = (List<Object>) ((Map<String, Object>) handleResult.getLstData().get(0))
                 .get(Constants.ConstFieldName.CHANGE_KEYS_FEILD);
         return queryByIds(lstId, param.getTable());
     }
@@ -137,7 +137,7 @@ public class ValidatorInterceptor implements IOperInterceptor {
         }
         QueryParam queryParam = new QueryParam();
         queryParam.setTable(new TableInfo[]{tableInfo});
-        queryParam.appendCriteria().andIn(tableInfo.getKeyField(), lstKey);
+        queryParam.appendCriteria().andIn(null, tableInfo.getKeyField(), lstKey);
         HandleResult result = handlerFactory.handleQuery(queryParam);
         if (result.isSuccess() && result.getLstData() != null) {
             return result.getLstData();

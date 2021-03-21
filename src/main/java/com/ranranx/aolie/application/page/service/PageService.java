@@ -16,7 +16,6 @@ import com.ranranx.aolie.core.datameta.dto.ReferenceDto;
 import com.ranranx.aolie.core.ds.dataoperator.DataOperatorFactory;
 import com.ranranx.aolie.core.ds.definition.*;
 import com.ranranx.aolie.core.exceptions.InvalidException;
-import com.ranranx.aolie.core.handler.param.condition.Criteria;
 import com.ranranx.aolie.core.service.UIService;
 import com.ranranx.aolie.core.tree.LevelProvider;
 import com.ranranx.aolie.core.tree.SysCodeRule;
@@ -50,8 +49,8 @@ public class PageService {
     public List<PageInfoDto> findPageInfos(Long schemaId) {
         QueryParamDefinition queryParamDefinition = new QueryParamDefinition();
         queryParamDefinition.setTableDtos(PageInfoDto.class);
-        queryParamDefinition.appendCriteria().andEqualTo("schema_id", schemaId)
-                .andEqualTo("version_code", SessionUtils.getLoginVersion());
+        queryParamDefinition.appendCriteria().andEqualTo(null, "schema_id", schemaId)
+        ;
         queryParamDefinition.addOrder(new FieldOrder(PageInfoDto.class, "lvl_code", true, 1));
         return factory.getDefaultDataOperator().select(queryParamDefinition, PageInfoDto.class);
 
@@ -66,8 +65,8 @@ public class PageService {
     public List<PageDetailDto> findPageDetail(Long pageId) {
         QueryParamDefinition queryParamDefinition = new QueryParamDefinition();
         queryParamDefinition.setTableDtos(PageDetailDto.class);
-        queryParamDefinition.appendCriteria().andEqualTo("page_id", pageId)
-                .andEqualTo("version_code", SessionUtils.getLoginVersion());
+        queryParamDefinition.appendCriteria().andEqualTo(null, "page_id", pageId)
+        ;
         return factory.getDefaultDataOperator().select(queryParamDefinition, PageDetailDto.class);
     }
 
@@ -80,8 +79,8 @@ public class PageService {
     public PageInfo findPageInfo(Long pageId) {
         QueryParamDefinition queryParamDefinition = new QueryParamDefinition();
         queryParamDefinition.setTableDtos(PageDetailDto.class);
-        queryParamDefinition.appendCriteria().andEqualTo("page_id", pageId)
-                .andEqualTo("version_code", SessionUtils.getLoginVersion());
+        queryParamDefinition.appendCriteria().andEqualTo(null, "page_id", pageId)
+        ;
         List<PageDetailDto> lstDetail = factory.getDefaultDataOperator().select(queryParamDefinition, PageDetailDto.class);
         queryParamDefinition.setTableDtos(PageInfoDto.class);
         PageInfoDto pageInfoDto = factory.getDefaultDataOperator().selectOne(queryParamDefinition, PageInfoDto.class);
@@ -100,8 +99,8 @@ public class PageService {
     public long findPageSchemaId(Long pageId, String version) {
         QueryParamDefinition queryParamDefinition = new QueryParamDefinition();
         queryParamDefinition.setTableDtos(PageInfoDto.class);
-        queryParamDefinition.appendCriteria().andEqualTo("page_id", pageId)
-                .andEqualTo("version_code", version);
+        queryParamDefinition.appendCriteria().andEqualTo(null, "page_id", pageId)
+        ;
         PageInfoDto pageInfoDto = factory.getDefaultDataOperator().selectOne(queryParamDefinition, PageInfoDto.class);
         return pageInfoDto.getSchemaId();
     }
@@ -155,9 +154,9 @@ public class PageService {
         field.setFieldName("lvl_code");
         field.setGroupType(Constants.GroupType.MAX);
         queryParamDefinition.addField(field);
-        Criteria criteria = queryParamDefinition.appendCriteria().andEqualTo("schema_id", schemaId)
-                .andCondition("length(lvl_code)=", provider.getFirstSubCode().length())
-                .andEqualTo("version_code", SessionUtils.getLoginVersion());
+        queryParamDefinition.appendCriteria().andEqualTo(null, "schema_id", schemaId)
+                .andEqualTo(null, "length(lvl_code)", provider.getFirstSubCode().length());
+
         List<Map<String, Object>> lstData = factory.getDefaultDataOperator().select(queryParamDefinition);
         if (lstData == null || lstData.isEmpty()) {
             return lvlParent + "001";
@@ -184,8 +183,7 @@ public class PageService {
         }
         DeleteParamDefinition deleteParamDefinition = new DeleteParamDefinition();
         deleteParamDefinition.setTableDto(PageDetailDto.class);
-        deleteParamDefinition.getCriteria().andEqualTo("page_id", pageId)
-                .andEqualTo("version_code", SessionUtils.getLoginVersion());
+        deleteParamDefinition.getCriteria().andEqualTo(null, "page_id", pageId);
 
         factory.getDefaultDataOperator().delete(deleteParamDefinition);
         deleteParamDefinition.setTableDto(PageInfoDto.class);
@@ -313,8 +311,8 @@ public class PageService {
     public List<Map<String, Object>> getPageElements(Long schemaId) {
         QueryParamDefinition queryParamDefinition = new QueryParamDefinition();
         queryParamDefinition.setTableDtos(BlockViewDto.class);
-        queryParamDefinition.appendCriteria().andEqualTo("schema_id", schemaId)
-                .andEqualTo("version_code", SessionUtils.getLoginVersion());
+        queryParamDefinition.appendCriteria().andEqualTo(null, "schema_id", schemaId)
+        ;
 
         List<PageInfoDto> lstPageDto = findPageInfos(schemaId);
         List<ReferenceDto> referenceDtos = SchemaHolder.getInstance().getReferenceDtos(SessionUtils.getLoginVersion());

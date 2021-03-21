@@ -13,18 +13,18 @@ import java.util.*;
 
 /**
  * @author xlei @qq 251425887 @tel 13352818008\n");
+ * @version V0.0.1
  * @Email dlei0009@163.com\n");
  * modified by  xxl
- *  这里是生成DTO的工具类, 做了修改
+ * 这里是生成DTO的工具类, 做了修改
  * @date 2020/12/9 22:18
- * @version V0.0.1
  **/
 public class DtoGenerator {
     public DtoGenerator() {
     }
 
     public static void main(String[] args) {
-        DTOHelper dto = new DTOHelper("com.ranranx.aolie.application.sysconfig.dto", "aolie_s_config");
+        DTOHelper dto = new DTOHelper("com.ranranx.aolie.core.affix.dto", "aolie_dm_affix");
 
         try {
             dto.createDto();
@@ -56,7 +56,7 @@ public class DtoGenerator {
                 InputStream is = this.getClass().getClassLoader().getResourceAsStream("aolie.properties");
                 if (is != null) {
                     props.load(is);
-                    this.driverClass = "com.mysql.jdbc.Driver";
+                    this.driverClass = props.getProperty("driver");
                     this.jdbcUrl = props.getProperty("url");
                     this.user = props.getProperty("userName");
                     this.password = props.getProperty("password");
@@ -72,7 +72,7 @@ public class DtoGenerator {
 
         public void createDto() throws Exception {
             String databaseName = this.jdbcUrl.substring(this.jdbcUrl.lastIndexOf("/") + 1).split("\\?")[0];
-            Class.forName(this.driverClass);
+//            Class.forName(this.driverClass);
             Connection conn = DriverManager.getConnection(this.jdbcUrl, this.user, this.password);
             PreparedStatement pstmt = conn.prepareStatement("SELECT table_name FROM information_schema.TABLES WHERE table_schema = ?");
             pstmt.setString(1, databaseName);

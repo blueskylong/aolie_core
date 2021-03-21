@@ -2,6 +2,7 @@ package com.ranranx.aolie.application.right;
 
 import com.ranranx.aolie.application.menu.dto.MenuButtonDto;
 import com.ranranx.aolie.application.user.service.UserService;
+import com.ranranx.aolie.core.annotation.DbOperInterceptor;
 import com.ranranx.aolie.core.common.CommonUtils;
 import com.ranranx.aolie.core.common.Constants;
 import com.ranranx.aolie.core.common.Ordered;
@@ -18,8 +19,8 @@ import com.ranranx.aolie.core.runtime.LoginUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.ApplicationListener;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 
 import java.util.Arrays;
 import java.util.List;
@@ -37,8 +38,9 @@ import java.util.Set;
  * @version V0.0.1
  * @date 2021/2/4 0029 9:05
  **/
-//@DbOperInterceptor
-public class OperatorRightInterceptor implements IOperInterceptor, ICacheRefTableChanged, ApplicationListener<ApplicationReadyEvent> {
+@DbOperInterceptor
+@Order(3)
+public class OperatorRightInterceptor implements IOperInterceptor, ICacheRefTableChanged, CommandLineRunner {
 
     private Logger logger = LoggerFactory.getLogger(OperatorRightInterceptor.class);
     @Autowired
@@ -228,7 +230,7 @@ public class OperatorRightInterceptor implements IOperInterceptor, ICacheRefTabl
     }
 
     @Override
-    public void onApplicationEvent(ApplicationReadyEvent event) {
+    public void run(String... args) throws Exception {
         initOperatorRights();
     }
 }

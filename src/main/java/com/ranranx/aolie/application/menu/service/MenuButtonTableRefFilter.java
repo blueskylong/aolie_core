@@ -62,7 +62,7 @@ public class MenuButtonTableRefFilter implements IReferenceDataFilter {
             return null;
         }
         Criteria criteria = new Criteria();
-        criteria.andIn("table_id", pageRefTables);
+        criteria.andIn(null,"table_id", pageRefTables);
         return criteria;
     }
 

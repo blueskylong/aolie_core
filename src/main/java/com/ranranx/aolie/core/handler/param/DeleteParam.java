@@ -1,5 +1,8 @@
 package com.ranranx.aolie.core.handler.param;
 
+import com.ranranx.aolie.core.common.CommonUtils;
+import com.ranranx.aolie.core.common.SessionUtils;
+import com.ranranx.aolie.core.datameta.datamodel.SchemaHolder;
 import com.ranranx.aolie.core.datameta.datamodel.TableInfo;
 import com.ranranx.aolie.core.ds.definition.SqlExp;
 import com.ranranx.aolie.core.handler.param.condition.Criteria;
@@ -10,9 +13,9 @@ import java.util.Map;
 
 /**
  * @author xxl
- *  删除参数载体
- * @date 2020/8/6 14:28
+ * 删除参数载体
  * @version V0.0.1
+ * @date 2020/8/6 14:28
  **/
 public class DeleteParam {
     /**
@@ -106,6 +109,21 @@ public class DeleteParam {
         }
         this.mapControlParam.put(key, value);
     }
+
+    public void setTableDto(Long schemaId, Class clazz) {
+        this.table = SchemaHolder.findTableByTableName(CommonUtils.getTableName(clazz),
+                schemaId, SessionUtils.getLoginVersion());
+    }
+
+    public DeleteParam setDeleteDto(Long schemaId, Object obj) {
+        if (obj == null) {
+            return this;
+        }
+        this.criteria.andAllEqualToDto(null, obj);
+        this.setTableDto(schemaId, obj.getClass());
+        return this;
+    }
+
 
     /**
      * 取得一个控制参数

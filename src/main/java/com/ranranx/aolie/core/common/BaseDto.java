@@ -1,14 +1,15 @@
 package com.ranranx.aolie.core.common;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
  * @author xxl
- *  基础数据库表对象
- * @date 2020/8/5 9:03
+ * 基础数据库表对象
  * @version V0.0.1
+ * @date 2020/8/5 9:03
  **/
-public class BaseDto {
+public class BaseDto implements Serializable {
     protected Date createDate;
     protected Date lastUpdateDate;
     protected Long createUser;

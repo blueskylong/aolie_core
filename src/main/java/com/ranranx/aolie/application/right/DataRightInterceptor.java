@@ -3,6 +3,7 @@ package com.ranranx.aolie.application.right;
 import com.ranranx.aolie.application.user.dto.RightResourceDto;
 import com.ranranx.aolie.application.user.service.UserService;
 import com.ranranx.aolie.core.annotation.DbOperInterceptor;
+import com.ranranx.aolie.core.common.CommonUtils;
 import com.ranranx.aolie.core.common.Constants;
 import com.ranranx.aolie.core.common.Ordered;
 import com.ranranx.aolie.core.common.SessionUtils;
@@ -22,8 +23,8 @@ import com.ranranx.aolie.core.handler.param.condition.Criteria;
 import com.ranranx.aolie.core.interceptor.IOperInterceptor;
 import com.ranranx.aolie.core.runtime.LoginUser;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.ApplicationListener;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 
 import java.util.*;
 
@@ -36,7 +37,8 @@ import java.util.*;
  * @date 2021/2/22 0029 9:05
  **/
 @DbOperInterceptor
-public class DataRightInterceptor implements IOperInterceptor, ApplicationListener<ApplicationReadyEvent> {
+@Order(value = 10)
+public class DataRightInterceptor implements IOperInterceptor, CommandLineRunner {
     /**
      * 权限ID与引用的关系
      */
@@ -126,8 +128,8 @@ public class DataRightInterceptor implements IOperInterceptor, ApplicationListen
                     if (ids == null || ids.isEmpty()) {
                         return HandleResult.success(0);
                     }
-                    param.appendCriteria().setTableName(tableInfo.getTableDto().getTableName())
-                            .andIn(infos[0], ids);
+                    param.appendCriteria()
+                            .andIn(tableInfo.getTableDto().getTableName(), infos[0], CommonUtils.toList(ids));
                 }
             }
             List<Column> lstColumn = findTableRightCols(tableInfo);
@@ -142,8 +144,9 @@ public class DataRightInterceptor implements IOperInterceptor, ApplicationListen
                         return HandleResult.success(0);
                     }
                     //如存在,则添加条件
-                    param.appendCriteria().setTableName(tableInfo.getTableDto().getTableName())
-                            .andIn(column.getColumnDto().getFieldName(), ids);
+                    param.appendCriteria()
+                            .andIn(tableInfo.getTableDto().getTableName(),
+                                    column.getColumnDto().getFieldName(), CommonUtils.toList(ids));
                 }
             }
         }
@@ -219,12 +222,13 @@ public class DataRightInterceptor implements IOperInterceptor, ApplicationListen
                 //如果需要的权限用户没有,则直接返回空的结果
                 return HandleResult.success(0);
             }
-            criteria.setTableName(tableInfo.getTableDto().getTableName())
-                    .andIn(infos[0], ids);
+            criteria
+                    .andIn(tableInfo.getTableDto().getTableName(), infos[0], CommonUtils.toList(ids));
 
         }
         List<Column> lstColumn = findTableRightCols(tableInfo);
         if (lstColumn != null && !lstColumn.isEmpty()) {
+            String tableName = tableInfo.getTableDto().getTableName();
             for (Column column : lstColumn) {
                 //一般情况下,查找到此用户此列的权限值,添加到条件中即可,
                 //考虑到另一些情况,权限数据量过多时,需要使用关联查询,--这种暂时不实现
@@ -236,7 +240,7 @@ public class DataRightInterceptor implements IOperInterceptor, ApplicationListen
                 }
                 //如存在,则添加条件
                 criteria
-                        .andIn(column.getColumnDto().getFieldName(), ids);
+                        .andIn(tableName, column.getColumnDto().getFieldName(), CommonUtils.toList(ids));
             }
         }
         return null;
@@ -311,7 +315,9 @@ public class DataRightInterceptor implements IOperInterceptor, ApplicationListen
     }
 
     @Override
-    public void onApplicationEvent(ApplicationReadyEvent event) {
+    public void run(String... args) throws Exception {
         initRightInfo();
     }
+
+
 }

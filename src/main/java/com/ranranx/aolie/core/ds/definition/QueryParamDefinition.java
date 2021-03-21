@@ -12,9 +12,9 @@ import java.util.List;
 
 /**
  * @author xxl
- *  支持多表的查询定义
- * @date 2020/8/7 15:20
+ * 支持多表的查询定义
  * @version V0.0.1
+ * @date 2020/8/7 15:20
  **/
 public class QueryParamDefinition {
     /**
@@ -58,32 +58,36 @@ public class QueryParamDefinition {
         return sqlExp;
     }
 
-    public void setSqlExp(SqlExp sqlExp) {
+    public QueryParamDefinition setSqlExp(SqlExp sqlExp) {
         this.sqlExp = sqlExp;
+        return this;
     }
 
-    public void setLstOrder(List<FieldOrder> lstOrder) {
+    public QueryParamDefinition setLstOrder(List<FieldOrder> lstOrder) {
         this.lstOrder = lstOrder;
+        return this;
     }
 
 
-    public void addOrder(FieldOrder order) {
+    public QueryParamDefinition addOrder(FieldOrder order) {
         if (this.lstOrder == null) {
             this.lstOrder = new ArrayList<>();
         }
         order.setOrder(this.lstOrder.size() + 1);
         this.lstOrder.add(order);
+        return this;
     }
 
     /**
      * 增加一个字段的升序排序,要求在单表情况下使用
      */
-    public void addOrderField(String field) {
+    public QueryParamDefinition addOrderField(String field) {
         if (this.tableNames == null || this.tableNames.size() != 1) {
             throw new IllegalOperatorException("'addOrderField'方法不可以在多表,或无表情况下使用");
         }
         FieldOrder fieldOrder = new FieldOrder(this.tableNames.get(0), field, true, 1);
         this.addOrder(fieldOrder);
+        return this;
     }
 
 
@@ -91,8 +95,9 @@ public class QueryParamDefinition {
         return lstRelation;
     }
 
-    public void setLstRelation(List<TableRelation> lstRelation) {
+    public QueryParamDefinition setLstRelation(List<TableRelation> lstRelation) {
         this.lstRelation = lstRelation;
+        return this;
     }
 
     /**
@@ -100,7 +105,7 @@ public class QueryParamDefinition {
      *
      * @param lstClass
      */
-    public void setTableDtos(Class... lstClass) {
+    public QueryParamDefinition setTableDtos(Class... lstClass) {
         this.tableNames = new ArrayList<>();
         String tableName;
         for (Class clazz : lstClass) {
@@ -111,6 +116,7 @@ public class QueryParamDefinition {
             }
             tableNames.add(tableName);
         }
+        return this;
     }
 
 
@@ -125,8 +131,9 @@ public class QueryParamDefinition {
         return this.appendCriteria();
     }
 
-    public void setCriteria(List<Criteria> criteria) {
+    public QueryParamDefinition setCriteria(List<Criteria> criteria) {
         this.lstCriteria = criteria;
+        return this;
     }
 
     /**
@@ -155,8 +162,9 @@ public class QueryParamDefinition {
         return lstCriteria;
     }
 
-    public void setLstCriteria(List<Criteria> lstCriteria) {
+    public QueryParamDefinition setLstCriteria(List<Criteria> lstCriteria) {
         this.lstCriteria = lstCriteria;
+        return this;
     }
 
     public List<String> getTableNames() {
@@ -171,28 +179,32 @@ public class QueryParamDefinition {
         return tableNames;
     }
 
-    public void setTableNames(List<String> tableNames) {
+    public QueryParamDefinition setTableNames(List<String> tableNames) {
         this.tableNames = tableNames;
+        return this;
     }
 
-    public void setTableNames(String... tableName) {
+    public QueryParamDefinition setTableNames(String... tableName) {
 
         this.tableNames = Arrays.asList(tableName);
+        return this;
     }
 
     public List<Field> getFields() {
         return fields;
     }
 
-    public void setFields(List<Field> fields) {
+    public QueryParamDefinition setFields(List<Field> fields) {
         this.fields = fields;
+        return this;
     }
 
-    public void addField(Field field) {
+    public QueryParamDefinition addField(Field field) {
         if (this.fields == null) {
             this.fields = new ArrayList<>();
         }
         this.fields.add(field);
+        return this;
     }
 
     /**
@@ -221,13 +233,13 @@ public class QueryParamDefinition {
             return "没有指定查询的表名";
         }
         //
-        if (lstCriteria != null && !lstCriteria.isEmpty()) {
-            for (Criteria criteria : lstCriteria) {
-                if (tableNames.indexOf(criteria.getTableName()) == -1) {
-                    return "条件指定的表名不存在";
-                }
-            }
-        }
+//        if (lstCriteria != null && !lstCriteria.isEmpty()) {
+//            for (Criteria criteria : lstCriteria) {
+//                if (tableNames.indexOf(criteria.) == -1) {
+//                    return "条件指定的表名不存在";
+//                }
+//            }
+//        }
         if (fields != null && !fields.isEmpty()) {
             for (Field field : fields) {
                 if (tableNames.indexOf(field.getTableName()) == -1) {
@@ -264,8 +276,9 @@ public class QueryParamDefinition {
         return page;
     }
 
-    public void setPage(Page page) {
+    public QueryParamDefinition setPage(Page page) {
         this.page = page;
+        return this;
     }
 
 }

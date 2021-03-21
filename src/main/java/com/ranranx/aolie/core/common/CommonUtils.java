@@ -19,6 +19,7 @@ import java.util.regex.Pattern;
  * @date 2020/8/7 9:17
  **/
 public class CommonUtils {
+    private static Map<String, String> tableNameCache = new HashMap<>();
     private static final Pattern NUMBER_PATTERN = Pattern.compile("[+-]?(\\d+(\\.\\d*)?|\\.\\d+)(E\\d+)?");
 
     private static Pattern UNDERLINE_PATTEN = Pattern.compile("_[a-z]");
@@ -297,10 +298,15 @@ public class CommonUtils {
      * @return
      */
     public static String getTableName(Class<?> clazz) {
+        String className = clazz.getName();
+        if (tableNameCache.containsKey(className)) {
+            return tableNameCache.get(className);
+        }
         Table table = clazz.getAnnotation(Table.class);
         if (table == null || CommonUtils.isEmpty(table.name())) {
             throw new InvalidParamException("查询操作没有找到指定的表信息:" + clazz.getName());
         }
+        tableNameCache.put(className, table.name());
         return table.name();
     }
 
@@ -392,5 +398,11 @@ public class CommonUtils {
             map.put(key, lstEle);
         }
         lstEle.add(subElement);
+    }
+
+    public static List toList(Set values) {
+        List lst = new ArrayList();
+        lst.addAll(values);
+        return lst;
     }
 }

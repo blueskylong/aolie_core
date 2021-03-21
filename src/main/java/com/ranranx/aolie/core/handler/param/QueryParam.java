@@ -2,6 +2,7 @@ package com.ranranx.aolie.core.handler.param;
 
 import com.ranranx.aolie.core.common.CommonUtils;
 import com.ranranx.aolie.core.datameta.datamodel.SchemaHolder;
+import com.ranranx.aolie.core.datameta.datamodel.TableColumnRelation;
 import com.ranranx.aolie.core.datameta.datamodel.TableInfo;
 import com.ranranx.aolie.core.ds.definition.Field;
 import com.ranranx.aolie.core.ds.definition.FieldOrder;
@@ -36,9 +37,9 @@ public class QueryParam {
      */
     private List<Criteria> lstCriteria;
     /**
-     * 字段条件    视图模式条件
+     * 插件扩展条件,前后端配合使用
      */
-    private Map<String, Object> mapFilter;
+    private Map<String, Object> plugFilter;
     /**
      * 表信息   表条件
      */
@@ -62,6 +63,13 @@ public class QueryParam {
     private List<Field> fields;
 
     /**
+     * 表间关系,多表时传入
+     * 这个关系一般情况下不需要人为指定,此关系会根据数据表的定义来生成,但如果需要指定特殊的关系,则可以使用
+     * 如: 流程管理中,审核表与其它表的ID字段关系,因为不能在数据方案中关联,所以只能手动指定
+     */
+    private List<TableColumnRelation> lstRelation;
+
+    /**
      * 增加控制信息,让拦截器使用
      */
     private Map<String, Object> mapControlParam;
@@ -74,57 +82,64 @@ public class QueryParam {
         return sqlExp;
     }
 
-    public void setSqlExp(SqlExp sqlExp) {
+    public QueryParam setSqlExp(SqlExp sqlExp) {
         this.sqlExp = sqlExp;
+        return this;
     }
 
     public Long getViewId() {
         return viewId;
     }
 
-    public void setViewId(Long viewId) {
+    public QueryParam setViewId(Long viewId) {
         this.viewId = viewId;
+        return this;
     }
 
 
-    public Map<String, Object> getMapFilter() {
-        return mapFilter;
+    public Map<String, Object> getPlugFilter() {
+        return plugFilter;
     }
 
-    public void setMapFilter(Map<String, Object> mapFilter) {
-        this.mapFilter = mapFilter;
+    public QueryParam setPlugFilter(Map<String, Object> mapFilter) {
+        this.plugFilter = mapFilter;
+        return this;
     }
 
     public List<FieldOrder> getLstOrder() {
         return lstOrder;
     }
 
-    public void setLstOrder(List<FieldOrder> lstOrder) {
+    public QueryParam setLstOrder(List<FieldOrder> lstOrder) {
         this.lstOrder = lstOrder;
+        return this;
     }
 
     public Integer getDisplayType() {
         return displayType;
     }
 
-    public void setDisplayType(Integer displayType) {
+    public QueryParam setDisplayType(Integer displayType) {
         this.displayType = displayType;
+        return this;
     }
 
     public List<Criteria> getLstCriteria() {
         return lstCriteria;
     }
 
-    public void setLstCriteria(List<Criteria> lstCriteria) {
+    public QueryParam setLstCriteria(List<Criteria> lstCriteria) {
         this.lstCriteria = lstCriteria;
+        return this;
     }
 
     public TableInfo[] getTable() {
         return table;
     }
 
-    public void setTable(TableInfo[] table) {
+    public QueryParam setTable(TableInfo[] table) {
         this.table = table;
+        return this;
     }
 
     /**
@@ -132,7 +147,7 @@ public class QueryParam {
      *
      * @param lstClass
      */
-    public void setTableDtos(Long schemaId, String version, Class... lstClass) {
+    public QueryParam setTableDtos(Long schemaId, String version, Class... lstClass) {
         this.table = new TableInfo[lstClass.length];
         String tableName;
         int index = 0;
@@ -144,32 +159,71 @@ public class QueryParam {
             }
             table[index++] = SchemaHolder.findTableByTableName(tableName, schemaId, version);
         }
+        return this;
     }
+
+    /**
+     * 设置查询表和返回类型,他们都是一个DTO类
+     *
+     * @param schemaId
+     * @param version
+     * @param clazz
+     * @return
+     */
+    public QueryParam setTableDtoAndResultType(Long schemaId, String version, Class clazz) {
+        this.table = new TableInfo[1];
+        String tableName;
+        int index = 0;
+
+        tableName = CommonUtils.getTableName(clazz);
+        if (CommonUtils.isEmpty(tableName)) {
+            throw new InvalidException("指定的类没有@Table注解");
+        }
+        table[0] = SchemaHolder.findTableByTableName(tableName, schemaId, version);
+        this.resultClass = clazz;
+        return this;
+    }
+
+    public QueryParam setFilterObjectAndTableAndResultType(Long schemaId, String version, Object filter) {
+        setTableDtoAndResultType(schemaId, version, filter.getClass());
+        this.appendCriteria().andEqualToDto(null, filter);
+        return this;
+    }
+
+    public QueryParam setFilterObjectAndTable(Long schemaId, String version, Object filter) {
+        setTableDtos(schemaId, version, filter.getClass())
+                .appendCriteria().andEqualToDto(null, filter);
+        return this;
+    }
+
 
     public Page getPage() {
         return page;
     }
 
-    public void setPage(Page page) {
+    public QueryParam setPage(Page page) {
         this.page = page;
+        return this;
     }
 
-    public void addOrder(FieldOrder order) {
+    public QueryParam addOrder(FieldOrder order) {
         if (this.lstOrder == null) {
             this.lstOrder = new ArrayList<>();
         }
         order.setOrder(this.lstOrder.size() + 1);
         this.lstOrder.add(order);
+        return this;
     }
 
-    public void addOrders(List<FieldOrder> order) {
+    public QueryParam addOrders(List<FieldOrder> order) {
         if (order == null || order.isEmpty()) {
-            return;
+            return this;
         }
         if (this.lstOrder == null) {
             this.lstOrder = new ArrayList<>();
         }
         this.lstOrder.addAll(order);
+        return this;
     }
 
     /**
@@ -192,11 +246,12 @@ public class QueryParam {
      *
      * @param criteria
      */
-    public void addCriteria(Criteria criteria) {
+    public QueryParam addCriteria(Criteria criteria) {
         if (lstCriteria == null) {
             lstCriteria = new ArrayList<>();
         }
         lstCriteria.add(criteria);
+        return this;
     }
 
 
@@ -204,8 +259,9 @@ public class QueryParam {
         return fields;
     }
 
-    public void setFields(List<Field> fields) {
+    public QueryParam setFields(List<Field> fields) {
         this.fields = fields;
+        return this;
     }
 
     @Transient
@@ -213,16 +269,19 @@ public class QueryParam {
         return resultClass;
     }
 
-    public void setResultClass(Class resultClass) {
+    public QueryParam setResultClass(Class resultClass) {
         this.resultClass = resultClass;
+        return this;
     }
+
 
     public Map<String, Object> getMapControlParam() {
         return mapControlParam;
     }
 
-    public void setMapControlParam(Map<String, Object> mapControlParam) {
+    public QueryParam setMapControlParam(Map<String, Object> mapControlParam) {
         this.mapControlParam = mapControlParam;
+        return this;
     }
 
     /**
@@ -231,11 +290,12 @@ public class QueryParam {
      * @param key
      * @param value
      */
-    public void addControlParam(String key, Object value) {
+    public QueryParam addControlParam(String key, Object value) {
         if (this.mapControlParam == null) {
             this.mapControlParam = new HashMap<>();
         }
         this.mapControlParam.put(key, value);
+        return this;
     }
 
     /**
@@ -256,9 +316,32 @@ public class QueryParam {
         return noVersionFilter;
     }
 
-    public void setNoVersionFilter(boolean noVersionFilter) {
+    public QueryParam setNoVersionFilter(boolean noVersionFilter) {
         this.noVersionFilter = noVersionFilter;
+        return this;
     }
 
 
+    /**
+     * 增加插件条件
+     *
+     * @param field
+     * @param value
+     */
+    public QueryParam addPlugFilter(String field, Object value) {
+        if (this.plugFilter == null) {
+            this.plugFilter = new HashMap<>();
+        }
+        this.plugFilter.put(field, value);
+        return this;
+    }
+
+    public List<TableColumnRelation> getLstRelation() {
+        return lstRelation;
+    }
+
+    public QueryParam setLstRelation(List<TableColumnRelation> lstRelation) {
+        this.lstRelation = lstRelation;
+        return this;
+    }
 }
