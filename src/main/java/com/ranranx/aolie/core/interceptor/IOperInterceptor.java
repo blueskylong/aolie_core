@@ -63,6 +63,6 @@ public interface IOperInterceptor extends Ordered, IHandleFilter {
      */
     default HandleResult beforeReturn(Object param, String handleType, Map<String, Object> globalParamData,
                                       HandleResult handleResult) {
-        return handleResult;
+        return null;
     }
 }

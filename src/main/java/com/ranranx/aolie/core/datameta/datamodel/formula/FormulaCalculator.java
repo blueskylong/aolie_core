@@ -190,7 +190,7 @@ public class FormulaCalculator {
         List<Map<String, Object>> lstRow = queryForeignRows(SchemaHolder.getColumn(fieldFrom, version),
                 SchemaHolder.getColumn(fieldTo, version), mapFromRow, version);
         if (lstRow != null && lstRow.size() != 1) {
-            throw new InvalidConfigException("外表公式数据查询,多于一个:" +
+            throw new InvalidConfigException("外表公式数据查询,多于一个或不存在:" +
                     "" + table.getTableDto().getTitle()
                     + "=>" + SchemaHolder.getTable(
                     SchemaHolder.getColumn(fieldTo, version).getColumnDto().getTableId(), version)

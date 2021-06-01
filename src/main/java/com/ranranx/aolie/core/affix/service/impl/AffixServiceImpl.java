@@ -32,7 +32,6 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.*;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -49,15 +48,20 @@ import java.util.*;
 public class AffixServiceImpl implements AffixService {
 
     private Logger logger = LoggerFactory.getLogger(AffixServiceImpl.class);
-    @Value("${dm.uploadpath:upload}")
+    @Value("${aolie.uploadpath:upload}")
     private String UPLOAD_PATH;
+
+    private static final String TEMPLATE = "<object style='width:160px;height:160px'><div class=\"file-preview-other\">\n" +
+            "   <span class=\"file-icon-4x\"><i class=\"fa fa-file\"></i></span>\n" +
+            "</div></object>";
 
     /**
      * 默认上传目录
      */
     private static String DEFAULT_UPLOAD_DIR = "upload";
 
-    private static final DateFormat DATEFORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static String SERVER_PATH = null;
+
     @Autowired
     private HandlerFactory handlerFactory;
 
@@ -81,44 +85,65 @@ public class AffixServiceImpl implements AffixService {
         }
         try {
             String path = genFullPath();
+            String subPath = genSubDir();
 
             File filePath = new File(path);
             if (!filePath.exists()) {
                 filePath.mkdirs();
             }
+            List<PreviewConfig> initialPreviewConfig = new ArrayList<>();
+            List<String> lstTemplate = new ArrayList<>();
             while (itr.hasNext()) {
-                dto = new AffixDto();
-
                 MultipartFile file = request.getFile(itr.next());
-                String fileName = file.getOriginalFilename();
-
-                logger.info(">>>>>>>>>>>>>>收到文件:" + fileName);
-                dto.setRowId(rowId);
-                dto.setColumnId(columnId);
-                dto.setFileExt(fileName.substring(fileName.lastIndexOf(".") + 1));
-                dto.setAffixId(-1L);
-                dto.setOraFilename(fileName);
-                dto.setFilePath(path);
-                dto.setFileName(IdGenerator.getNextId(AffixDto.class.getName()) + "");
+                dto = genNewDto(rowId, columnId, file.getOriginalFilename(), subPath);
                 //一次保存,只会有一个ROWID
-                rowId = insertAffixInfo(dto);
+                HandleResult result = insertAffixInfo(dto);
+                rowId = dto.getRowId();
+                List<Long> keys = (List<Long>) ((List) result.getLstData().get(0).get("keys")).get(0);
 
-
+                dto.setAffixId(keys.get(1));
                 //保存文件
                 String newFileName = path + File.separator + dto.getFileName();
                 FileOutputStream outputStream = new FileOutputStream(newFileName);
                 outputStream.write(file.getBytes());
                 outputStream.flush();
                 outputStream.close();
+                //返回信息
+                initialPreviewConfig.add(genNewPreviewConfig(dto));
+                lstTemplate.add(TEMPLATE);
             }
+
+            AffixResponse response = new AffixResponse();
+            response.setRowId(rowId + "");
+            response.setInitialPreviewConfig(initialPreviewConfig);
+            response.setInitialPreview(lstTemplate);
+            return response;
+
         } catch (Exception e) {
             logger.error(e.getMessage());
             e.printStackTrace();
             throw new InvalidParamException("上传出现异常！" + e.getMessage());
         }
-        AffixResponse object = new AffixResponse();
-        object.setId(rowId + "");
-        return object;
+    }
+
+    private PreviewConfig genNewPreviewConfig(AffixDto dto) {
+        PreviewConfig previewConfig = new PreviewConfig();
+        previewConfig.setUrl(this.getServerUrl() + "/deleteAffix/" + dto.getAffixId());
+        previewConfig.setCaption(dto.getOraFilename());
+        previewConfig.setId(dto.getAffixId());
+        return previewConfig;
+    }
+
+    private AffixDto genNewDto(Long rowId, Long columnId, String fileName, String path) {
+        AffixDto dto = new AffixDto();
+        dto.setRowId(rowId);
+        dto.setColumnId(columnId);
+        dto.setFileExt(fileName.substring(fileName.lastIndexOf(".") + 1));
+        dto.setAffixId(-1L);
+        dto.setOraFilename(fileName);
+        dto.setFilePath(path);
+        dto.setFileName(IdGenerator.getNextId(AffixDto.class.getName()) + "");
+        return dto;
     }
 
     /**
@@ -136,7 +161,7 @@ public class AffixServiceImpl implements AffixService {
      * @param affixInfo
      * @return
      */
-    private long insertAffixInfo(AffixDto affixInfo) {
+    private HandleResult insertAffixInfo(AffixDto affixInfo) {
         InsertParam insertParam = new InsertParam();
         //如果是新增加的行数据,这里生成rowId
         if (affixInfo.getRowId() == null || affixInfo.getRowId() < 1) {
@@ -144,7 +169,7 @@ public class AffixServiceImpl implements AffixService {
         }
         insertParam.setObject(affixInfo, Constants.DEFAULT_DM_SCHEMA);
         HandleResult result = handlerFactory.handleInsert(insertParam);
-        return affixInfo.getRowId();
+        return result;
     }
 
     private String getFixSavePath() {
@@ -153,6 +178,14 @@ public class AffixServiceImpl implements AffixService {
                     .getSession().getServletContext().getRealPath(File.separator + DEFAULT_UPLOAD_DIR);
         }
         return UPLOAD_PATH;
+    }
+
+    private String getServerUrl() {
+        if (SERVER_PATH == null) {
+            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+            SERVER_PATH = "http://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
+        }
+        return SERVER_PATH;
     }
 
     @Override
@@ -189,12 +222,13 @@ public class AffixServiceImpl implements AffixService {
         // 获取所有需要删除的数据
 
 
-        File file = new File(getFixSavePath()
-                + getSysFilePath(dto)
-                + File.separator + dto.getFileName());
+        File file = new File(
+                getSaveFile(dto)
+        );
         if (file.exists()) {
             file.delete();
         }
+        file = null;
 
 
         return 1;
@@ -204,16 +238,13 @@ public class AffixServiceImpl implements AffixService {
         return handlerFactory.handleDelete(new DeleteParam().setDeleteDto(Constants.DEFAULT_DM_SCHEMA, affixDto));
     }
 
-    private String getSysFilePath(AffixDto affix) {
-        if (affix != null) {
-            return getSysFilePath(affix.getFilePath());
-        } else {
-            return null;
-        }
+    private String getSaveFile(AffixDto affix) {
+        return covertPath(getFixSavePath() + File.separator + affix.getFilePath()
+                + File.separator + affix.getFileName());
     }
 
-    private String getSysFilePath(String filePath) {
-        if (!StringUtils.hasLength(filePath)) {
+    private String covertPath(String filePath) {
+        if (StringUtils.hasLength(filePath)) {
             if (File.separator.equals("\\")) {
                 return filePath.replaceAll("/", "\\\\");
             } else {
@@ -227,15 +258,12 @@ public class AffixServiceImpl implements AffixService {
     public ResponseEntity<byte[]> downloadAffix(long affixId) {
         AffixDto affixInfo = findBaseAffix(affixId);
         if (affixInfo != null) {
-            String filePath = affixInfo.getFilePath();
-            String realFileName = affixInfo.getOraFilename();
-            String path = getFixSavePath();
-            File file = new File(path + getSysFilePath(filePath) + File.separator + realFileName);
+            File file = new File(getSaveFile(affixInfo));
             HttpHeaders headers = new HttpHeaders();
             String fileName;
             try {
                 //为了解决中文名称乱码问题
-                fileName = new String(affixInfo.getFileName().getBytes("gbk"), "iso-8859-1");
+                fileName = new String(affixInfo.getOraFilename().getBytes("gbk"), "iso-8859-1");
                 headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"");
                 headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
                 return new ResponseEntity<byte[]>(FileUtils.readFileToByteArray(file), headers, HttpStatus.OK);
@@ -246,18 +274,32 @@ public class AffixServiceImpl implements AffixService {
         return null;
     }
 
+    @Override
+    public FileInputStream getFileStream(AffixDto dto) {
+        String fileRealPath = getSaveFile(dto);
+        File file = new File(fileRealPath);
+        FileInputStream fileInputStream = null;
+
+        int n;
+        try {
+            fileInputStream = new FileInputStream(file);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return fileInputStream;
+    }
 
     @Override
-    public byte[] getByteArray(HttpServletRequest req, Long affixId) {
+    public byte[] getByteArray(Long affixId) {
         AffixDto affixQuery = new AffixDto();
         affixQuery.setAffixId(affixId);
         AffixDto affixInfo = getAffixById(affixId, SessionUtils.getLoginUser());
         if (affixInfo != null) {
             byte[] fileByte = null;
-            String filePath = affixInfo.getFilePath();
-            String realFileName = affixInfo.getFileName();
-            String path = getFixSavePath();
-            String fileRealPath = path + getSysFilePath(filePath) + File.separator + realFileName;
+
+            String fileRealPath = getSaveFile(affixInfo);
             File file = new File(fileRealPath);
             FileInputStream fileInputStream = null;
             ByteArrayOutputStream byteArrayOutStream = null;
@@ -310,6 +352,7 @@ public class AffixServiceImpl implements AffixService {
         return result;
     }
 
+
     @Override
     public ResponseEntity<byte[]> downloadAffixList(Long columnId, Long bizId) {
         List<AffixDto> lstDto = findAffixByBizId(columnId, bizId);
@@ -320,18 +363,15 @@ public class AffixServiceImpl implements AffixService {
         String path = getFixSavePath();
         for (AffixDto affix : lstDto) {
             Map<String, Object> map = new HashMap<String, Object>();
-            String filePath = affix.getFilePath();
-            String realFileName = affix.getOraFilename();
-
-            map.put("filePath", path + getSysFilePath(filePath) + File.separator + realFileName);
-            map.put("fileName", affix.getFileName());
+            map.put("filePath", getSaveFile(affix));
+            map.put("fileName", affix.getOraFilename());
             affixfilePath.add(map);
         }
         File file = null;
         try {
             String zipPath = FileTools.batchExportAffixFile(getFixSavePath(), affixfilePath);
             file = new File(zipPath);
-            String zipName = "资源库附件导出文件.zip";
+            String zipName = "附件导出文件.zip";
             HttpHeaders headers = new HttpHeaders();
             zipName = new String(zipName.getBytes("gbk"), "iso-8859-1");//为了解决中文名称乱码问题
             headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + zipName + "\"");
@@ -367,12 +407,12 @@ public class AffixServiceImpl implements AffixService {
     @Override
     public List<AffixDto> findAffixByBizId(Long columnId, Long rowID) {
         AffixDto dto = new AffixDto();
-        dto.setAffixId(rowID);
+        dto.setRowId(rowID);
         dto.setColumnId(columnId);
         QueryParam param = new QueryParam()
                 .setFilterObjectAndTableAndResultType(Constants.DEFAULT_DM_SCHEMA,
                         SessionUtils.getLoginVersion(), dto);
-        return handlerFactory.handleQuery(param).getLstData();
+        return (List<AffixDto>) handlerFactory.handleQuery(param).getData();
     }
 
     /* (non-Javadoc)
@@ -380,6 +420,7 @@ public class AffixServiceImpl implements AffixService {
      */
     @Override
     public AffixDto getAffixById(long affixId, LoginUser user) {
+
         AffixDto affix = new AffixDto();
         affix.setAffixId(affixId);
         affix.setVersionCode(user.getVersionCode());
@@ -390,14 +431,74 @@ public class AffixServiceImpl implements AffixService {
     }
 
     static class AffixResponse implements Serializable {
-        private String id;
+        private String rowId;
+        private List<PreviewConfig> initialPreviewConfig;
+        private List<String> initialPreview;
 
-        public String getId() {
+        public List<PreviewConfig> getInitialPreviewConfig() {
+            return initialPreviewConfig;
+        }
+
+        public void setInitialPreviewConfig(List<PreviewConfig> initialPreviewConfig) {
+            this.initialPreviewConfig = initialPreviewConfig;
+        }
+
+        public List<String> getInitialPreview() {
+            return initialPreview;
+        }
+
+        public void setInitialPreview(List<String> initialPreview) {
+            this.initialPreview = initialPreview;
+        }
+
+        public String getRowId() {
+            return rowId;
+        }
+
+        public void setRowId(String rowId) {
+            this.rowId = rowId;
+        }
+    }
+
+    static class PreviewConfig {
+        private String caption;
+        private Long id;
+        private String url;
+
+        public String getCaption() {
+            return caption;
+        }
+
+        public void setCaption(String caption) {
+            this.caption = caption;
+        }
+
+
+        public String getUrl() {
+            return url;
+        }
+
+        public void setUrl(String url) {
+            this.url = url;
+        }
+
+        public Long getId() {
             return id;
         }
 
-        public void setId(String id) {
+        public void setId(Long id) {
             this.id = id;
         }
+    }
+
+    /**
+     * 取得附件路径
+     *
+     * @param affix
+     * @return
+     */
+    @Override
+    public String getAffixRealPath(AffixDto affix) {
+        return getFixSavePath() + File.separator + affix.getFilePath();
     }
 }

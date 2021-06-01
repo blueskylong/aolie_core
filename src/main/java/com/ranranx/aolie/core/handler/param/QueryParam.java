@@ -8,6 +8,7 @@ import com.ranranx.aolie.core.ds.definition.Field;
 import com.ranranx.aolie.core.ds.definition.FieldOrder;
 import com.ranranx.aolie.core.ds.definition.SqlExp;
 import com.ranranx.aolie.core.exceptions.InvalidException;
+import com.ranranx.aolie.core.exceptions.NotExistException;
 import com.ranranx.aolie.core.handler.param.condition.Criteria;
 
 import java.beans.Transient;
@@ -142,6 +143,19 @@ public class QueryParam {
         return this;
     }
 
+    public QueryParam appendTable(TableInfo tableInfo) {
+        if (this.table == null) {
+            this.table = new TableInfo[]{tableInfo};
+        } else {
+            TableInfo[] tables = new TableInfo[this.table.length + 1];
+            System.arraycopy(this.table, 0, tables, 0, this.table.length);
+            tables[this.table.length] = tableInfo;
+            this.table = tables;
+
+        }
+        return this;
+    }
+
     /**
      * 设置DTO代替表名
      *
@@ -179,7 +193,11 @@ public class QueryParam {
         if (CommonUtils.isEmpty(tableName)) {
             throw new InvalidException("指定的类没有@Table注解");
         }
-        table[0] = SchemaHolder.findTableByTableName(tableName, schemaId, version);
+        TableInfo tableInfo = SchemaHolder.findTableByTableName(tableName, schemaId, version);
+        if (tableInfo == null) {
+            throw new NotExistException("没有查询到指定表的定义信息:" + tableName + "[" + schemaId + "]");
+        }
+        table[0] = tableInfo;
         this.resultClass = clazz;
         return this;
     }
@@ -256,6 +274,9 @@ public class QueryParam {
 
 
     public List<Field> getFields() {
+        if (fields == null) {
+            fields = new ArrayList<>();
+        }
         return fields;
     }
 

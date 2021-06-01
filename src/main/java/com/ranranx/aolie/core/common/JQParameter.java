@@ -7,7 +7,6 @@ import com.ranranx.aolie.core.datameta.datamodel.Column;
 import com.ranranx.aolie.core.datameta.datamodel.SchemaHolder;
 import com.ranranx.aolie.core.datameta.datamodel.TableInfo;
 import com.ranranx.aolie.core.ds.definition.FieldOrder;
-import com.ranranx.aolie.core.ds.definition.QueryParamDefinition;
 import com.ranranx.aolie.core.exceptions.InvalidParamException;
 import com.ranranx.aolie.core.handler.param.Page;
 import com.ranranx.aolie.core.handler.param.QueryParam;
@@ -62,42 +61,42 @@ public class JQParameter implements RequestParamHandler {
 
     }
 
-    @Override
-    public QueryParamDefinition getQueryParamDefinition() {
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-        Map mapParam = request.getParameterMap();
-        if (request.getMethod().equalsIgnoreCase("POST")) {
-            mapParam = (Map) JSONUtils.parse(getPostData(request));
-        }
-        String value = getParamValue("blockId", mapParam);
-        if (CommonUtils.isEmpty(value)) {
-            throw new InvalidParamException("没有指定视图ID");
-        }
-        long blockId = new Long(value);
-        BlockViewer blockViewer = SchemaHolder.getViewerInfo(blockId, SessionUtils.getLoginVersion());
-
-        boolean needConvert = blockViewer.getBlockViewDto().getFieldToCamel() != null && blockViewer.getBlockViewDto().getFieldToCamel() == 1;
-        QueryParamDefinition queryParamDefinition = new QueryParamDefinition();
-        String search = getParamValue(SEARCH, mapParam);
-        if (CommonUtils.isEmpty(search) || search.equals("true")) {
-            parseCriteria(getParamValue(FILTERS, mapParam), queryParamDefinition.appendCriteria(),
-                    needConvert);
-        }
-        String extFilter = getParamValue(EXT_FILTER, mapParam);
-        if (extFilter != null) {
-            System.out.println("---->" + getParamValue(EXT_FILTER, mapParam));
-            parseExtCriteria(extFilter, queryParamDefinition.appendCriteria(), needConvert);
-        }
-        queryParamDefinition.setFields(blockViewer.getSelectFields());
-        //TODO 这里要增加表关系
-        FieldOrder order = parseOrder(mapParam, blockViewer, needConvert);
-        if (order != null) {
-            queryParamDefinition.addOrder(order);
-        }
-        queryParamDefinition.setPage(parsePage(mapParam));
-        return queryParamDefinition;
-
-    }
+//    @Override
+//    public QueryParamDefinition getQueryParamDefinition() {
+//        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+//        Map mapParam = request.getParameterMap();
+//        if (request.getMethod().equalsIgnoreCase("POST")) {
+//            mapParam = (Map) JSONUtils.parse(getPostData(request));
+//        }
+//        String value = getParamValue("blockId", mapParam);
+//        if (CommonUtils.isEmpty(value)) {
+//            throw new InvalidParamException("没有指定视图ID");
+//        }
+//        long blockId = new Long(value);
+//        BlockViewer blockViewer = SchemaHolder.getViewerInfo(blockId, SessionUtils.getLoginVersion());
+//
+//        boolean needConvert = blockViewer.getBlockViewDto().getFieldToCamel() != null && blockViewer.getBlockViewDto().getFieldToCamel() == 1;
+//        QueryParamDefinition queryParamDefinition = new QueryParamDefinition();
+//        String search = getParamValue(SEARCH, mapParam);
+//        if (CommonUtils.isEmpty(search) || search.equals("true")) {
+//            parseCriteria(getParamValue(FILTERS, mapParam), queryParamDefinition.appendCriteria(),
+//                    needConvert);
+//        }
+//        String extFilter = getParamValue(EXT_FILTER, mapParam);
+//        if (extFilter != null) {
+//            System.out.println("---->" + getParamValue(EXT_FILTER, mapParam));
+//            parseExtCriteria(extFilter, queryParamDefinition.appendCriteria(), needConvert);
+//        }
+//        queryParamDefinition.setFields(blockViewer.getSelectFields());
+//        //TODO 这里要增加表关系
+//        FieldOrder order = parseOrder(mapParam, blockViewer, needConvert);
+//        if (order != null) {
+//            queryParamDefinition.addOrder(order);
+//        }
+//        queryParamDefinition.setPage(parsePage(mapParam));
+//        return queryParamDefinition;
+//
+//    }
 
     public QueryParam getQueryParam() {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
@@ -115,7 +114,7 @@ public class JQParameter implements RequestParamHandler {
         boolean needConvert = blockViewer.getBlockViewDto().getFieldToCamel() != null && blockViewer.getBlockViewDto().getFieldToCamel() == 1;
         QueryParam queryParam = new QueryParam();
         String search = getParamValue(SEARCH, mapParam);
-        if (CommonUtils.isEmpty(search) || search.equals("true")) {
+        if (CommonUtils.isEmpty(search) || "true".equalsIgnoreCase(search)) {
             Map<String, Object> mapPlugFilter = parseCriteria(getParamValue(FILTERS, mapParam), queryParam.appendCriteria(),
                     needConvert);
             if (mapPlugFilter != null && !mapPlugFilter.isEmpty()) {
@@ -144,10 +143,6 @@ public class JQParameter implements RequestParamHandler {
 
     }
 
-
-    private void seperatePlugParams() {
-
-    }
 
     /**
      * 取得指定数据表的查询参数
@@ -265,7 +260,6 @@ public class JQParameter implements RequestParamHandler {
         order.setAsc(getParamValue("sord", mapParam).equals("asc"));
         return order;
     }
-
 
     private Map<String, Object> parseCriteria(String filter, Criteria criteria, boolean convertToUnderLine) {
         if (CommonUtils.isEmpty(filter)) {

@@ -42,7 +42,7 @@ public abstract class BaseHandler<T> implements IDbHandler {
         this.lstInterceptor = lstInterceptor;
     }
 
-    protected HandleResult doAfterOperater(Object param, String handleType, Map<String, Object> mapGlobalParam, HandleResult result) {
+    protected HandleResult doAfterOperator(Object param, String handleType, Map<String, Object> mapGlobalParam, HandleResult result) {
         List<IOperInterceptor> validInterceptor = findValidInterceptor(getCanHandleType(), param);
         if (validInterceptor != null && !validInterceptor.isEmpty()) {
             HandleResult interResult;
@@ -83,7 +83,6 @@ public abstract class BaseHandler<T> implements IDbHandler {
     public HandleResult doHandle(Object mapParam) {
         HandleResult result = new HandleResult();
         result.setSuccess(true);
-        double transaction = -1;
         if (needTransaction()) {
             beginTransaction();
         }
@@ -98,7 +97,7 @@ public abstract class BaseHandler<T> implements IDbHandler {
                 return iResult;
             }
             result = handle(param);
-            iResult = doAfterOperater(param, this.getCanHandleType(), mapGlobalParam, result);
+            iResult = doAfterOperator(param, this.getCanHandleType(), mapGlobalParam, result);
             if (iResult != null) {
                 return iResult;
             }
@@ -107,7 +106,7 @@ public abstract class BaseHandler<T> implements IDbHandler {
             if (iResult != null) {
                 return iResult;
             }
-            if (needTransaction() && iResult.isSuccess()) {
+            if (needTransaction()) {
                 commit();
             }
             return result;

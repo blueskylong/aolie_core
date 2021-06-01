@@ -42,13 +42,15 @@ public class SqlBuilder {
      * @param tableNames
      * @return
      */
-    public static String buildTables(List<TableRelation> lstRelation, Map<String, String> mapTableAlias, List<String> tableNames) {
+    public static String buildTables(List<TableRelation> lstRelation, Map<String,
+            String> mapTableAlias, List<String> tableNames,
+                                     Map<String, Object> mapValues) {
         List<String> hasAddedTable = new ArrayList<>();
         StringBuilder sb = new StringBuilder();
         if (lstRelation != null && !lstRelation.isEmpty()) {
             for (TableRelation relation : lstRelation) {
                 sb.append(addTable(relation, mapTableAlias, lstRelation,
-                        relation == lstRelation.get(0), hasAddedTable));
+                        relation == lstRelation.get(0), hasAddedTable, mapValues));
             }
         }
         //如果还存在没有关联的表,则直接加到后面
@@ -98,7 +100,8 @@ public class SqlBuilder {
      * @return
      */
     private static String addRightTable(TableRelation relation,
-                                        Map<String, String> tableAlias, List<String> hadAddedTables) {
+                                        Map<String, String> tableAlias, List<String> hadAddedTables,
+                                        Map<String, Object> mapValue) {
         StringBuilder sb = new StringBuilder();
         String aliasLeft = tableAlias.get(relation.getTableLeft());
         String aliasRight = tableAlias.get(relation.getTableRight());
@@ -111,19 +114,30 @@ public class SqlBuilder {
             int len = relation.getFieldLeft().length;
             for (int i = 0; i < len; i++) {
                 sb.append(" on ").append(aliasLeft).append(".").append(relation.getFieldLeft()[i]).append("=")
-                        .append(aliasRight).append(".").append(relation.getFieldRight()[i]).append(" and ");
+                        .append(aliasRight).append(".").append(relation.getFieldRight()[i])
+                        .append(" and ");
             }
             sb.delete(sb.length() - 4, sb.length());
+
+        }
+        if (relation.hasWhere()) {
+            String where = SqlBuilder.getWhere(tableAlias, relation.getLstCriteria(), mapValue, 100);
+            if (CommonUtils.isNotEmpty(where.trim())) {
+                sb.append(" and ").append(where);
+            }
         }
         return sb.toString();
     }
 
+
     /**
      * 增加剩下的表
      */
-    private static String addRemainTable(TableRelation relation, boolean isLeftTable, Map<String, String> tableAlias, List<String> hadAddedTables) {
+    private static String addRemainTable(TableRelation relation, boolean isLeftTable,
+                                         Map<String, String> tableAlias, List<String> hadAddedTables,
+                                         Map<String, Object> mapValues) {
         if (!isLeftTable) {
-            return addRightTable(relation, tableAlias, hadAddedTables);
+            return addRightTable(relation, tableAlias, hadAddedTables, mapValues);
         }
         //增加剩下的表是左表,则关系要反转
         StringBuilder sb = new StringBuilder();
@@ -134,13 +148,18 @@ public class SqlBuilder {
         hadAddedTables.add(relation.getTableLeft());
         //添加关联
         if (relation.getFieldLeft() != null && relation.getFieldLeft().length > 0) {
-
             int len = relation.getFieldLeft().length;
             for (int i = 0; i < len; i++) {
                 sb.append(" on ").append(aliasRight).append(".").append(relation.getFieldRight()[i]).append("=")
                         .append(aliasLeft).append(".").append(relation.getFieldLeft()[i]).append(" and ");
             }
             sb.delete(sb.length() - 4, sb.length());
+        }
+        if (relation.hasWhere()) {
+            String where = SqlBuilder.getWhere(tableAlias, relation.getLstCriteria(), mapValues, 100);
+            if (CommonUtils.isNotEmpty(where.trim())) {
+                sb.append(" and ").append(where);
+            }
         }
         return sb.toString();
     }
@@ -156,7 +175,7 @@ public class SqlBuilder {
      * @return
      */
     private static String addTable(TableRelation relation, Map<String, String> tableAlias, List<TableRelation> lstRelation,
-                                   boolean isFirstTable, List<String> hadAddedTables) {
+                                   boolean isFirstTable, List<String> hadAddedTables, Map<String, Object> mapValues) {
         if (isAllDone(relation, hadAddedTables)) {
             return "";
         }
@@ -166,7 +185,7 @@ public class SqlBuilder {
         if (isFirstTable) {
             sb.append(relation.getTableLeft()).append(SqlTools.roundSpace(tableAlias.get(relation.getTableLeft())));
             hadAddedTables.add(relation.getTableLeft());
-            sb.append(addRightTable(relation, tableAlias, hadAddedTables));
+            sb.append(addRightTable(relation, tableAlias, hadAddedTables, mapValues));
             return sb.toString();
         } else {
             //寻找左表有关系的
@@ -176,7 +195,7 @@ public class SqlBuilder {
                 //去了本身
                 relationTables.remove(relation);
                 for (TableRelation superRelation : relationTables) {
-                    sb.append(addTable(superRelation, tableAlias, lstRelation, false, hadAddedTables));
+                    sb.append(addTable(superRelation, tableAlias, lstRelation, false, hadAddedTables, mapValues));
                 }
             }
             //再次判断,是不是表都已经存在
@@ -186,16 +205,16 @@ public class SqlBuilder {
             if (hadAddedTables.indexOf(relation.getTableRight()) != -1 &&
                     hadAddedTables.indexOf(relation.getTableLeft()) == -1) {
                 //如果右表已增加,左表没有增加,则增加左表
-                sb.append(addRemainTable(relation, true, tableAlias, hadAddedTables));
+                sb.append(addRemainTable(relation, true, tableAlias, hadAddedTables, mapValues));
             } else if (hadAddedTables.indexOf(relation.getTableRight()) == -1 &&
                     hadAddedTables.indexOf(relation.getTableLeft()) != -1) {
                 //如果左表没有增加,则增加右表
-                sb.append(addRemainTable(relation, true, tableAlias, hadAddedTables));
+                sb.append(addRemainTable(relation, true, tableAlias, hadAddedTables, mapValues));
             } else {
                 //如果二张表都没有增加
                 //先增加左表
                 sb.append(addNotFirstLeftTable(relation, tableAlias, hadAddedTables))
-                        .append(addRemainTable(relation, false, tableAlias, hadAddedTables));
+                        .append(addRemainTable(relation, false, tableAlias, hadAddedTables, mapValues));
             }
             return sb.toString();
 
@@ -253,11 +272,30 @@ public class SqlBuilder {
      * @return
      */
     public static String getWhere(Map<String, String> tableAlias, List<Criteria> lstCriteria, Map<String, Object> paramValues) {
+        return getWhere(tableAlias, lstCriteria, paramValues, 1);
+    }
+
+    /**
+     * 生成查询条件
+     *
+     * @param tableAlias
+     * @param lstCriteria
+     * @param paramValues
+     * @return
+     */
+    public static String getWhere(Map<String, String> tableAlias, List<Criteria> lstCriteria,
+                                  Map<String, Object> paramValues, int index) {
         if (lstCriteria == null || lstCriteria.isEmpty()) {
             return "";
         }
+        //删除没有条件的条件组
+        for (int i = lstCriteria.size() - 1; i >= 0; i--) {
+            Criteria criteria = lstCriteria.get(i);
+            if (criteria.isEmpty()) {
+                lstCriteria.remove(criteria);
+            }
+        }
         StringBuilder sb = new StringBuilder();
-        int index = 1;
         for (Criteria criteria : lstCriteria) {
             sb.append(criteria.getSqlWhere(paramValues, tableAlias, index++, criteria != lstCriteria.get(0)));
         }
@@ -326,7 +364,7 @@ public class SqlBuilder {
         Map<String, Object> mapParamValue = new HashMap<>();
         String sField = SqlBuilder.buildFields(queryParamDefinition.getFields(), mapAlias);
         String sTable = SqlBuilder.buildTables(queryParamDefinition.getLstRelation(),
-                mapAlias, queryParamDefinition.getTableNames());
+                mapAlias, queryParamDefinition.getTableNames(), mapParamValue);
         String sWhere = SqlBuilder.getWhere(mapAlias, queryParamDefinition.getLstCriteria(), mapParamValue);
         String sGroup = "";
         if (queryParamDefinition.isHasGroup()) {
@@ -361,6 +399,6 @@ public class SqlBuilder {
     }
 
     private static String makeTableAliasString(int index) {
-        return "table" + UUID.randomUUID().toString().replace("-", "");
+        return "table_alias_" + (index + 1);
     }
 }

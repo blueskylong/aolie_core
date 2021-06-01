@@ -81,6 +81,10 @@ public class ComponentDto extends SchemaBaseDto {
      * 分组类型
      */
     private Short groupType;
+    /**
+     * 其它个性的属性扩展,使用JSON的格式,在生成时会合并到创建属性中
+     */
+    private String extAttr;
 
     /**
      * 默认排序类型
@@ -288,5 +292,13 @@ public class ComponentDto extends SchemaBaseDto {
 
     public void setPosLeft(Integer posLeft) {
         this.posLeft = posLeft;
+    }
+
+    public String getExtAttr() {
+        return extAttr;
+    }
+
+    public void setExtAttr(String extAttr) {
+        this.extAttr = extAttr;
     }
 }

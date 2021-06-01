@@ -76,7 +76,13 @@ public class ParamConverter {
             newRelation.setFieldRight(SchemaHolder.getColumn(relation.getDto()
                     .getFieldTo(), version).getColumnDto().getFieldName());
             newRelation.setTableRight(relation.getTableTo().getTableDto().getTableName());
-            newRelation.setJoinType(Constants.JoinType.INNER_JOIN);
+            newRelation.setLstCriteria(relation.getLstCriteria());
+            if (relation.getDto().getRelationType() <= 9) {
+
+                newRelation.setJoinType(Constants.JoinType.INNER_JOIN);
+            } else {
+                newRelation.setJoinType(Constants.JoinType.LEFT_JOIN);
+            }
             result.add(newRelation);
         }
         return result;

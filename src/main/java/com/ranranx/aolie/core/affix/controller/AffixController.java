@@ -48,7 +48,7 @@ public class AffixController {
         return HandleResult.success(result);
     }
 
-    @DeleteMapping("/deleteAffixByBiz/{columnId}/{bizId}")
+    @RequestMapping("/deleteAffixByBiz/{columnId}/{bizId}")
     public HandleResult deleteAffixByBiz(@PathVariable Long columnId, @PathVariable Long bizId) {
         return HandleResult.success(affixService.deleteAffixByBiz(columnId, bizId));
     }

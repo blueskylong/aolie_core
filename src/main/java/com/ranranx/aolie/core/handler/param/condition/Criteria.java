@@ -24,6 +24,7 @@
 
 package com.ranranx.aolie.core.handler.param.condition;
 
+import com.ranranx.aolie.core.common.CommonUtils;
 import com.ranranx.aolie.core.handler.param.QueryParam;
 import com.ranranx.aolie.core.handler.param.condition.express.*;
 import org.apache.ibatis.reflection.MetaObject;
@@ -334,8 +335,8 @@ public class Criteria implements ICondition {
             Object value = metaObject.getValue(property);
             //属性值不为空
             if (value != null) {
-                andEqualTo(tableName, property, value);
 
+                andEqualTo(tableName, CommonUtils.convertToUnderline(property), value);
             }
         }
         return this;
@@ -354,9 +355,9 @@ public class Criteria implements ICondition {
             Object value = metaObject.getValue(property);
             //属性值不为空
             if (value != null) {
-                andEqualTo(tableName, property, value);
+                andEqualTo(tableName, CommonUtils.convertToUnderline(property), value);
             } else {
-                andIsNull(tableName, property);
+                andIsNull(tableName, CommonUtils.convertToUnderline(property));
             }
 
         }
@@ -520,9 +521,9 @@ public class Criteria implements ICondition {
             Object value = metaObject.getValue(property);
             //属性值不为空
             if (value != null) {
-                andEqualTo(tableName, property, value);
+                andEqualTo(tableName,  CommonUtils.convertToUnderline(property), value);
             } else {
-                andIsNull(tableName, property);
+                andIsNull(tableName,  CommonUtils.convertToUnderline(property));
             }
 
         }

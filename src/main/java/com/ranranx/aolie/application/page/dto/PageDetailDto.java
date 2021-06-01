@@ -19,6 +19,7 @@ public class PageDetailDto extends SchemaBaseDto {
     private Integer initState;
     private String customUi;
     private String customParam;
+    private String uiCode;
     /**
      * 关联数据源,用于用户自定义界面,用户可以通过动态指定此数据源,来显示按钮,监听数据源的状态等,而
      * 不需要在代码中指定数据源的ID
@@ -136,5 +137,13 @@ public class PageDetailDto extends SchemaBaseDto {
 
     public void setRelationDs(Long relationDs) {
         this.relationDs = relationDs;
+    }
+
+    public String getUiCode() {
+        return uiCode;
+    }
+
+    public void setUiCode(String uiCode) {
+        this.uiCode = uiCode;
     }
 }

@@ -1,7 +1,5 @@
 package com.ranranx.aolie.core.interfaces;
 
-import com.ranranx.aolie.core.ds.definition.QueryParamDefinition;
-
 /**
  * 客户端查询参数处理器
  */
@@ -11,5 +9,5 @@ public interface RequestParamHandler {
      *
      * @return
      */
-    QueryParamDefinition getQueryParamDefinition() throws Exception;
+//    QueryParamDefinition getQueryParamDefinition() throws Exception;
 }

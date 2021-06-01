@@ -119,7 +119,10 @@ public class DeleteParam {
         if (obj == null) {
             return this;
         }
-        this.criteria.andAllEqualToDto(null, obj);
+        if (this.criteria == null) {
+            this.criteria = new Criteria();
+        }
+        this.criteria.andEqualToDto(null, obj);
         this.setTableDto(schemaId, obj.getClass());
         return this;
     }

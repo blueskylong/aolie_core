@@ -10,9 +10,9 @@ import java.util.Map;
 
 /**
  * @author xxl
- *  更新和插入的参数载体
- * @date 2020/8/6 14:29
+ * 更新和插入的参数载体
  * @version V0.0.1
+ * @date 2020/8/6 14:29
  **/
 public class UpdateParam {
     /**
@@ -80,8 +80,13 @@ public class UpdateParam {
     }
 
     public List<Map<String, Object>> getLstRows() {
+        //这里做一下处理,不在表字段中的数据去除
+
+
         return lstRows;
     }
+
+
 
     public void setLstRows(List<Map<String, Object>> lstRows) {
         this.lstRows = lstRows;

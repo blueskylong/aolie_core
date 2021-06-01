@@ -14,16 +14,13 @@ import com.ranranx.aolie.core.handler.param.InsertParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author xxl
- *  数据新增或更新服务服务
- * @date 2020/8/4 14:32
+ * 数据新增或更新服务服务
  * @version V0.0.1
+ * @date 2020/8/4 14:32
  **/
 @Component
 public class InsertHandler<T extends InsertParam> extends BaseHandler<T> {
@@ -46,7 +43,7 @@ public class InsertHandler<T extends InsertParam> extends BaseHandler<T> {
         if (param.getLstRows() == null || param.getLstRows().isEmpty()) {
             throw new InvalidParamException("没有提供插入行数据");
         }
-        List<long[]> keys = genKeys(param);
+        List<List<Long>> keys = genKeys(param);
         InsertParamDefinition definition = new InsertParamDefinition();
         definition.setTableName(param.getTable().getTableDto().getTableName());
         definition.setLstRows(param.getLstRows());
@@ -71,7 +68,7 @@ public class InsertHandler<T extends InsertParam> extends BaseHandler<T> {
         return result;
     }
 
-    private List<long[]> genKeys(InsertParam param) {
+    private List<List<Long>> genKeys(InsertParam param) {
 
         //这里需要先生成数据的主键
         List<Column> keyColumn = param.getTable().getKeyColumn();
@@ -88,7 +85,7 @@ public class InsertHandler<T extends InsertParam> extends BaseHandler<T> {
         String keyField = keyColumn.get(0).getColumnDto().getFieldName();
         Long tableId = param.getTable().getTableDto().getTableId();
         //更新表ID值
-        List<long[]> lstChangeId = new ArrayList();
+        List<List<Long>> lstChangeId = new ArrayList();
         for (Map<String, Object> row : param.getLstRows()) {
             lstChangeId.add(genAndUpdateKey(row, tableId, keyField, errTable));
         }
@@ -111,13 +108,13 @@ public class InsertHandler<T extends InsertParam> extends BaseHandler<T> {
      * @param row
      * @return
      */
-    private long[] genAndUpdateKey(Map<String, Object> row, Long tableId, String keyField, String errTable) {
+    private List<Long> genAndUpdateKey(Map<String, Object> row, Long tableId, String keyField, String errTable) {
         Object obj = row.get(keyField);
         if (!CommonUtils.isNumber(obj.toString()) || Long.parseLong(obj.toString()) >= 0) {
             throw new InvalidParamException(errTable + " 指定的值不符合预期,预期为一负数");
         }
         long nextId = IdGenerator.getNextId("table_" + SessionUtils.getLoginVersion() + "_" + tableId);
         row.put(keyField, nextId);
-        return new long[]{Long.parseLong(obj.toString()), nextId};
+        return Arrays.asList(Long.parseLong(obj.toString()), nextId);
     }
 }

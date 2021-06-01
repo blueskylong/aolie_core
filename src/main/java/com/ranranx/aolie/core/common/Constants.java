@@ -20,17 +20,34 @@ public class Constants {
          */
         public static final Integer TYPE_ONE_ONE = 1;
         /**
+         * 一对一关系(包含0个)
+         */
+        public static final Integer TYPE_ONE_ONE0 = 10;
+        /**
          * 一对多关系
          */
         public static final Integer TYPE_ONE_MULTI = 2;
+        /**
+         * 一对多关系(包含0个)
+         */
+        public static final Integer TYPE_ONE_MULTI0 = 20;
+
         /**
          * 多对一关系
          */
         public static final Integer TYPE_MULTI_ONE = 3;
         /**
+         * 多对一关系(包含0个)
+         */
+        public static final Integer TYPE_MULTI_ONE0 = 30;
+        /**
          * 多对多关系
          */
         public static final Integer TYPE_MULTI_MULTI = 4;
+        /**
+         * 多对多关系(包含0个)
+         */
+        public static final Integer TYPE_MULTI_MULTI0 = 40;
     }
 
     /**

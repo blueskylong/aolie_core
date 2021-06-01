@@ -1,12 +1,17 @@
 package com.ranranx.aolie.core.ds.definition;
 
 import com.ranranx.aolie.core.common.Constants;
+import com.ranranx.aolie.core.handler.param.condition.Criteria;
+
+import java.beans.Transient;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author xxl
- *  用来描述二表中的相等字段信息, 其中左右表/字段在没有主表的情况下没有其它含义,只是区分.
- * @date 2020/8/8 14:38
+ * 用来描述二表中的相等字段信息, 其中左右表/字段在没有主表的情况下没有其它含义,只是区分.
  * @version V0.0.1
+ * @date 2020/8/8 14:38
  **/
 public class TableRelation {
 
@@ -30,6 +35,11 @@ public class TableRelation {
      * 右表关联字段
      */
     private String[] fieldRight;
+
+    /**
+     * 连接额外条件,放到on 后面
+     */
+    private List<Criteria> lstCriteria;
 
     public String getTableLeft() {
         return tableLeft;
@@ -129,5 +139,33 @@ public class TableRelation {
 
     public void setJoinType(String joinType) {
         this.joinType = joinType;
+    }
+
+    @Transient
+    public List<Criteria> getLstCriteria() {
+        return lstCriteria;
+    }
+
+    /**
+     * 是否含有条件
+     *
+     * @return
+     */
+    public boolean hasWhere() {
+        return lstCriteria != null && !lstCriteria.isEmpty();
+    }
+
+    public void setLstCriteria(List<Criteria> lstCriteria) {
+        this.lstCriteria = lstCriteria;
+    }
+
+    @Transient
+    public Criteria appendCriteria() {
+        if (this.lstCriteria == null) {
+            this.lstCriteria = new ArrayList<>();
+        }
+        Criteria criteria = new Criteria();
+        this.lstCriteria.add(criteria);
+        return criteria;
     }
 }

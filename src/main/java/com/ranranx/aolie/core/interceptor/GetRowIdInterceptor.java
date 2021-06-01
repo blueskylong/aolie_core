@@ -76,14 +76,14 @@ public class GetRowIdInterceptor implements IOperInterceptor {
         }
         if (param instanceof InsertParam) {
             List<Map<String, Object>> lstData = result.getLstData();
-            List<long[]> lstId = (List<long[]>) ((Map<String, Object>) result.getLstData().get(0))
+            List<List<Long>> lstId = (List<List<Long>>) ((Map<String, Object>) result.getLstData().get(0))
                     .get(Constants.ConstFieldName.CHANGE_KEYS_FEILD);
             if (lstId == null || lstId.isEmpty()) {
                 return null;
             }
             List<Object> lst = new ArrayList<>();
-            for (long[] ids : lstId) {
-                lst.add(ids[1]);
+            for (List<Long> ids : lstId) {
+                lst.add(ids.get(1));
             }
             globalParamData.put(PARAM_IDS, lst);
         }

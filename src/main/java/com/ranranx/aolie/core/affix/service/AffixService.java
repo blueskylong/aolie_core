@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
-import javax.servlet.http.HttpServletRequest;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
 
@@ -31,10 +31,10 @@ public interface AffixService {
      * 根据业务主键查询附件列表
      *
      * @param columnId
-     * @param affixId
+     * @param bizId
      * @return
      */
-    List<AffixDto> findAffixByBizId(Long columnId, Long affixId);
+    List<AffixDto> findAffixByBizId(Long columnId, Long bizId);
 
     /**
      * 保存上传文件
@@ -86,11 +86,26 @@ public interface AffixService {
     /**
      * 根据affixId获取对应附件的byte[]
      *
-     * @param req
      * @param affixId
      * @return
      */
-    byte[] getByteArray(HttpServletRequest req, Long affixId);
+    byte[] getByteArray(Long affixId);
+
+
+    /**
+     * 取得附件流
+     *
+     * @param dto
+     * @return
+     */
+    FileInputStream getFileStream(AffixDto dto);
+
+    /**
+     * 取得附件路径
+     * @param affix
+     * @return
+     */
+    public String getAffixRealPath(AffixDto affix);
 
 
 }

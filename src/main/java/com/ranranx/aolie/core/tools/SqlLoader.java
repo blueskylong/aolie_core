@@ -7,10 +7,7 @@ import com.ranranx.aolie.core.exceptions.NotExistException;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.Enumeration;
@@ -21,9 +18,8 @@ import java.util.jar.JarFile;
 
 /**
  * @author xxl
- *
- * @date 2021/1/7 0007 20:39
  * @version V0.0.1
+ * @date 2021/1/7 0007 20:39
  **/
 @Component
 public class SqlLoader {
@@ -201,10 +197,18 @@ class JarScanner implements Scan {
                                     org/junit/runners/*/
                                 JarEntry entry = jarEntryEnumeration.nextElement();
                                 String jarEntryName = entry.getName();
+
                                 //这里我们需要过滤不是class文件和不在basePack包名下的类
-                                if (jarEntryName.contains(".sql") && jarEntryName.substring(0, jarEntryName.lastIndexOf("/") - 1).endsWith("/" + packageName)) {
+                                if (jarEntryName.contains(".sql") && jarEntryName.indexOf(packageName) != -1) {
                                     System.out.println("--->load:" + jarEntryName);
-                                    BufferedReader reader = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream(jarEntryName)));
+                                    InputStreamReader inputStreamReader;
+                                    InputStream resourceAsStream = this.getClass().getResourceAsStream(jarEntryName);
+                                    if (resourceAsStream == null) {
+                                        inputStreamReader = new InputStreamReader(jarFile.getInputStream(entry));
+                                    } else {
+                                        inputStreamReader = new InputStreamReader(resourceAsStream);
+                                    }
+                                    BufferedReader reader = new BufferedReader(inputStreamReader);
                                     parseSql(reader, mapSql);
                                 }
                             }

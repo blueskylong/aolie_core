@@ -12,7 +12,7 @@ import java.util.Map;
  * @version V0.0.1
  * @date 2020/8/8 19:58
  **/
-public class HandleResult<T> {
+public class HandleResult {
 
     /**
      * 是否成功
@@ -21,7 +21,7 @@ public class HandleResult<T> {
     /**
      * 返回的数据
      */
-    private T data;
+    private Object data;
     /**
      * 错误提供信息
      */
@@ -96,7 +96,7 @@ public class HandleResult<T> {
         return result;
     }
 
-    public T getData() {
+    public Object getData() {
         return data;
     }
 
@@ -108,7 +108,7 @@ public class HandleResult<T> {
         return null;
     }
 
-    public void setData(T data) {
+    public void setData(Object data) {
         this.data = data;
         if (this.data instanceof com.github.pagehelper.Page) {
             com.github.pagehelper.Page resultPage = (com.github.pagehelper.Page) this.data;
@@ -144,7 +144,7 @@ public class HandleResult<T> {
         if (((List) this.data).isEmpty()) {
             return null;
         }
-        return ((List) ((List) this.data).get(0));
+        return ((List) this.data).get(0);
     }
 
 

@@ -56,7 +56,7 @@ public class HandlerFactory {
         return handler.doHandle(params);
     }
 
-    public HandleResult handleQuery(QueryParam params) {
+    public <T> HandleResult handleQuery(QueryParam params) {
         IDbHandler handler = this.getHandler(Constants.HandleType.TYPE_QUERY, params);
         return handler.doHandle(params);
     }
