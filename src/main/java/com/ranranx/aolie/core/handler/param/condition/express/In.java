@@ -2,7 +2,7 @@ package com.ranranx.aolie.core.handler.param.condition.express;
 
 import com.ranranx.aolie.core.common.SqlTools;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -11,7 +11,7 @@ import java.util.Map;
  * @date 2021/3/11 0011 19:26
  **/
 public class In extends BaseCondition {
-    public In(String tableName, String fieldName, List<Object> lst) {
+    public In(String tableName, String fieldName, Collection<Object> lst) {
         super(tableName, fieldName, lst, null);
 
     }

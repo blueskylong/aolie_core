@@ -4,6 +4,7 @@ import com.ranranx.aolie.application.menu.dto.MenuDto;
 import com.ranranx.aolie.application.menu.dto.MenuInfo;
 import com.ranranx.aolie.application.menu.service.MenuService;
 import com.ranranx.aolie.core.common.SessionUtils;
+import com.ranranx.aolie.core.handler.HandleResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,9 +14,8 @@ import java.util.List;
 
 /**
  * @author xxl
- *
- * @date 2020/12/10 10:55
  * @version V0.0.1
+ * @date 2020/12/10 10:55
  **/
 @RestController()
 @RequestMapping("/menu")
@@ -31,8 +31,16 @@ public class MenuController {
      * @return
      */
     @RequestMapping("/findMenuInfo/{menuId}")
-    public MenuInfo findMenuInfo(@PathVariable Long menuId) {
-        return menuService.findMenuInfo(menuId, SessionUtils.getLoginVersion());
+    public HandleResult findMenuInfo(@PathVariable Long menuId) {
+        try {
+            MenuInfo menuInfo = menuService.findMenuInfo(menuId, SessionUtils.getLoginVersion());
+            HandleResult success = HandleResult.success(1);
+            success.setData(menuInfo);
+            return success;
+
+        } catch (Exception e) {
+            return HandleResult.failure(e.getMessage());
+        }
     }
 
     /**

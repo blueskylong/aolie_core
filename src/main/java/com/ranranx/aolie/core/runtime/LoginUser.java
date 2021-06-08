@@ -20,7 +20,7 @@ public class LoginUser extends UserDto implements UserDetails, CredentialsContai
     /**
      * 当前登录的角色
      */
-    private Long roleId;
+    private Long roleId = 1L;
 
     /**
      * 所有权限信息 key 权限资源ID 参考Constants.DefaultRsIds
@@ -107,15 +107,6 @@ public class LoginUser extends UserDto implements UserDetails, CredentialsContai
         return this.getUserId().equals(((LoginUser) o).getUserId());
     }
 
-    @Override
-    public String toString() {
-        return this.getUserId().toString();
-    }
-
-    @Override
-    public int hashCode() {
-        return this.getUserId().hashCode();
-    }
 
     public Map<Long, Set<Long>> getMapRights() {
         return mapRights;

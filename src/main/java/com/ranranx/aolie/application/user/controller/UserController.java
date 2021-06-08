@@ -1,7 +1,10 @@
 package com.ranranx.aolie.application.user.controller;
 
+import com.ranranx.aolie.application.right.dto.Role;
+import com.ranranx.aolie.application.right.service.RightService;
 import com.ranranx.aolie.application.user.dto.RightRelationDto;
 import com.ranranx.aolie.application.user.dto.RightResourceDto;
+import com.ranranx.aolie.application.user.service.ILoginService;
 import com.ranranx.aolie.application.user.service.UserService;
 import com.ranranx.aolie.core.common.SessionUtils;
 import com.ranranx.aolie.core.handler.HandleResult;
@@ -21,6 +24,12 @@ import java.util.Map;
 public class UserController {
     @Autowired
     private UserService service;
+
+    @Autowired
+    private RightService rightService;
+
+    @Autowired
+    private ILoginService loginService;
 
     /**
      * 查询用户的所有数据权限,
@@ -152,6 +161,28 @@ public class UserController {
     @GetMapping("/findAllRelationDto/{version}")
     public List<RightRelationDto> findAllRelationDto(@PathVariable String version) {
         return service.findAllRelationDto(version);
+    }
+
+    /**
+     * 取得用户所有角色
+     *
+     * @return
+     */
+    @GetMapping("/findUserRoles")
+    public HandleResult findUserRoles() {
+        List<Role> userRoles = rightService.findUserRoles(SessionUtils.getLoginUser().getUserId(), SessionUtils.getLoginVersion());
+        int length = userRoles == null ? 0 : userRoles.size();
+        HandleResult result = HandleResult.success(length);
+        result.setData(userRoles);
+        return result;
+    }
+
+    @PutMapping("/selectUserRole/{roleId}")
+    public HandleResult selectUserRole(@PathVariable Long roleId) {
+        Role role = loginService.initUserRight(SessionUtils.getLoginUser(), roleId);
+        HandleResult result = HandleResult.success(1);
+        result.setData(role);
+        return result;
     }
 
 }

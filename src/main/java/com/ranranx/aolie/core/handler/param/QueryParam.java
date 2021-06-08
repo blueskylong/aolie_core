@@ -78,6 +78,11 @@ public class QueryParam {
      * 直接语句.暂时提供在复杂语句下使用.
      */
     private SqlExp sqlExp;
+    /**
+     * 屏蔽数据权限过滤拦截,慎用
+     * 目前应用在登录后的角色选择上,因为登录只有一个角色的权限,而选择角色时的列表需要超越当前选择的角色权限
+     */
+    private boolean maskDataRight = false;
 
     public SqlExp getSqlExp() {
         return sqlExp;
@@ -364,5 +369,13 @@ public class QueryParam {
     public QueryParam setLstRelation(List<TableColumnRelation> lstRelation) {
         this.lstRelation = lstRelation;
         return this;
+    }
+
+    public boolean isMaskDataRight() {
+        return maskDataRight;
+    }
+
+    public void setMaskDataRight(boolean maskDataRight) {
+        this.maskDataRight = maskDataRight;
     }
 }

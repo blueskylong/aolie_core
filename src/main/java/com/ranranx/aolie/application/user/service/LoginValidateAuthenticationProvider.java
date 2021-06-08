@@ -6,23 +6,25 @@ package com.ranranx.aolie.application.user.service;
  * @date 2021/2/6 0006 22:08
  **/
 
-import com.ranranx.aolie.application.right.RightNode;
+import com.ranranx.aolie.application.right.dto.Role;
+import com.ranranx.aolie.application.right.service.RightService;
 import com.ranranx.aolie.core.common.CommonUtils;
-import com.ranranx.aolie.core.common.SessionUtils;
 import com.ranranx.aolie.core.config.authentication.NamePassVersionScodeAuthenticationToken;
+import com.ranranx.aolie.core.exceptions.NotExistException;
 import com.ranranx.aolie.core.runtime.GlobalParameterService;
 import com.ranranx.aolie.core.runtime.LoginUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 @Component
 
@@ -39,7 +41,7 @@ public class LoginValidateAuthenticationProvider implements AuthenticationProvid
     private GlobalParameterService parameterService;
 
     @Autowired
-    private UserService userService;
+    private RightService rightService;
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
@@ -75,97 +77,45 @@ public class LoginValidateAuthenticationProvider implements AuthenticationProvid
         if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
             throw new BadCredentialsException("输入密码错误!");
         }
-
-        initUserRight(user);
-
         initUserParams(user);
-        return new NamePassVersionScodeAuthenticationToken(user, rawPassword, user.getAuthorities());
-    }
-
-    /**
-     * 初始化用户的权限信息,如果此用户只有一个角色,可以直接查询,但如果是多个角色,则需要选择角色后查询
-     *
-     * @param user
-     */
-    private void initUserRight(LoginUser user) {
-        try {
-            //取得权限结构
-            RightNode rightNodeRoot = SessionUtils.getMapRightStruct().get(user.getVersionCode());
-            //查询所有权限相关信息,生成Map
-            Map<Long, Set<Long>> mapRights = populateNodeStruct(rightNodeRoot, user);
-            user.setMapRights(mapRights);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    /**
-     * 查询具体的权限ID,这里需要思考一个平衡问题,如果权限数据过多,是不是可以采用临时查询的方式处理,否则内存占用会较多
-     *
-     * @param root
-     * @return key: rsId,value:array of ids
-     */
-    private Map<Long, Set<Long>> populateNodeStruct(RightNode root, LoginUser user) {
-        Map<Long, Set<Long>> mapResult = userService.findUserDirectAllRights(user.getUserId(), user.getVersionCode());
-        List<RightNode> lstSub = root.getLstSub();
-        if (lstSub == null || lstSub.isEmpty()) {
-            return mapResult;
-        }
-        if (mapResult == null || mapResult.isEmpty()) {
-            return mapResult;
-        }
-
-        lstSub.forEach(el -> {
-            //如果有下级,则处理下级
-            //这里使用了深度优先的方式,如果采用广度优先的方式,一定情况下会理有效率
-            List<RightNode> subNodes = el.getLstSub();
-            if (subNodes != null && !subNodes.isEmpty()) {
-                subNodes.forEach(node -> {
-                    findSubRights(el, node, mapResult, user);
-                });
-            }
-        });
-        return mapResult;
-    }
-
-    /**
-     * 处理下级的权限传递
-     *
-     * @param fromNode
-     * @param toNode
-     * @param mapRights
-     */
-    private void findSubRights(RightNode fromNode, RightNode toNode, Map<Long, Set<Long>> mapRights, LoginUser user) {
-        Set<Long> rights = findRight(fromNode, toNode, mapRights.get(fromNode.getRightId()), user);
-        Set<Long> lstExists = mapRights.computeIfAbsent(toNode.getRightId(), key -> {
-            return new HashSet<Long>();
-        });
-        //添加到结果集中
-        if (rights != null) {
-            lstExists.addAll(rights);
-        }
-
-        //检查下级
-        List<RightNode> lstSub = toNode.getLstSub();
-        if (lstSub != null && !lstSub.isEmpty()) {
-            //执行递归
-            lstSub.forEach(el -> {
-                findSubRights(toNode, el, mapRights, user);
+        //这里将角色信息当作授权信息,供前端做是否选择角色的判断
+        List<Role> userRoles = rightService.findUserRoles(user.getUserId(), user.getVersionCode());
+        Collection<GrantedAuthority> authorities = new ArrayList<>();
+        if (userRoles != null && !userRoles.isEmpty()) {
+            userRoles.forEach(role -> {
+                authorities.add(new SimpleGrantedAuthority(role.getRoleId().toString()));
             });
         }
+//        if (userRoles != null && userRoles.size() == 1) {
+//            initSingleRoleRight(authorities, userRoles.get(0).getRoleId(), user);
+//        } else {
+        //更新登录的权限
+        loginService.initUserRight(user, null);
+//        }
+
+        return new NamePassVersionScodeAuthenticationToken(user, rawPassword, authorities);
     }
 
 
-    private Set<Long> findRight(RightNode fromNode, RightNode toNode, Set<Long> lstFormIds, LoginUser user) {
-        //如果是根节点,则不再查询,因前面已统一查询用户的直接权限
-        if (fromNode.getLstParent().isEmpty()) {
-            return null;
-        } else {
-            //否则查询资源关联表
-            return userService.findNextRights(fromNode.getRightId(),
-                    toNode.getRightId(), lstFormIds, user.getVersionCode());
+    private Collection<? extends GrantedAuthority> initSingleRoleRight(Collection<? extends GrantedAuthority> authorities, Long roleId
+            , LoginUser user) {
+        if (authorities == null) {
+
+            authorities = new ArrayList<>();
         }
+        String sRoleId = roleId.toString();
+        boolean hasRole = false;
+        for (GrantedAuthority authority : authorities) {
+            if (sRoleId.equals(authority.getAuthority())) {
+                hasRole = true;
+            }
+        }
+        if (!hasRole) {
+            throw new NotExistException("用户没有指定的角色权限");
+        }
+        //更新登录的权限
+        loginService.initUserRight(user, roleId);
+        return authorities;
     }
 
 

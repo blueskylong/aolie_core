@@ -1,5 +1,7 @@
 package com.ranranx.aolie.application.user.service;
 
+import com.ranranx.aolie.application.right.dto.Role;
+import com.ranranx.aolie.core.runtime.LoginUser;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
@@ -17,5 +19,12 @@ public interface ILoginService {
      * @return
      * @throws UsernameNotFoundException
      */
-    public UserDetails loadUserByUserNameAndVersion(String username, String version) throws UsernameNotFoundException;
+    UserDetails loadUserByUserNameAndVersion(String username, String version) throws UsernameNotFoundException;
+
+    /**
+     * 初始化用户的权限信息,如果此用户只有一个角色,可以直接查询,但如果是多个角色,则需要选择角色后查询
+     *
+     * @param user
+     */
+    Role initUserRight(LoginUser user, Long roleId);
 }

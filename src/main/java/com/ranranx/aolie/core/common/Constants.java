@@ -1,5 +1,7 @@
 package com.ranranx.aolie.core.common;
 
+import java.text.SimpleDateFormat;
+
 /**
  * @author xxl
  * @version V0.0.1
@@ -200,6 +202,10 @@ public class Constants {
         public static final String ACCOUNT_CODE = "account_code";
         /*用户密码*/
         public static final String PASSWORD = "password";
+        /**
+         * 虚拟列后缀
+         */
+        public static final String V_COL_AFFIX = "__VCOL";
     }
 
     public static class UserState {
@@ -326,4 +332,9 @@ public class Constants {
     public static class DefaultTableName {
         public static final String commonSelection = "aolie_s_common_selection";
     }
+
+    /**
+     * 时间格式
+     */
+    public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 }

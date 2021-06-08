@@ -21,7 +21,7 @@ public class SqlTools {
      */
     public static String genInClause(String field,
                                      List<Object> values, int parIndex, Map<String, Object> paramValues) {
-        if (values == null) {
+        if (values == null || values.isEmpty()) {
             return "";
         }
         //每500生成一个in

@@ -37,7 +37,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests().antMatchers("/loginExpired",
-                "/logoutSuccess").permitAll()
+                "/logoutSuccess").permitAll().regexMatchers("/index.html").permitAll()
                 .anyRequest().authenticated()
 //                .accessDecisionManager(accessDecisionManager())
                 .and().exceptionHandling().
@@ -46,6 +46,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .formLogin();
         http.cors().disable();
         http.csrf().disable();
+        http.headers().frameOptions().disable();
         http.addFilterAt(createJSONAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
         http.sessionManagement().invalidSessionUrl("/loginExpired");
 //        http.sessionManagement().maximumSessions(1).expiredUrl("/loginExpired");

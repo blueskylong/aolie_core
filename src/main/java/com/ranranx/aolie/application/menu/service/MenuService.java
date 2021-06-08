@@ -40,18 +40,19 @@ public class MenuService {
      */
     public MenuInfo findMenuInfo(Long menuId, String version) {
         QueryParam param = new QueryParam();
-        param.setTableDtos(Constants.DEFAULT_SYS_SCHEMA, SessionUtils.getLoginVersion(), MenuDto.class);
-        param.appendCriteria().andEqualTo(null, "menu_id", menuId);
-        param.setResultClass(MenuDto.class);
+        MenuDto menuDto = new MenuDto();
+        menuDto.setMenuId(menuId);
+        param.setFilterObjectAndTableAndResultType(Constants.DEFAULT_SYS_SCHEMA, version, menuDto);
         HandleResult result = handlerFactory.handleQuery(param);
-        List<MenuDto> lstMenuDto = (List<MenuDto>) result.getData();
-        if (result == null || !result.isSuccess() || lstMenuDto == null || lstMenuDto.isEmpty()) {
+        menuDto = (MenuDto) result.singleValue();
+        if (result == null) {
             throw new NotExistException("指定的菜单不存在");
         }
-        MenuDto menuDto = lstMenuDto.get(0);
-        param.setTableDtos(Constants.DEFAULT_SYS_SCHEMA, SessionUtils.getLoginVersion(), MenuButtonDto.class);
+        param = new QueryParam();
+        MenuButtonDto menuButtonDto = new MenuButtonDto();
+        menuButtonDto.setMenuId(menuId);
+        param.setFilterObjectAndTableAndResultType(Constants.DEFAULT_SYS_SCHEMA, version, menuButtonDto);
         param.addOrder(new FieldOrder(MenuButtonDto.class, "lvl_code", true, 1));
-        param.setResultClass(MenuButtonDto.class);
         result = handlerFactory.handleQuery(param);
         MenuInfo info = new MenuInfo();
         info.setMenuDto(menuDto);

@@ -1,7 +1,6 @@
 package com.ranranx.aolie.core.datameta.datamodel;
 
 import com.ranranx.aolie.core.datameta.dto.ColumnDto;
-import com.ranranx.aolie.core.ds.definition.Field;
 
 import java.beans.Transient;
 import java.util.List;
@@ -9,9 +8,8 @@ import java.util.Map;
 
 /**
  * @author xxl
- *
- * @date 2020/8/5 17:34
  * @version V0.0.1
+ * @date 2020/8/5 17:34
  **/
 public class Column {
     private ColumnDto columnDto;
@@ -80,6 +78,12 @@ public class Column {
         return fieldType.equals(DmConstants.FieldType.DECIMAL)
                 || fieldType.equals(DmConstants.FieldType.INT);
 
+    }
+
+    @Transient
+    public boolean isDateColumn() {
+        String fieldType = this.columnDto.getFieldType();
+        return fieldType.equals(DmConstants.FieldType.DATETIME);
     }
 
 }

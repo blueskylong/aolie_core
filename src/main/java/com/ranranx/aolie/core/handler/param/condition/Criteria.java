@@ -521,9 +521,9 @@ public class Criteria implements ICondition {
             Object value = metaObject.getValue(property);
             //属性值不为空
             if (value != null) {
-                andEqualTo(tableName,  CommonUtils.convertToUnderline(property), value);
+                andEqualTo(tableName, CommonUtils.convertToUnderline(property), value);
             } else {
-                andIsNull(tableName,  CommonUtils.convertToUnderline(property));
+                andIsNull(tableName, CommonUtils.convertToUnderline(property));
             }
 
         }

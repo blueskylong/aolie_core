@@ -24,6 +24,7 @@ public class CommonUtils {
 
     private static Pattern UNDERLINE_PATTEN = Pattern.compile("_[a-z]");
 
+
     /**
      * 字符串
      *
@@ -85,7 +86,7 @@ public class CommonUtils {
     public static <T> List<T> convertCamelAndToObject(List<Map<String, Object>> lst, Class<T> clazz) {
 
         List lstResult = new ArrayList<>();
-        if (lst == null) {
+        if (lst == null || lst.isEmpty()) {
             return lstResult;
         }
         try {

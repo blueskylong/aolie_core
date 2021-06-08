@@ -108,6 +108,10 @@ public class DataRightInterceptor implements IOperInterceptor, CommandLineRunner
      * @return 返回错误信息或空信息
      */
     private HandleResult beforeQuery(QueryParam param) {
+        //没有登录的和超级管理员不做数据权限过滤
+        if (param.isMaskDataRight()) {
+            return null;
+        }
         TableInfo[] tables = param.getTable();
         if (tables == null || tables.length < 1) {
             return null;

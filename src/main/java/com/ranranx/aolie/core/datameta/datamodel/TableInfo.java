@@ -22,9 +22,8 @@ import java.util.Map;
 
 /**
  * @author xxl
- *
- * @date 2020/8/5 17:34
  * @version V0.0.1
+ * @date 2020/8/5 17:34
  **/
 public class TableInfo {
 
@@ -423,6 +422,22 @@ public class TableInfo {
             }
         }
         return null;
+    }
+
+    /**
+     * 生成查询用列信息,key:fieldName,value :列信息
+     *
+     * @return
+     */
+    public Map<String, Column> getMapColumn() {
+        if (this.lstColumn == null || this.lstColumn.isEmpty()) {
+            return null;
+        }
+        Map<String, Column> map = new HashMap<>();
+        for (Column col : this.lstColumn) {
+            map.put(col.getColumnDto().getFieldName(), col);
+        }
+        return map;
     }
 
 }

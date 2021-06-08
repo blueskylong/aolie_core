@@ -31,13 +31,4 @@ public class PageHelperInterceptor implements IOperInterceptor {
         return null;
     }
 
-    @Override
-    public HandleResult afterOper(Object param, String handleType, Map<String, Object> globalParamData, HandleResult result) {
-        QueryParam queryParam = (QueryParam) param;
-        if (queryParam.getPage() != null) {
-            System.out.println(result.getData());
-        }
-        return null;
-
-    }
 }
