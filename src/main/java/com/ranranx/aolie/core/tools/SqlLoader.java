@@ -10,9 +10,7 @@ import javax.annotation.PostConstruct;
 import java.io.*;
 import java.net.JarURLConnection;
 import java.net.URL;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -25,16 +23,29 @@ import java.util.jar.JarFile;
 public class SqlLoader {
 
     private static final String SQL_PACKAGE = "sqltemplate";
-    private static Map<String, String> mapSql = new HashMap<>();
+    private static Map<String, List<String>> mapSql = new HashMap<>();
 
     public static String getSql(String name) {
         if (CommonUtils.isEmpty(name)) {
             throw new InvalidParamException("没有指定语句名称");
         }
-        String sql = mapSql.get(name);
+        List<String> sql = mapSql.get(name);
         if (CommonUtils.isEmpty(sql)) {
             throw new NotExistException("指定语句不存在:" + name);
         }
+
+        return sql.get(0);
+    }
+
+    public static List<String> getSqls(String name) {
+        if (CommonUtils.isEmpty(name)) {
+            throw new InvalidParamException("没有指定语句名称");
+        }
+        List<String> sql = mapSql.get(name);
+        if (CommonUtils.isEmpty(sql)) {
+            throw new NotExistException("指定语句不存在:" + name);
+        }
+
         return sql;
     }
 
@@ -42,7 +53,7 @@ public class SqlLoader {
     public void scanSql() {
         System.out.println("-->scan Sql");
         ClassScannerUtils classScannerUtils = new ClassScannerUtils();
-        Map<String, String> map = classScannerUtils.searchClasses(SQL_PACKAGE);
+        Map<String, List<String>> map = classScannerUtils.searchClasses(SQL_PACKAGE);
         if (map != null) {
             mapSql.putAll(map);
         }
@@ -55,9 +66,9 @@ interface Scan {
 
     String SQL_SUFFIX = ".sql";
 
-    void search(String packageName, Map<String, String> sql);
+    void search(String packageName, Map<String, List<String>> sql);
 
-    default void parseSql(BufferedReader bufferedReader, Map<String, String> mapSql) {
+    default void parseSql(BufferedReader bufferedReader, Map<String, List<String>> mapSql) {
         try {
             String line = null;
             StringBuilder builder = new StringBuilder();
@@ -66,8 +77,13 @@ interface Scan {
                 line = bufferedReader.readLine();
                 //如果结束了,则保存最后一个数据
                 if (line == null) {
-                    if (lastName != null) {
-                        mapSql.put(lastName, builder.toString());
+                    if (lastName != null && builder.toString().trim().length() > 0) {
+                        List<String> lstSql = mapSql.get(lastName);
+                        if (lstSql == null) {
+                            lstSql = new ArrayList<>();
+                            mapSql.put(lastName, lstSql);
+                        }
+                        lstSql.add(builder.toString());
                     }
                     return;
                 }
@@ -76,13 +92,6 @@ interface Scan {
                 }
                 //表示名称行
                 if (line.trim().endsWith(":")) {
-                    if (lastName != null) {
-                        String sql = builder.toString().trim();
-                        if (sql.endsWith(";")) {
-                            sql = sql.substring(0, sql.length() - 1);
-                        }
-                        mapSql.put(lastName, sql);
-                    }
                     //开始新的语句
                     builder = new StringBuilder();
                     line = line.substring(0, line.length() - 1).trim();
@@ -90,6 +99,19 @@ interface Scan {
                     if (mapSql.containsKey(line)) {
                         throw new InvalidConfigException("SQL语句名重复:" + line);
                     }
+                } else if (line.trim().endsWith(";")) {
+                    //如果有结束标记
+                    String sql = builder.append(line).toString();
+
+                    sql = sql.substring(0, sql.length() - 1);
+
+                    List<String> lstSql = mapSql.get(lastName);
+                    if (lstSql == null) {
+                        lstSql = new ArrayList<>();
+                        mapSql.put(lastName, lstSql);
+                    }
+                    lstSql.add(sql);
+                    builder = new StringBuilder();
                 } else {
                     //以下语句行
                     //如果还没有名称的,是舍弃
@@ -131,7 +153,7 @@ class FileScanner implements Scan {
 
 
     @Override
-    public void search(String packageName, Map<String, String> mapSql) {
+    public void search(String packageName, Map<String, List<String>> mapSql) {
         //先把包名转换为路径,首先得到项目的classpath
         String classpath = defaultClassPath;
         //然后把我们的包名basPack转换为路径名
@@ -143,7 +165,7 @@ class FileScanner implements Scan {
     public class ClassSearcher {
         String SQL_SUFFIX = ".sql";
 
-        public void doPath(File file, String packageName, boolean flag, Map<String, String> mapSql) {
+        public void doPath(File file, String packageName, boolean flag, Map<String, List<String>> mapSql) {
 
             if (file.isDirectory()) {
                 //文件夹我们就递归
@@ -174,7 +196,7 @@ class FileScanner implements Scan {
 class JarScanner implements Scan {
 
     @Override
-    public void search(String packageName, Map<String, String> mapSql) {
+    public void search(String packageName, Map<String, List<String>> mapSql) {
         try {
             //通过当前线程得到类加载器从而得到URL的枚举
             Enumeration<URL> urlEnumeration = Thread.currentThread().getContextClassLoader().getResources(packageName.replace(".", "/"));
@@ -232,7 +254,7 @@ class ScanExecutor implements Scan {
     private volatile ScanExecutor instance;
 
     @Override
-    public void search(String packageName, Map<String, String> mapSql) {
+    public void search(String packageName, Map<String, List<String>> mapSql) {
 //        Scan fileSc = new FileScanner();
 //        fileSc.search(packageName, mapSql);
         Scan jarScanner = new JarScanner();
@@ -257,8 +279,8 @@ class ScanExecutor implements Scan {
 
 
 class ClassScannerUtils {
-    public Map<String, String> searchClasses(String packageName) {
-        Map<String, String> mapSql = new HashMap<>();
+    public Map<String, List<String>> searchClasses(String packageName) {
+        Map<String, List<String>> mapSql = new HashMap<>();
         new ScanExecutor().search(packageName, mapSql);
         return mapSql;
     }

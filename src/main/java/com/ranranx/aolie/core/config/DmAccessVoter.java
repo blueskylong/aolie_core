@@ -28,7 +28,6 @@ public class DmAccessVoter implements AccessDecisionVoter {
 
         if (object instanceof FilterInvocation) {
             FilterInvocation invocation = (FilterInvocation) object;
-            System.out.println(invocation.getRequestUrl());
             return ACCESS_GRANTED;
         }
         return ACCESS_ABSTAIN;

@@ -1,4 +1,4 @@
-package com.ranranx.aolie.application.right;
+package com.ranranx.aolie.core.interceptor;
 
 import com.ranranx.aolie.application.user.dto.RightResourceDto;
 import com.ranranx.aolie.application.user.service.UserService;
@@ -15,12 +15,8 @@ import com.ranranx.aolie.core.datameta.dto.TableDto;
 import com.ranranx.aolie.core.exceptions.InvalidException;
 import com.ranranx.aolie.core.handler.HandleResult;
 import com.ranranx.aolie.core.handler.HandlerFactory;
-import com.ranranx.aolie.core.handler.param.DeleteParam;
-import com.ranranx.aolie.core.handler.param.InsertParam;
-import com.ranranx.aolie.core.handler.param.QueryParam;
-import com.ranranx.aolie.core.handler.param.UpdateParam;
+import com.ranranx.aolie.core.handler.param.*;
 import com.ranranx.aolie.core.handler.param.condition.Criteria;
-import com.ranranx.aolie.core.interceptor.IOperInterceptor;
 import com.ranranx.aolie.core.runtime.LoginUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -70,7 +66,7 @@ public class DataRightInterceptor implements IOperInterceptor, CommandLineRunner
     }
 
     @Override
-    public HandleResult beforeOper(Object param, String handleType, Map<String, Object> globalParamData)
+    public HandleResult beforeOper(OperParam param, String handleType, Map<String, Object> globalParamData)
             throws InvalidException {
         LoginUser user = SessionUtils.getLoginUser();
         //没有登录的和超级管理员不做数据权限过滤
@@ -112,7 +108,7 @@ public class DataRightInterceptor implements IOperInterceptor, CommandLineRunner
         if (param.isMaskDataRight()) {
             return null;
         }
-        TableInfo[] tables = param.getTable();
+        TableInfo[] tables = param.getTables();
         if (tables == null || tables.length < 1) {
             return null;
         }

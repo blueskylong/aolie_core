@@ -7,9 +7,8 @@ import java.util.Map;
 
 /**
  * @author xxl
- *
- * @date 2021/1/7 0007 20:05
  * @version V0.0.1
+ * @date 2021/1/7 0007 20:05
  **/
 public class SqlExp {
 
@@ -26,6 +25,19 @@ public class SqlExp {
 
     public Map<String, Object> getParamValues() {
         return paramValues;
+    }
+
+    public SqlExp() {
+    }
+
+    public SqlExp(String sql, Map<String, Object> paramValues) {
+        this.sql = sql;
+        this.paramValues = paramValues;
+    }
+
+    public SqlExp(String sql) {
+        this.sql = sql;
+        this.paramValues = new HashMap<>();
     }
 
     public void setParamValues(Map<String, Object> paramValues) {

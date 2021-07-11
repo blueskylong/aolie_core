@@ -37,19 +37,23 @@ public class InsertHandler<T extends InsertParam> extends BaseHandler<T> {
      */
     @Override
     protected HandleResult handle(InsertParam param) {
-        if (param == null) {
-            throw new InvalidParamException("没有提供插入参数");
-        }
-        if (param.getLstRows() == null || param.getLstRows().isEmpty()) {
-            throw new InvalidParamException("没有提供插入行数据");
-        }
-        List<List<Long>> keys = genKeys(param);
-        InsertParamDefinition definition = new InsertParamDefinition();
-        definition.setTableName(param.getTable().getTableDto().getTableName());
-        definition.setLstRows(param.getLstRows());
-        HandleResult result = new HandleResult();
-        result.setSuccess(false);
         try {
+            if (param.getSqlExp() != null) {
+                return HandleResult.success(factory.getDefaultDataOperator().executeDirect(param.getSqlExp().getExecuteMap()));
+            }
+            if (param == null) {
+                throw new InvalidParamException("没有提供插入参数");
+            }
+            if (param.getLstRows() == null || param.getLstRows().isEmpty()) {
+                throw new InvalidParamException("没有提供插入行数据");
+            }
+            List<List<Long>> keys = genKeys(param);
+            InsertParamDefinition definition = new InsertParamDefinition();
+            definition.setTableName(param.getTable().getTableDto().getTableName());
+            definition.setLstRows(param.getLstRows());
+            HandleResult result = new HandleResult();
+            result.setSuccess(false);
+
             int num = factory.getDataOperatorByKey(param.getTable().getDsKey()).insert(definition);
             result.setChangeNum(num);
             List<Map<String, Object>> lstData = new ArrayList<>();
@@ -60,12 +64,12 @@ public class InsertHandler<T extends InsertParam> extends BaseHandler<T> {
             if (num == param.getLstRows().size()) {
                 result.setSuccess(true);
             }
+            return result;
         } catch (Exception e) {
             IllegalOperatorException ex = new IllegalOperatorException(e.getMessage());
             ex.setStackTrace(e.getStackTrace());
             throw ex;
         }
-        return result;
     }
 
     private List<List<Long>> genKeys(InsertParam param) {

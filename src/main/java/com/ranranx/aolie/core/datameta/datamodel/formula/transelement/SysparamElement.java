@@ -52,7 +52,7 @@ public class SysparamElement implements TransElement {
 
     @Override
     public String transToCn(String curElement, TransCenter transcenter) {
-        System.out.println(this.getName() + "  matched!");
+
         List<String> sysParams = FormulaTools.getSysParams(curElement);
         if (sysParams != null && sysParams.size() > 0) {
             for (String paramExp : sysParams) {
@@ -65,7 +65,7 @@ public class SysparamElement implements TransElement {
 
     @Override
     public String transToInner(String curElement, Schema schema, TransCenter transcenter) {
-        System.out.println(this.getName() + "  matched!");
+
         List<String> sysParams = FormulaTools.getSysParams(curElement);
         String version = schema.getSchemaDto().getVersionCode();
         if (sysParams != null && sysParams.size() > 0) {

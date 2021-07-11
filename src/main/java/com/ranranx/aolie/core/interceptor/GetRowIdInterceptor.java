@@ -3,12 +3,12 @@ package com.ranranx.aolie.core.interceptor;
 
 import com.ranranx.aolie.core.annotation.DbOperInterceptor;
 import com.ranranx.aolie.core.common.Constants;
-import com.ranranx.aolie.core.datameta.datamodel.TableInfo;
 import com.ranranx.aolie.core.ds.definition.Field;
 import com.ranranx.aolie.core.exceptions.InvalidException;
 import com.ranranx.aolie.core.handler.HandleResult;
 import com.ranranx.aolie.core.handler.HandlerFactory;
 import com.ranranx.aolie.core.handler.param.InsertParam;
+import com.ranranx.aolie.core.handler.param.OperParam;
 import com.ranranx.aolie.core.handler.param.QueryParam;
 import com.ranranx.aolie.core.handler.param.UpdateParam;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +45,7 @@ public class GetRowIdInterceptor implements IOperInterceptor {
     }
 
     @Override
-    public HandleResult beforeOper(Object param, String handleType,
+    public HandleResult beforeOper(OperParam param, String handleType,
                                    Map<String, Object> globalParamData) throws InvalidException {
 
         if (param instanceof UpdateParam) {
@@ -69,13 +69,12 @@ public class GetRowIdInterceptor implements IOperInterceptor {
     }
 
     @Override
-    public HandleResult afterOper(Object param, String handleType, Map<String, Object> globalParamData,
+    public HandleResult afterOper(OperParam param, String handleType, Map<String, Object> globalParamData,
                                   HandleResult result) {
         if (!result.isSuccess()) {
             return null;
         }
         if (param instanceof InsertParam) {
-            List<Map<String, Object>> lstData = result.getLstData();
             List<List<Long>> lstId = (List<List<Long>>) ((Map<String, Object>) result.getLstData().get(0))
                     .get(Constants.ConstFieldName.CHANGE_KEYS_FEILD);
             if (lstId == null || lstId.isEmpty()) {
@@ -119,7 +118,7 @@ public class GetRowIdInterceptor implements IOperInterceptor {
             return null;
         }
         QueryParam queryParam = new QueryParam();
-        queryParam.setTable(new TableInfo[]{param.getTable()});
+        queryParam.setTable(param.getTable());
         String keyName = param.getTable().getKeyField();
         Field field = new Field();
         field.setFieldName(keyName);
@@ -145,6 +144,9 @@ public class GetRowIdInterceptor implements IOperInterceptor {
 
 
     private List<Object> getKeys(UpdateParam param) {
+        if (param.getTable() == null) {
+            return null;
+        }
         String keyField = param.getTable().getKeyField();
         List<Map<String, Object>> lstRows = param.getLstRows();
         if (lstRows == null || lstRows.isEmpty()) {

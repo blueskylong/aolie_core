@@ -4,10 +4,7 @@ import com.ranranx.aolie.core.common.CommonUtils;
 import com.ranranx.aolie.core.common.Constants;
 import com.ranranx.aolie.core.exceptions.InvalidParamException;
 import com.ranranx.aolie.core.exceptions.NotExistException;
-import com.ranranx.aolie.core.handler.param.DeleteParam;
-import com.ranranx.aolie.core.handler.param.InsertParam;
-import com.ranranx.aolie.core.handler.param.QueryParam;
-import com.ranranx.aolie.core.handler.param.UpdateParam;
+import com.ranranx.aolie.core.handler.param.*;
 import com.ranranx.aolie.core.interceptor.IOperInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -17,9 +14,8 @@ import java.util.List;
 
 /**
  * @author xxl
- *
- * @date 2020/8/9 15:34
  * @version V0.0.1
+ * @date 2020/8/9 15:34
  **/
 @Component
 public class HandlerFactory {
@@ -51,7 +47,7 @@ public class HandlerFactory {
      * @param params
      * @return
      */
-    public HandleResult handleRequest(String type, Object params) {
+    public HandleResult handleRequest(String type, OperParam params) {
         IDbHandler handler = this.getHandler(type, params);
         return handler.doHandle(params);
     }

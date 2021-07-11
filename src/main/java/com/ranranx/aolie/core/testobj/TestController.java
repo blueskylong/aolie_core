@@ -119,7 +119,7 @@ public class TestController {
         queryParamDefinition.appendCriteria().andEqualTo(null, "table_id", 2);
 
         List<Map<String, Object>> lst = factory.getDefaultDataOperator().select(queryParamDefinition);
-        System.out.println(lst);
+
 
         DeleteParamDefinition deleteParamDefinition = new DeleteParamDefinition();
         deleteParamDefinition.setTableName(tableName);

@@ -22,7 +22,7 @@ public class RightNode implements Serializable {
     private List<RightNode> lstParent = new ArrayList<>();
 
     /**
-     * 权限ID
+     * 权限ID 即RS_ID
      */
     private Long rightId;
     /**

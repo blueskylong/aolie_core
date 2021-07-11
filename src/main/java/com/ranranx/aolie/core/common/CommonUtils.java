@@ -1,5 +1,6 @@
 package com.ranranx.aolie.core.common;
 
+import com.ranranx.aolie.core.exceptions.IllegalOperatorException;
 import com.ranranx.aolie.core.exceptions.InvalidException;
 import com.ranranx.aolie.core.exceptions.InvalidParamException;
 import org.apache.commons.beanutils.BeanUtils;
@@ -7,7 +8,12 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.springframework.lang.Nullable;
 
 import javax.persistence.Table;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,6 +29,8 @@ public class CommonUtils {
     private static final Pattern NUMBER_PATTERN = Pattern.compile("[+-]?(\\d+(\\.\\d*)?|\\.\\d+)(E\\d+)?");
 
     private static Pattern UNDERLINE_PATTEN = Pattern.compile("_[a-z]");
+    //用于存储系统级参数，包含启动参数，数据库连接可以用此处参数覆盖
+    private static final Map<String, String> mapGlobalParam = new HashMap<>();
 
 
     /**
@@ -167,6 +175,28 @@ public class CommonUtils {
         }
     }
 
+    /**
+     * 深度克隆对象
+     *
+     * @param source
+     * @param <T>
+     * @return
+     */
+    public static <T> T deepClone(T source) {
+        try {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(bos);
+            oos.writeObject(source);
+            ByteArrayInputStream bais = new ByteArrayInputStream(bos.toByteArray());
+            ObjectInputStream ois = new ObjectInputStream(bais);
+            return (T) ois.readObject();
+        } catch (Exception e) {
+            new IllegalOperatorException("复制出错" + e.getStackTrace());
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 
     private static Map<String, Object> removeEmptyValues(Map<String, Object> map) {
 
@@ -289,7 +319,7 @@ public class CommonUtils {
             lstValue.add(i);
         }
         String sql = SqlTools.genInClause("field1", lstValue, 1, mapResult);
-        System.out.println(sql);
+
     }
 
     /**
@@ -318,6 +348,17 @@ public class CommonUtils {
         Object obj = map.get(fieldName);
         if (obj == null) {
             return null;
+        }
+        return obj.toString();
+    }
+
+    public static String getStringField(Map<String, Object> map, String fieldName, String defaultValue) {
+        if (map == null || map.isEmpty()) {
+            return defaultValue;
+        }
+        Object obj = map.get(fieldName);
+        if (obj == null) {
+            return defaultValue;
         }
         return obj.toString();
     }
@@ -405,5 +446,39 @@ public class CommonUtils {
         List lst = new ArrayList();
         lst.addAll(values);
         return lst;
+    }
+
+    public static void addGlobalParam(String name, String value) {
+        mapGlobalParam.put(name, value);
+    }
+
+    public static String getGlobalParam(String name) {
+        return mapGlobalParam.get(name);
+    }
+
+    public static Map<String, String> getAllParams() {
+        Map<String, String> map = new HashMap<>();
+        map.putAll(mapGlobalParam);
+        return map;
+    }
+
+    /**
+     * 根据字段名取得字段值，需要存在getter方法
+     *
+     * @param obj
+     * @param field
+     * @return
+     */
+    public static Object getObjectValue(Object obj, String field) {
+        String fieldName = "get" + field.substring(0, 1).toUpperCase() + field.substring(1);
+        try {
+            Method method = obj.getClass().getMethod(fieldName, null);
+            if (method != null) {
+                return method.invoke(obj, null);
+            }
+            return null;
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

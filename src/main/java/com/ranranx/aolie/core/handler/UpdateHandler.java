@@ -15,9 +15,9 @@ import java.util.Map;
 
 /**
  * @author xxl
- *  数据新增或更新服务服务
- * @date 2020/8/4 14:32
+ * 数据新增或更新服务服务
  * @version V0.0.1
+ * @date 2020/8/4 14:32
  **/
 @Component
 public class UpdateHandler<T extends UpdateParam> extends BaseHandler<T> {
@@ -42,6 +42,9 @@ public class UpdateHandler<T extends UpdateParam> extends BaseHandler<T> {
      */
     @Override
     protected HandleResult handle(UpdateParam param) {
+        if (param.getSqlExp() != null) {
+            return HandleResult.success(factory.getDefaultDataOperator().executeDirect(param.getSqlExp().getExecuteMap()));
+        }
         HandleResult result = new HandleResult();
         List<Map<String, Object>> lstData = param.getLstRows();
         if (lstData == null || lstData.isEmpty()) {

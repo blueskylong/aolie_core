@@ -134,7 +134,8 @@ public class SchemaHolder {
         if (schema == null) {
             synchronized (SchemaHolder.class) {
                 if (schema == null) {
-                    if (triedSchema.containsKey(code)) {//如果已尝试过,则直接返回
+                    //如果已尝试过,则直接返回
+                    if (triedSchema.containsKey(code)) {
                         return null;
                     }
                     triedSchema.put(code, null);
@@ -507,6 +508,56 @@ public class SchemaHolder {
 
     public static TableInfo findTableByTableName(String tableName, long schemaId, String version) {
 
+        if (schemaId < 1) {
+            List<TableInfo> lstTables = findTablesByTableName(tableName, version);
+            if (lstTables == null) {
+                return null;
+            }
+            if (lstTables.size() > 1) {
+                throw new InvalidParamException("查询到多个表对象");
+            }
+            return lstTables.get(0);
+        }
+        Schema schema = getInstance().getSchema(schemaId, version);
+        if (schema == null) {
+            return null;
+        }
+        return schema.findTableByName(tableName);
+    }
+
+    /**
+     * 查询所有方案中包含的表
+     *
+     * @param tableName
+     * @param version
+     * @return
+     */
+    public static List<TableInfo> findTablesByTableName(String tableName, String version) {
+        Iterator<Schema> iterator = mapSchema.values().iterator();
+        List<TableInfo> lstResult = new ArrayList<>();
+        while (iterator.hasNext()) {
+            Schema schema = iterator.next();
+            if (schema.getSchemaDto().getVersionCode().equals(version)) {
+                TableInfo tableInfo = schema.findTableByName(tableName);
+                if (tableInfo != null) {
+                    lstResult.add(tableInfo);
+                }
+            }
+
+        }
+        return lstResult;
+    }
+
+    /**
+     * 根据DTO类查询表定义
+     *
+     * @param clazz
+     * @param schemaId
+     * @param version
+     * @return
+     */
+    public static TableInfo findTableByDto(Class clazz, long schemaId, String version) {
+        String tableName = CommonUtils.getTableName(clazz);
         Schema schema = getInstance().getSchema(schemaId, version);
         if (schema == null) {
             return null;

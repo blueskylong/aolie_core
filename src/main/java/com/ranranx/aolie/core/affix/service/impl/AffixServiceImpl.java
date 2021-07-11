@@ -235,7 +235,8 @@ public class AffixServiceImpl implements AffixService {
     }
 
     private HandleResult deleteAffixInfo(AffixDto affixDto) {
-        return handlerFactory.handleDelete(new DeleteParam().setDeleteDto(Constants.DEFAULT_DM_SCHEMA, affixDto));
+        return handlerFactory.handleDelete((DeleteParam) new DeleteParam().setOperDto(Constants.DEFAULT_DM_SCHEMA,
+                affixDto, affixDto.getVersionCode()));
     }
 
     private String getSaveFile(AffixDto affix) {
@@ -284,8 +285,6 @@ public class AffixServiceImpl implements AffixService {
         try {
             fileInputStream = new FileInputStream(file);
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
             e.printStackTrace();
         }
         return fileInputStream;

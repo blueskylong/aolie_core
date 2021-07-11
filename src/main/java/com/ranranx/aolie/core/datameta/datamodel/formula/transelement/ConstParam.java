@@ -47,13 +47,12 @@ public class ConstParam implements TransElement {
 
     @Override
     public String transToCn(String curElement, TransCenter transcenter) {
-        System.out.println(this.getName() + "  matched!");
         return curElement;
     }
 
     @Override
     public String transToInner(String curElement, Schema schema, TransCenter transcenter) {
-        System.out.println(this.getName() + "  matched!");
+
         curElement = curElement.trim();
         if ((curElement.startsWith("'") && curElement.endsWith("'"))
                 || (curElement.startsWith("\"") && curElement.endsWith("\""))) {

@@ -27,4 +27,11 @@ public interface ILoginService {
      * @param user
      */
     Role initUserRight(LoginUser user, Long roleId);
+
+    /**
+     * 设置选择的角色
+     *
+     * @param roleId
+     */
+    void setSelectRole(Long roleId);
 }

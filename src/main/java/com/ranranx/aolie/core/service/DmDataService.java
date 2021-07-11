@@ -12,10 +12,10 @@ import com.ranranx.aolie.core.handler.param.DeleteParam;
 import com.ranranx.aolie.core.handler.param.InsertParam;
 import com.ranranx.aolie.core.handler.param.QueryParam;
 import com.ranranx.aolie.core.handler.param.UpdateParam;
+import com.ranranx.aolie.core.handler.param.condition.Criteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.*;
 
@@ -54,11 +54,112 @@ public class DmDataService {
      * @return
      * @throws Exception
      */
-    public List<Map<String, Object>> findBlockDataNoPage(@PathVariable Long blockId, JQParameter queryParams) throws Exception {
+    public List<Map<String, Object>> findBlockDataNoPage(Long blockId, JQParameter queryParams) throws Exception {
         QueryParam queryParam = queryParams.getQueryParam();
         queryParam.setViewId(blockId);
         HandleResult handleResult = handlerFactory.handleRequest(Constants.HandleType.TYPE_QUERY, queryParam);
         return (List<Map<String, Object>>) handleResult.getData();
+    }
+
+
+    /**
+     * 保存从表行,这样前端可以不传入删除的行,通过关联关系删除相应的行
+     *
+     * @param rows
+     * @param dsId
+     * @param masterDsId
+     * @param masterKey
+     * @return
+     */
+    public HandleResult saveSlaveRows(List<Map<String, Object>> rows, Long dsId, Long masterDsId, Long masterKey) {
+        if (masterKey == null) {
+            return HandleResult.failure("没有指定主表主键");
+        }
+        String version = SessionUtils.getLoginVersion();
+        TableColumnRelation tableRelation = findTableRelation(dsId, masterDsId, version);
+        if (tableRelation == null) {
+            throw new NotExistException("表关系不存在:" + dsId + "&" + masterDsId);
+        }
+        String outKeyFieldName = findSlaveTableField(tableRelation, dsId);
+        //根据条件查询当前不存在的主健
+        TableInfo table = SchemaHolder.getTable(dsId, version);
+        List<Long> existIds = findRowIds(rows, dsId, table.getKeyField(), version);
+
+        // 查询从表中需要删除的主键
+        DeleteParam param = new DeleteParam();
+        param.setTable(table);
+        Criteria criteria = param.getCriteria().andEqualTo(null, outKeyFieldName, masterKey);
+        if (existIds != null && !existIds.isEmpty()) {
+            criteria.andNotIn(null, table.getKeyField(), existIds);
+        }
+        handlerFactory.handleDelete(param);
+        //设置外主健字段值
+        updateOutKeyField(rows, outKeyFieldName, masterKey);
+        //执行其它保存
+        return saveRows(rows, dsId);
+    }
+
+    private void updateOutKeyField(List<Map<String, Object>> rows, String outKeyField, Long outKeyValue) {
+        if (rows == null || rows.isEmpty()) {
+            return;
+        }
+        for (Map<String, Object> row : rows) {
+            row.put(outKeyField, outKeyValue);
+        }
+    }
+
+    private String findSlaveTableField(TableColumnRelation tableRelation, Long slaveDsId) {
+        if (tableRelation.getTableFrom().getTableDto().getTableId().equals(slaveDsId)) {
+            return tableRelation.getTableFrom().findColumn(tableRelation.getDto().getFieldFrom()).getColumnDto().getFieldName();
+        } else {
+            return tableRelation.getTableTo().findColumn(tableRelation.getDto().getFieldTo()).getColumnDto().getFieldName();
+        }
+    }
+
+    /**
+     * 取得已存在的ID值
+     *
+     * @param rows
+     * @param dsId
+     * @param fieldName
+     * @param version
+     * @return
+     */
+    private List<Long> findRowIds(List<Map<String, Object>> rows, Long dsId, String fieldName, String version) {
+        if (rows == null || rows.isEmpty()) {
+            return null;
+        }
+        //查找主键字段
+        TableInfo table = SchemaHolder.getTable(dsId, version);
+        if (table == null) {
+            throw new NotExistException("表不存在:" + dsId);
+        }
+        List<Long> existIds = new ArrayList<>();
+        rows.forEach(map -> {
+            Long id = CommonUtils.getLongField(map, fieldName);
+            if (id == null || id < 0) {
+                return;
+            }
+            existIds.add(id);
+        });
+        return existIds;
+
+    }
+
+    private TableColumnRelation findTableRelation(Long dsId1, Long dsId2, String version) {
+        Long schemaId = getSchemaByDs(dsId1, version);
+        if (schemaId == null) {
+            throw new NotExistException("数据源不存在:" + dsId1);
+        }
+        return SchemaHolder.getInstance().getSchema(schemaId, version).findTableRelation(dsId1, dsId2);
+    }
+
+    private Long getSchemaByDs(Long dsId, String version) {
+        TableInfo table = SchemaHolder.getTable(dsId, version);
+        if (table == null) {
+            return null;
+        }
+        return table.getTableDto().getSchemaId();
     }
 
     /**
@@ -296,7 +397,7 @@ public class DmDataService {
         }
         String keyField = table.getKeyField();
         QueryParam param = new QueryParam();
-        param.setTable(new TableInfo[]{table});
+        param.setTable(table);
         param.appendCriteria()
                 .andEqualTo(null, keyField, id);
         return handlerFactory.handleRequest(Constants.HandleType.TYPE_QUERY, param);

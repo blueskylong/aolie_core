@@ -17,9 +17,8 @@ import java.util.Map;
 
 /**
  * @author xxl
- *
- * @date 2020/9/1 16:44
  * @version V0.0.1
+ * @date 2020/9/1 16:44
  **/
 @RestController
 @RequestMapping("/ui")
@@ -41,6 +40,17 @@ public class UIController {
     @GetMapping("/getSchemaViewer/{blockViewId}")
     public BlockViewer getSchemaViewer(@PathVariable Long blockViewId) {
         return uiService.getViewerInfo(blockViewId, SessionUtils.getLoginVersion());
+    }
+
+    /**
+     * 取得方案视图信息(通过编码）,只包含自身及控件信息(含列),不包含公式及约束,用于显示
+     *
+     * @param blockViewCode
+     * @return
+     */
+    @GetMapping("/getSchemaViewerByCode/{blockViewCode}")
+    public BlockViewer getSchemaViewerByCode(@PathVariable String blockViewCode) {
+        return uiService.getViewerInfoByCode(blockViewCode, SessionUtils.getLoginVersion());
     }
 
 

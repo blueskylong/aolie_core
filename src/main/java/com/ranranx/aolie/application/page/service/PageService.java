@@ -34,6 +34,14 @@ import java.util.*;
 @Transactional(readOnly = true)
 public class PageService {
 
+    /**
+     * 自定义视图虚拟ID
+     */
+    public static final Long CUSTOM_VIEW_ID = 2L;
+    /**
+     * 视图节点虚拟ID
+     */
+    public static final Long VIEW_ROOT_ID = 1L;
     @Autowired
     private DataOperatorFactory factory;
     @Autowired
@@ -198,9 +206,14 @@ public class PageService {
         }
         List<Long> lstResult = new ArrayList();
         for (PageDetailDto dto : lstPageDetail) {
-            //如果存在自定义的界面,则不再过滤
-            if (dto.getViewId().equals(DmConstants.DispType.CUSTOM_UI_ID)) {
-                return null;
+            //如果存在自定义的界面,且没有指定引用的源,则不再过滤
+            if (dto.getViewId().equals(DmConstants.DispType.CUSTOM_UI_ID) ) {
+                if( dto.getRelationDs() != null){
+                    lstResult.add(dto.getRelationDs());
+                }else{
+                    return null;
+                }
+
             }
             if (dto.getViewType() == Constants.PageViewType.reference) {
                 continue;
@@ -358,13 +371,13 @@ public class PageService {
      */
     private void addBlockInfo(List<BlockViewDto> lstBlockDto, List<Map<String, Object>> result) {
         Map<String, Object> map = new HashMap<>();
-        map.put("id", 1);
+        map.put("id", VIEW_ROOT_ID);
         map.put("code", "001");
         map.put("name", "视图");
         map.put("type", "1");
         result.add(map);
         map = new HashMap<>();
-        map.put("id", 2);
+        map.put("id", CUSTOM_VIEW_ID);
         map.put("code", "001000");
         map.put("name", "自定义视图");
         map.put("type", "1");
@@ -389,13 +402,13 @@ public class PageService {
      */
     private void addReferenceInfo(List<ReferenceDto> lstReferenceDto, List<Map<String, Object>> result) {
         Map<String, Object> map = new HashMap<>();
-        map.put("id", 2);
+        map.put("id", 12121);
         map.put("code", "002");
         map.put("name", "引用");
         map.put("type", "2");
         result.add(map);
         LevelProvider provider = new LevelProvider(SysCodeRule
-                .createClient(new int[]{3, 6, 9}), "");
+                .create(new int[]{3, 6, 9}), "");
         if (lstReferenceDto != null && !lstReferenceDto.isEmpty()) {
             for (ReferenceDto dto : lstReferenceDto) {
                 map = new HashMap<>();

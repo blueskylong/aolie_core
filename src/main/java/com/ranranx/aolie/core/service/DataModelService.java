@@ -220,11 +220,19 @@ public class DataModelService {
         field.setFieldName(reference.getReferenceDto().getIdField() + " as id");
         lstField.add(field);
 
-        field = new Field();
-        field.setTableName(tableName);
-        field.setFieldName(reference.getReferenceDto().getCodeField() + " as code");
-        field.setOrderType(Constants.OrderType.ASC);
-        lstField.add(field);
+        if (reference.getReferenceDto().getCodeField() != null) {
+            field = new Field();
+            field.setTableName(tableName);
+            field.setFieldName(reference.getReferenceDto().getCodeField() + " as code");
+            field.setOrderType(Constants.OrderType.ASC);
+            lstField.add(field);
+        }
+        if (reference.getReferenceDto().getParentField() != null) {
+            field = new Field();
+            field.setTableName(tableName);
+            field.setFieldName(reference.getReferenceDto().getParentField() + " as parent_id");
+            lstField.add(field);
+        }
 
         field = new Field();
         field.setTableName(tableName);
@@ -492,6 +500,8 @@ public class DataModelService {
                 insertParamDefinition.setObjects(lstReference);
                 factory.getDefaultDataOperator().insert(insertParamDefinition);
             }
+            //清除缓存
+            clearPrefixCache(KEY_REFERENCE_DATA_PREFIX.replace("'", ""));
         }
 
     }

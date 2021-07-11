@@ -7,12 +7,12 @@ import com.ranranx.aolie.core.common.Ordered;
 import com.ranranx.aolie.core.datameta.datamodel.Constraint;
 import com.ranranx.aolie.core.datameta.datamodel.Schema;
 import com.ranranx.aolie.core.datameta.datamodel.SchemaHolder;
+import com.ranranx.aolie.core.datameta.datamodel.TableInfo;
 import com.ranranx.aolie.core.datameta.datamodel.formula.FormulaParse;
 import com.ranranx.aolie.core.datameta.datamodel.formula.FormulaTools;
 import com.ranranx.aolie.core.handler.HandleResult;
 import com.ranranx.aolie.core.handler.HandlerFactory;
-import com.ranranx.aolie.core.handler.param.InsertParam;
-import com.ranranx.aolie.core.handler.param.UpdateParam;
+import com.ranranx.aolie.core.handler.param.OperParam;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Iterator;
@@ -54,7 +54,7 @@ public class ConstraintInterceptor implements IOperInterceptor {
      * @return 如果存在问题, 则返回处理结果
      */
     @Override
-    public HandleResult afterOper(Object param, String handleType, Map<String, Object> globalParamData,
+    public HandleResult afterOper(OperParam param, String handleType, Map<String, Object> globalParamData,
                                   HandleResult result) {
         //取得当前表
         Map<Long, List<Map<String, Object>>> mapTableAndRows
@@ -62,16 +62,12 @@ public class ConstraintInterceptor implements IOperInterceptor {
         if (mapTableAndRows == null || mapTableAndRows.isEmpty()) {
             return null;
         }
-        Long schemaId = -1L;
-        String version = null;
-        if (Constants.HandleType.TYPE_UPDATE.equals(handleType)) {
-            schemaId = ((UpdateParam) param).getTable().getTableDto().getSchemaId();
-            version = ((UpdateParam) param).getTable().getTableDto().getVersionCode();
-        } else if (Constants.HandleType.TYPE_INSERT.equals(handleType)) {
-            schemaId = ((InsertParam) param).getTable().getTableDto().getSchemaId();
-            version = ((InsertParam) param).getTable().getTableDto().getVersionCode();
+        TableInfo table = param.getTable();
+        if (table == null) {
+            return null;
         }
-        Schema schema = SchemaHolder.getInstance().getSchema(schemaId, version);
+        Schema schema = SchemaHolder.getInstance().getSchema(table.getTableDto().getSchemaId(),
+                table.getTableDto().getVersionCode());
         FormulaParse formulaParse = FormulaParse.getInstance(true, schema);
         //收集检查的数据
         Iterator<Map.Entry<Long, List<Map<String, Object>>>> iterator =

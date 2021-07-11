@@ -8,17 +8,20 @@ import com.ranranx.aolie.core.datameta.datamodel.Formula;
 import com.ranranx.aolie.core.datameta.datamodel.SchemaHolder;
 import com.ranranx.aolie.core.datameta.datamodel.TableInfo;
 import com.ranranx.aolie.core.datameta.datamodel.formula.FormulaCalculator;
+import com.ranranx.aolie.core.datameta.dto.TableDto;
 import com.ranranx.aolie.core.exceptions.InvalidException;
 import com.ranranx.aolie.core.handler.HandleResult;
 import com.ranranx.aolie.core.handler.HandlerFactory;
-import com.ranranx.aolie.core.handler.param.InsertParam;
+import com.ranranx.aolie.core.handler.param.OperParam;
 import com.ranranx.aolie.core.handler.param.QueryParam;
-import com.ranranx.aolie.core.handler.param.UpdateParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
 
 /**
  * 公式计算, 因为会有跨表的公式,所以需要在保存后验证
@@ -35,7 +38,7 @@ public class FormulaInterceptor implements IOperInterceptor {
     private HandlerFactory handlerFactory;
 
     @Override
-    public HandleResult afterOper(Object param, String handleType,
+    public HandleResult afterOper(OperParam param, String handleType,
                                   Map<String, Object> globalParamData, HandleResult result) {
 
         logger.info("----->拦截器=>公式计算");
@@ -48,29 +51,19 @@ public class FormulaInterceptor implements IOperInterceptor {
         }
 
         Stack<Formula> lstFormula = null;
-        TableInfo tableInfo = null;
-        if (param instanceof InsertParam) {
-            //检查是不是公式回写
-            if (((InsertParam) param).getControlParam(IOperInterceptor.AFTER_FORMULA_DIRECT_OPER) != null) {
-                return null;
-            }
-            lstFormula = findCalcFormula(((InsertParam) param).getTable().getTableDto().getTableId(),
-                    ((InsertParam) param).getTable().getTableDto().getVersionCode(),
-                    null);
-            tableInfo = ((InsertParam) param).getTable();
-        } else if (param instanceof UpdateParam) {
-            //检查是不是公式回写
-            if (((UpdateParam) param).getControlParam(IOperInterceptor.AFTER_FORMULA_DIRECT_OPER) != null) {
-                return null;
-            }
-            lstFormula = findCalcFormula(((UpdateParam) param).getTable().getTableDto().getTableId(),
-                    ((UpdateParam) param).getTable().getTableDto().getVersionCode(),
-                    ((List<String>) globalParamData.get(GetRowIdInterceptor.PARAM_UPDATE_FIELDS)));
-            tableInfo = ((UpdateParam) param).getTable();
+        TableDto tableDto = param.getTable().getTableDto();
+
+        //检查是不是公式回写
+        if (param.getControlParam(IOperInterceptor.AFTER_FORMULA_DIRECT_OPER) != null) {
+            return null;
         }
+        lstFormula = findCalcFormula(tableDto.getTableId(),
+                param.getTable().getTableDto().getVersionCode(),
+                (List<String>) globalParamData.get(GetRowIdInterceptor.PARAM_UPDATE_FIELDS));
+
         //取得变动的行数据,循环处理
-        List<Map<String, Object>> lstRow = findTableRows(tableInfo.getTableDto().getTableId(),
-                ids, tableInfo.getTableDto().getVersionCode());
+        List<Map<String, Object>> lstRow = findTableRows(tableDto.getTableId(),
+                ids, tableDto.getVersionCode());
         //1.取得所有的关联此表的公式
         if (lstFormula == null || lstFormula.isEmpty()) {
             return null;
@@ -84,7 +77,7 @@ public class FormulaInterceptor implements IOperInterceptor {
         //这里要计算一下变化的表信息,以备后面约束检查
         Map<Long, List<Map<String, Object>>> changeValues = new HashMap<>();
         for (Map<String, Object> row : lstRow) {
-            formulaCalculator.calcTableFormulas(lstFormula, tableInfo.getTableDto().getTableId()
+            formulaCalculator.calcTableFormulas(lstFormula, tableDto.getTableId()
                     , row, null, null, null,
                     changeValues);
         }
@@ -143,7 +136,7 @@ public class FormulaInterceptor implements IOperInterceptor {
     private List<Map<String, Object>> findTableRows(long tableId, List<Object> ids, String version) {
         QueryParam queryParam = new QueryParam();
         TableInfo tableInfo = SchemaHolder.getTable(tableId, version);
-        queryParam.setTable(new TableInfo[]{tableInfo});
+        queryParam.setTable(tableInfo);
         queryParam.appendCriteria().andIn(null, tableInfo.getKeyField(), ids);
         HandleResult result = handlerFactory.handleQuery(queryParam);
         if (result.isSuccess()) {

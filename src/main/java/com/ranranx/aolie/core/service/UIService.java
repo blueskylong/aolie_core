@@ -102,7 +102,7 @@ public class UIService {
     @Cacheable(value = GROUP_NAME,
             key = KEY_VIEWER)
     public BlockViewer getViewerInfo(Long blockViewId, String version) {
-        if (blockViewId == 2) {
+        if (blockViewId == DmConstants.DispType.CUSTOM_UI_ID) {
             return createCustomViewInfo();
         }
         BlockViewDto viewerDto = findViewerDto(blockViewId, version);
@@ -110,6 +110,16 @@ public class UIService {
             return null;
         }
         return new BlockViewer(viewerDto, findViewerComponents(blockViewId, version));
+    }
+
+    @Cacheable(value = GROUP_NAME,
+            key = KEY_VIEWER)
+    public BlockViewer getViewerInfoByCode(String blockViewCode, String version) {
+        BlockViewDto viewerDto = findViewerDtoByCode(blockViewCode);
+        if (viewerDto == null) {
+            return null;
+        }
+        return new BlockViewer(viewerDto, findViewerComponents(viewerDto.getBlockViewId(), version));
     }
 
     private BlockViewer createCustomViewInfo() {
@@ -136,6 +146,20 @@ public class UIService {
         queryParamDefinition.appendCriteria()
                 .andEqualTo(null, "block_view_id", blockViewId)
         ;
+        return factory.getDefaultDataOperator().selectOne(queryParamDefinition, BlockViewDto.class);
+    }
+
+    /**
+     * 查询视图主信息
+     *
+     * @param blockViewCode
+     * @return
+     */
+    private BlockViewDto findViewerDtoByCode(String blockViewCode) {
+        QueryParamDefinition queryParamDefinition = new QueryParamDefinition();
+        queryParamDefinition.setTableDtos(BlockViewDto.class);
+        queryParamDefinition.appendCriteria()
+                .andEqualTo(null, "block_code", blockViewCode);
         return factory.getDefaultDataOperator().selectOne(queryParamDefinition, BlockViewDto.class);
     }
 

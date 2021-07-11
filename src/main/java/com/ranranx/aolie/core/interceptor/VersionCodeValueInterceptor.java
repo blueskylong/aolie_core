@@ -7,6 +7,7 @@ import com.ranranx.aolie.core.common.SessionUtils;
 import com.ranranx.aolie.core.exceptions.InvalidException;
 import com.ranranx.aolie.core.handler.HandleResult;
 import com.ranranx.aolie.core.handler.param.InsertParam;
+import com.ranranx.aolie.core.handler.param.OperParam;
 
 import java.util.List;
 import java.util.Map;
@@ -28,7 +29,7 @@ public class VersionCodeValueInterceptor implements IOperInterceptor {
     }
 
     @Override
-    public HandleResult beforeOper(Object param, String handleType, Map<String, Object> globalParamData) throws InvalidException {
+    public HandleResult beforeOper(OperParam param, String handleType, Map<String, Object> globalParamData) throws InvalidException {
         InsertParam insertParam = (InsertParam) param;
         List<Map<String, Object>> lstRows = insertParam.getLstRows();
         if (lstRows == null || lstRows.isEmpty()) {

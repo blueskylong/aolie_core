@@ -1,6 +1,7 @@
 package com.ranranx.aolie.core.handler;
 
 import com.ranranx.aolie.core.common.Ordered;
+import com.ranranx.aolie.core.handler.param.OperParam;
 import com.ranranx.aolie.core.interfaces.IHandleFilter;
 
 /**
@@ -18,7 +19,7 @@ public interface IDbHandler extends Ordered, IHandleFilter {
      * @param mapParam
      * @return
      */
-    HandleResult doHandle(Object mapParam);
+    HandleResult doHandle(OperParam mapParam);
 
     /**
      * 开始事务

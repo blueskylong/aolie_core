@@ -429,6 +429,7 @@ public class TableInfo {
      *
      * @return
      */
+    @Transient
     public Map<String, Column> getMapColumn() {
         if (this.lstColumn == null || this.lstColumn.isEmpty()) {
             return null;

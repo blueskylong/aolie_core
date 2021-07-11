@@ -3,6 +3,7 @@ package com.ranranx.aolie.core.datameta.datamodel;
 import com.ranranx.aolie.core.datameta.dto.ColumnDto;
 
 import java.beans.Transient;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -11,7 +12,7 @@ import java.util.Map;
  * @version V0.0.1
  * @date 2020/8/5 17:34
  **/
-public class Column {
+public class Column implements Serializable {
     private ColumnDto columnDto;
     private Reference reference;
 

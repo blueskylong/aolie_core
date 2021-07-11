@@ -27,6 +27,11 @@ public class LoginUser extends UserDto implements UserDetails, CredentialsContai
      */
     public Map<Long, Set<Long>> mapRights;
 
+    /**
+     * 自定义的权限信息,信息存在操作的权限字段里
+     */
+    public Set<String> lstCustomRights = new HashSet<>();
+
     @Transient
     public Map<Long, SystemParam> getParams() {
         return params;
@@ -110,6 +115,27 @@ public class LoginUser extends UserDto implements UserDetails, CredentialsContai
 
     public Map<Long, Set<Long>> getMapRights() {
         return mapRights;
+    }
+
+    public Set<String> getCustomRights() {
+        return lstCustomRights;
+    }
+
+    public void setCustomRights(Set<String> lstCustomRights) {
+        this.lstCustomRights = lstCustomRights;
+        if (this.lstCustomRights == null) {
+            this.lstCustomRights = new HashSet<>();
+        }
+    }
+
+    /**
+     * 当前用户是否有指定的权限
+     *
+     * @param rightCode
+     * @return
+     */
+    public boolean hasCustomRight(String rightCode) {
+        return this.lstCustomRights.contains(rightCode);
     }
 
     public void setMapRights(Map<Long, Set<Long>> mapRights) {

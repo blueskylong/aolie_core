@@ -16,12 +16,17 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author xxl
@@ -43,18 +48,34 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and().exceptionHandling().
                 authenticationEntryPoint(point)
                 .and()
-                .formLogin();
-        http.cors().disable();
-        http.csrf().disable();
+                .formLogin().and().cors().and().csrf().disable();
         http.headers().frameOptions().disable();
         http.addFilterAt(createJSONAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
         http.sessionManagement().invalidSessionUrl("/loginExpired");
-//        http.sessionManagement().maximumSessions(1).expiredUrl("/loginExpired");
+        http.sessionManagement().maximumSessions(100).expiredUrl("/loginExpired");
         http.logout()
                 .logoutUrl("/logout")
                 .logoutSuccessUrl("/logoutSuccess")
                 .deleteCookies("JSESSIONID")
                 .permitAll();
+        http.sessionManagement();
+    }
+
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        List<String> allowedOrigins = new ArrayList<String>();
+        allowedOrigins.add("http://localhost:8000");
+        allowedOrigins.add("http://localhost:5000");
+
+
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(allowedOrigins);
+        configuration.addAllowedHeader("*");
+        configuration.addAllowedMethod("*");
+        configuration.setAllowCredentials(true);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 
     /**

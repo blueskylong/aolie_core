@@ -62,7 +62,6 @@ public class ColumnElement implements TransElement {
     @Override
     public String transToCn(String curElement, TransCenter transcenter
     ) {
-        System.out.println(getName() + "  matched!");
         /**
          * 这里要注意,会有临时列,这里是查询不到的
          * @param exp
@@ -85,7 +84,7 @@ public class ColumnElement implements TransElement {
 
     @Override
     public String transToInner(String curElement, Schema schema, TransCenter transcenter) {
-        System.out.println(getName() + "  matched!");
+
         List<String> columnParams = FormulaTools.getColumnParams(curElement);
         if (columnParams == null || columnParams.isEmpty()) {
             return curElement;
@@ -127,7 +126,7 @@ public class ColumnElement implements TransElement {
     @Override
     public String transToValue(String curElement, long rowTableId, Map<String, Object> rowData,
                                Schema schema, TransCenter transcenter, Formula formula) {
-        System.out.println(getName() + "  matched!");
+
         /**
          * 这里要注意,会有临时列,这里是查询不到的
          * @param exp
@@ -229,7 +228,7 @@ public class ColumnElement implements TransElement {
         QueryParam queryParam = new QueryParam();
         TableInfo table = SchemaHolder.getTable(queryColumn.getColumnDto().getTableId(), version);
 //查询字段
-        queryParam.setTable(new TableInfo[]{table});
+        queryParam.setTable(table);
         Field field = new Field();
         field.setTableName(table.getTableDto().getTableName());
         field.setFieldName(queryColumn.getColumnDto().getFieldName());

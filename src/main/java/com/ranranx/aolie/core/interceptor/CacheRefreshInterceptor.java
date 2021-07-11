@@ -1,11 +1,10 @@
 package com.ranranx.aolie.core.interceptor;
 
 import com.ranranx.aolie.core.annotation.DbOperInterceptor;
+import com.ranranx.aolie.core.common.CommonUtils;
 import com.ranranx.aolie.core.common.Constants;
 import com.ranranx.aolie.core.handler.HandleResult;
-import com.ranranx.aolie.core.handler.param.DeleteParam;
-import com.ranranx.aolie.core.handler.param.InsertParam;
-import com.ranranx.aolie.core.handler.param.UpdateParam;
+import com.ranranx.aolie.core.handler.param.OperParam;
 import com.ranranx.aolie.core.interfaces.ICacheRefTableChanged;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
@@ -38,12 +37,15 @@ public class CacheRefreshInterceptor implements IOperInterceptor {
     }
 
     @Override
-    public HandleResult beforeReturn(Object param, String handleType, Map<String, Object> globalParamData, HandleResult handleResult) {
+    public HandleResult beforeReturn(OperParam param, String handleType, Map<String, Object> globalParamData, HandleResult handleResult) {
         if (lstCaches == null || lstCaches.isEmpty()) {
             return null;
         }
         initMapInterceptor();
         String tableName = getTableName(param);
+        if (CommonUtils.isEmpty(tableName)) {
+            return null;
+        }
         List<ICacheRefTableChanged> lst = mapInterceptor.get(tableName);
         if (lst == null || lst.isEmpty()) {
             return null;
@@ -52,15 +54,11 @@ public class CacheRefreshInterceptor implements IOperInterceptor {
         return null;
     }
 
-    private String getTableName(Object param) {
-        if (param instanceof UpdateParam) {
-            return ((UpdateParam) param).getTable().getTableDto().getTableName();
-        } else if (param instanceof DeleteParam) {
-            return ((DeleteParam) param).getTable().getTableDto().getTableName();
-        } else if (param instanceof InsertParam) {
-            return ((InsertParam) param).getTable().getTableDto().getTableName();
+    private String getTableName(OperParam param) {
+        if (param.getTable() == null) {
+            return null;
         }
-        return "";
+        return param.getTable().getTableDto().getTableName();
     }
 
     private void initMapInterceptor() {

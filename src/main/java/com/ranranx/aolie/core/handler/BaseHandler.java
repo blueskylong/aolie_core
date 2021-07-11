@@ -2,6 +2,8 @@ package com.ranranx.aolie.core.handler;
 
 import com.ranranx.aolie.core.common.CommonUtils;
 import com.ranranx.aolie.core.ds.dataoperator.DataOperatorFactory;
+import com.ranranx.aolie.core.exceptions.IllegalOperatorException;
+import com.ranranx.aolie.core.handler.param.OperParam;
 import com.ranranx.aolie.core.interceptor.IOperInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -15,7 +17,7 @@ import java.util.Map;
  * @version V0.0.1
  * @date 2020/8/10 11:00
  **/
-public abstract class BaseHandler<T> implements IDbHandler {
+public abstract class BaseHandler<T extends OperParam> implements IDbHandler {
     /**
      * 所有拦截器
      */
@@ -42,7 +44,7 @@ public abstract class BaseHandler<T> implements IDbHandler {
         this.lstInterceptor = lstInterceptor;
     }
 
-    protected HandleResult doAfterOperator(Object param, String handleType, Map<String, Object> mapGlobalParam, HandleResult result) {
+    protected HandleResult doAfterOperator(OperParam param, String handleType, Map<String, Object> mapGlobalParam, HandleResult result) {
         List<IOperInterceptor> validInterceptor = findValidInterceptor(getCanHandleType(), param);
         if (validInterceptor != null && !validInterceptor.isEmpty()) {
             HandleResult interResult;
@@ -57,7 +59,7 @@ public abstract class BaseHandler<T> implements IDbHandler {
 
     }
 
-    protected HandleResult doBeforeOperator(Object param, Map<String, Object> mapGlobalParam) {
+    protected HandleResult doBeforeOperator(OperParam param, Map<String, Object> mapGlobalParam) {
         int num;
         List<IOperInterceptor> validInterceptor = findValidInterceptor(getCanHandleType(), param);
         HandleResult result = null;
@@ -80,7 +82,7 @@ public abstract class BaseHandler<T> implements IDbHandler {
      * @return
      */
     @Override
-    public HandleResult doHandle(Object mapParam) {
+    public HandleResult doHandle(OperParam mapParam) {
         HandleResult result = new HandleResult();
         result.setSuccess(true);
         if (needTransaction()) {
@@ -94,16 +96,26 @@ public abstract class BaseHandler<T> implements IDbHandler {
             HandleResult iResult = doBeforeOperator(param, mapGlobalParam);
             //如果有拦截器直接返回数据,则不再向后执行
             if (iResult != null) {
+                if (!iResult.isSuccess()) {
+                    throw new IllegalOperatorException(iResult.getErr());
+                }
                 return iResult;
             }
             result = handle(param);
             iResult = doAfterOperator(param, this.getCanHandleType(), mapGlobalParam, result);
             if (iResult != null) {
+                if (!iResult.isSuccess()) {
+                    throw new IllegalOperatorException(iResult.getErr());
+                }
                 return iResult;
             }
             iResult = doBeforeReturn(param, mapGlobalParam, result);
 
+
             if (iResult != null) {
+                if (!iResult.isSuccess()) {
+                    throw new IllegalOperatorException(iResult.getErr());
+                }
                 return iResult;
             }
             if (needTransaction()) {
@@ -166,7 +178,7 @@ public abstract class BaseHandler<T> implements IDbHandler {
         return getCanHandleType().equals(type);
     }
 
-    protected HandleResult doBeforeReturn(Object param, Map<String, Object> mapGlobalParam, HandleResult result) {
+    protected HandleResult doBeforeReturn(OperParam param, Map<String, Object> mapGlobalParam, HandleResult result) {
         List<IOperInterceptor> validInterceptor = findValidInterceptor(getCanHandleType(), param);
         HandleResult hResult = null;
         if (validInterceptor != null && !validInterceptor.isEmpty()) {

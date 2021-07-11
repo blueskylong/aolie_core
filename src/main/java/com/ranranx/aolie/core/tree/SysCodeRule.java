@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public class SysCodeRule implements Serializable {
-
+    public static final int[] DEFAULT_RULE = new int[]{3, 6, 9, 12, 15, 18, 21};
     /**
      * The Constant serialVersionUID.
      */
@@ -44,27 +44,9 @@ public class SysCodeRule implements Serializable {
      */
     private List<Integer> codeLength = new ArrayList<Integer>();
 
-    /**
-     * 创建代码规则解析对象
-     *
-     * @param budgetYear
-     * @param codeType   代码规则类型
-     * @throws Exception
-     */
-    public SysCodeRule(int budgetYear, String codeType) throws Exception {
 
-    }
-
-    /**
-     * 创建代码规则解析对象
-     *
-     * @param clientOrServerSide 0客户端调用,1或服务端调用
-     * @param budgetYear         预算年度
-     * @param codeType           代码规则类型
-     * @throws Exception
-     */
-    public SysCodeRule(int clientOrServerSide, int budgetYear, String codeType) throws Exception {
-
+    public static SysCodeRule createDefault() {
+        return SysCodeRule.create(DEFAULT_RULE);
     }
 
     /**
@@ -73,9 +55,9 @@ public class SysCodeRule implements Serializable {
      * @param codeRule 代码规则数组
      * @throws Exception
      */
-    public static SysCodeRule createClient(int[] codeRule) {
+    public static SysCodeRule create(int[] codeRule) {
         try {
-            SysCodeRule codeRuleObj = new SysCodeRule(-1, null);
+            SysCodeRule codeRuleObj = new SysCodeRule();
             String codeRuleStr = "";
             for (int i = 0; i < codeRule.length; i++) {
                 codeRuleObj.codeLength.add(new Integer(codeRule[i]));
@@ -94,9 +76,9 @@ public class SysCodeRule implements Serializable {
      * @param codeRuleStr 代码规则字符串
      * @throws Exception
      */
-    public static SysCodeRule createClient(String codeRuleStr) {
+    public static SysCodeRule create(String codeRuleStr) {
         try {
-            SysCodeRule codeRuleObj = new SysCodeRule(-1, null);
+            SysCodeRule codeRuleObj = new SysCodeRule();
             if (splittedCodePattern.matcher(codeRuleStr).matches()) {
                 String[] ruleArray = codeSplitter.split(codeRuleStr);
                 codeRuleObj.createRuleArray(ruleArray);

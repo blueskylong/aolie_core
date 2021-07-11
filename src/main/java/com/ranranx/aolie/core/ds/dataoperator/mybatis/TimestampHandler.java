@@ -20,7 +20,6 @@ import java.util.Date;
 @MappedJdbcTypes(value = {JdbcType.TIMESTAMP, JdbcType.DATE})
 public class TimestampHandler extends BaseTypeHandler<TimestampHandler.MyTimestamp> {
     public TimestampHandler() {
-        System.out.println("xxx");
     }
 
     @Override

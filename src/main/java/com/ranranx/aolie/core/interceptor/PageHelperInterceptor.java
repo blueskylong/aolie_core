@@ -5,6 +5,7 @@ import com.ranranx.aolie.core.annotation.DbOperInterceptor;
 import com.ranranx.aolie.core.common.Constants;
 import com.ranranx.aolie.core.exceptions.InvalidException;
 import com.ranranx.aolie.core.handler.HandleResult;
+import com.ranranx.aolie.core.handler.param.OperParam;
 import com.ranranx.aolie.core.handler.param.QueryParam;
 
 import java.util.Map;
@@ -22,7 +23,7 @@ public class PageHelperInterceptor implements IOperInterceptor {
     }
 
     @Override
-    public HandleResult beforeOper(Object param, String handleType, Map<String, Object> globalParamData) throws InvalidException {
+    public HandleResult beforeOper(OperParam param, String handleType, Map<String, Object> globalParamData) throws InvalidException {
         QueryParam queryParam = (QueryParam) param;
         if (queryParam.getPage() != null) {
             PageHelper.startPage(queryParam.getPage().getCurrentPage(), queryParam.getPage().getPageSize());

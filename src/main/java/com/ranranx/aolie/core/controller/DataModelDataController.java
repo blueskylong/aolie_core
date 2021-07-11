@@ -13,9 +13,8 @@ import java.util.Map;
 
 /**
  * @author xxl
- *
- * @date 2020/9/11 10:03
  * @version V0.0.1
+ * @date 2020/9/11 10:03
  **/
 @RestController
 @RequestMapping("/dmdata")
@@ -26,14 +25,14 @@ public class DataModelDataController {
     @Autowired
     private DmDataService dmDataService;
 
-    @RequestMapping("/findBlockData/{blockId}")
-    public HandleResult findBlockDataForPage(@PathVariable Long blockId, JQParameter queryParams) throws Exception {
-        return dmDataService.findBlockDataForPage(blockId, queryParams);
+    @RequestMapping("/findBlockData/{viewId}")
+    public HandleResult findBlockDataForPage(@PathVariable Long viewId, JQParameter queryParams) throws Exception {
+        return dmDataService.findBlockDataForPage(viewId, queryParams);
     }
 
-    @RequestMapping("/findBlockDataNoPage/{blockId}")
-    public List<Map<String, Object>> findBlockDataNoPage(@PathVariable Long blockId, JQParameter queryParams) throws Exception {
-        return dmDataService.findBlockDataNoPage(blockId, queryParams);
+    @RequestMapping("/findBlockDataNoPage/{viewId}")
+    public List<Map<String, Object>> findBlockDataNoPage(@PathVariable Long viewId, JQParameter queryParams) throws Exception {
+        return dmDataService.findBlockDataNoPage(viewId, queryParams);
     }
 
     /**

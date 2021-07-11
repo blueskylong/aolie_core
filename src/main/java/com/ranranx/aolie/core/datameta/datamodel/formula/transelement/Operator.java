@@ -45,7 +45,7 @@ public class Operator implements TransElement {
 
     @Override
     public String transToCn(String curElement, TransCenter transcenter) {
-        System.out.println(this.getName() + "  matched!");
+
         String[] strs = curElement.split("[\\+\\-\\*\\/]");
         if (strs.length < 2) {
             throw new Error(this.getName() + "数学运算符,需要二个操作数");
@@ -59,7 +59,7 @@ public class Operator implements TransElement {
 
     @Override
     public String transToInner(String curElement, Schema schema, TransCenter transcenter) {
-        System.out.println(this.getName() + "  matched!");
+
         String[] strs = curElement.split("[\\+\\-\\*\\/]");
         if (strs.length < 2) {
             throw new Error(this.getName() + "数学运算符,需要二个操作数");
@@ -74,7 +74,7 @@ public class Operator implements TransElement {
     @Override
     public String transToValue(String curElement, long tableId, Map<String, Object> rowData,
                                Schema schema, TransCenter transcenter, Formula formula) {
-        System.out.println(this.getName() + "  matched!");
+
         String[] strs = curElement.split(sPattern);
         if (strs.length < 2) {
             throw new Error(this.getName() + "数学运算符,需要二个操作数");

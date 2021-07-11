@@ -7,9 +7,8 @@ import org.springframework.stereotype.Component;
 
 /**
  * @author xxl
- *
- * @date 2020/12/23 0023 10:34
  * @version V0.0.1
+ * @date 2020/12/23 0023 10:34
  **/
 @Component
 public class ApplicationService implements ApplicationContextAware {
@@ -23,6 +22,10 @@ public class ApplicationService implements ApplicationContextAware {
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         ApplicationService.applicationContext = applicationContext;
+    }
+
+    public static ApplicationContext getApplicationContext() {
+        return applicationContext;
     }
 
     /**

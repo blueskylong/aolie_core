@@ -18,6 +18,3 @@ FROM aolie_s_menu_button b,
 WHERE b.version_code = c.version_code
   AND b.menu_id = c.menu_id
   AND b.version_code = #{versionCode}
-
-name2:
-select * from aolie_s_user;

@@ -199,7 +199,7 @@ public class MyBatisDataOperator implements IDataOperator {
         }
         int count = 0;
         for (Map<String, Object> row : updateParamDefinition.getLstRows()) {
-            count += updateRow(row, updateParamDefinition.getCriteria(),
+            count += updateRow(row, CommonUtils.deepClone(updateParamDefinition.getCriteria()),
                     updateParamDefinition.getIdField(),
                     updateParamDefinition.getTableName(), updateParamDefinition.isSelective());
 

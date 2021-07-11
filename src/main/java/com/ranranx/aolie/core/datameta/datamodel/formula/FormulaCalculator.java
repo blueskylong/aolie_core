@@ -355,7 +355,7 @@ public class FormulaCalculator {
         QueryParam queryParam = new QueryParam();
         TableInfo table = SchemaHolder.getTable(colTo.getColumnDto().getTableId(), version);
         //查询字段
-        queryParam.setTable(new TableInfo[]{table});
+        queryParam.setTable(table);
         Object objFilterValue = mapFrom.get(colFrom.getColumnDto().getFieldName());
         if (objFilterValue == null) {
             throw new InvalidParamException("查询主表值不存在:" + colFrom.getColumnDto().getTitle() + "["

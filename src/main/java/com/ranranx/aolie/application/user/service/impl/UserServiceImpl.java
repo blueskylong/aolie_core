@@ -19,10 +19,12 @@ import com.ranranx.aolie.core.handler.HandlerFactory;
 import com.ranranx.aolie.core.handler.param.DeleteParam;
 import com.ranranx.aolie.core.handler.param.InsertParam;
 import com.ranranx.aolie.core.handler.param.QueryParam;
+import com.ranranx.aolie.core.handler.param.UpdateParam;
 import com.ranranx.aolie.core.handler.param.condition.Criteria;
 import com.ranranx.aolie.core.service.DmDataService;
 import com.ranranx.aolie.core.tools.SqlLoader;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,6 +45,10 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private DmDataService dataService;
+
+    //解密用的
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     /**
      * 查询用户的所有数据权限,
@@ -71,7 +77,7 @@ public class UserServiceImpl implements UserService {
         }
 
         QueryParam param = new QueryParam();
-        param.setTable(new TableInfo[]{table});
+        param.setTable(table);
         param.setLstOrder(table.getDefaultOrder());
         param.appendCriteria().andEqualTo(null, "user_id", userId);
         return handlerFactory.handleQuery(param);
@@ -244,7 +250,7 @@ public class UserServiceImpl implements UserService {
         TableInfo tableInfo = SchemaHolder.findTableByTableName(CommonUtils.getTableName(RightRelationDetailDto.class),
                 Constants.DEFAULT_SYS_SCHEMA, versionCode);
         QueryParam param = new QueryParam();
-        param.setTable(new TableInfo[]{tableInfo});
+        param.setTable(tableInfo);
         param.setResultClass(RightRelationDetailDto.class);
         Criteria criteria = param.appendCriteria().andEqualTo(null, "rr_id", rrId);
         if (sourceId >= 0) {
@@ -277,7 +283,7 @@ public class UserServiceImpl implements UserService {
         TableInfo info = SchemaHolder.findTableByTableName(
                 CommonUtils.getTableName(RightRelationDto.class),
                 Constants.DEFAULT_SYS_SCHEMA, versionCode);
-        param.setTable(new TableInfo[]{info});
+        param.setTable(info);
         param.appendCriteria().andEqualTo(null, "rs_id_from", sourceRsId)
                 .andEqualTo(null, "rs_id_to", destRsId);
         HandleResult result = handlerFactory.handleQuery(param);
@@ -743,5 +749,69 @@ public class UserServiceImpl implements UserService {
         return (List<UserDto>) handlerFactory.handleQuery(param).getData();
     }
 
+    /**
+     * 禁用用户账号
+     *
+     * @param userId
+     * @return
+     */
+    @Override
+    @Transactional(readOnly = false)
+    public HandleResult disableUser(Long userId) {
+        return updateUserState(userId, Constants.UserState.disabled, SessionUtils.getLoginVersion());
+    }
+
+    /**
+     * 启用账号
+     *
+     * @param userId
+     * @return
+     */
+    @Override
+    @Transactional(readOnly = false)
+    public HandleResult enableUser(Long userId) {
+        return updateUserState(userId, Constants.UserState.normal, SessionUtils.getLoginVersion());
+    }
+
+    /**
+     * 重置用户密码
+     *
+     * @param userId
+     * @return
+     */
+    @Override
+    @Transactional(readOnly = false)
+    public HandleResult resetUserPassword(Long userId) {
+        if (userId == null) {
+            return HandleResult.failure("未指定用户ID");
+        }
+        String version = SessionUtils.getLoginVersion();
+        UserDto dto = new UserDto();
+        dto.setUserId(userId);
+        dto.setPassword(passwordEncoder.encode(Constants.DEFAULT_PASSWORD));
+        dto.setVersionCode(SessionUtils.getLoginVersion());
+        return handlerFactory.handleUpdate(UpdateParam
+                .genUpdateByObject(Constants.DEFAULT_SYS_SCHEMA, version, dto, true));
+    }
+
+    /**
+     * 更新用户的状态
+     *
+     * @param userId
+     * @param state
+     * @param version
+     * @return
+     */
+    private HandleResult updateUserState(Long userId, Integer state, String version) {
+        if (userId == null) {
+            return HandleResult.failure("未指定用户ID");
+        }
+        UserDto userDto = new UserDto();
+        userDto.setVersionCode(version);
+        userDto.setUserId(userId);
+        userDto.setState(state);
+        return handlerFactory.handleUpdate(UpdateParam
+                .genUpdateByObject(Constants.DEFAULT_SYS_SCHEMA, version, userDto, true));
+    }
 
 }

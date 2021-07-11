@@ -43,6 +43,9 @@ public class QueryHandler<T extends QueryParam> extends BaseHandler<T> {
         HandleResult result = new HandleResult();
         result.setSuccess(true);
         result.setData(lstData);
+        if (lstData != null) {
+            result.setChangeNum(lstData.size());
+        }
         return result;
     }
 

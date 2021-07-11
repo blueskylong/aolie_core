@@ -4,11 +4,10 @@ import com.ranranx.aolie.core.annotation.DbOperInterceptor;
 import com.ranranx.aolie.core.common.CommonUtils;
 import com.ranranx.aolie.core.common.Constants;
 import com.ranranx.aolie.core.datameta.datamodel.SchemaHolder;
+import com.ranranx.aolie.core.datameta.datamodel.TableInfo;
 import com.ranranx.aolie.core.datameta.dto.ReferenceDto;
 import com.ranranx.aolie.core.handler.HandleResult;
-import com.ranranx.aolie.core.handler.param.DeleteParam;
-import com.ranranx.aolie.core.handler.param.InsertParam;
-import com.ranranx.aolie.core.handler.param.UpdateParam;
+import com.ranranx.aolie.core.handler.param.OperParam;
 import com.ranranx.aolie.core.service.DataModelService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,23 +43,17 @@ public class ReferenceClearCacheInterceptor implements IOperInterceptor {
 
 
     @Override
-    public HandleResult afterOper(Object param, String handleType,
+    public HandleResult afterOper(OperParam param, String handleType,
                                   Map<String, Object> extendData, HandleResult result) {
         if (result.isSuccess()) {
             String tableName;
             String versionCode;
-            if (param instanceof DeleteParam) {
-                tableName = ((DeleteParam) param).getTable().getTableDto().getTableName();
-                versionCode = ((DeleteParam) param).getTable().getTableDto().getVersionCode();
-            } else if (param instanceof InsertParam) {
-                tableName = ((InsertParam) param).getTable().getTableDto().getTableName();
-                versionCode = ((InsertParam) param).getTable().getTableDto().getVersionCode();
-            } else if (param instanceof UpdateParam) {
-                tableName = ((UpdateParam) param).getTable().getTableDto().getTableName();
-                versionCode = ((UpdateParam) param).getTable().getTableDto().getVersionCode();
-            } else {
+            TableInfo table = param.getTable();
+            if (table == null) {
                 return null;
             }
+            tableName = table.getTableDto().getTableName();
+            versionCode = table.getTableDto().getVersionCode();
             ReferenceDto tableInReference = findTableInReference(tableName, versionCode);
             if (tableInReference != null) {
                 logger.info("&&清除缓存-->" + tableName);

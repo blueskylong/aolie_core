@@ -1,15 +1,9 @@
 package com.ranranx.aolie.core.handler.param;
 
-import com.ranranx.aolie.core.common.CommonUtils;
-import com.ranranx.aolie.core.datameta.datamodel.SchemaHolder;
 import com.ranranx.aolie.core.datameta.datamodel.TableColumnRelation;
-import com.ranranx.aolie.core.datameta.datamodel.TableInfo;
 import com.ranranx.aolie.core.ds.definition.Field;
 import com.ranranx.aolie.core.ds.definition.FieldOrder;
 import com.ranranx.aolie.core.ds.definition.SqlExp;
-import com.ranranx.aolie.core.exceptions.InvalidException;
-import com.ranranx.aolie.core.exceptions.NotExistException;
-import com.ranranx.aolie.core.handler.param.condition.Criteria;
 
 import java.beans.Transient;
 import java.util.ArrayList;
@@ -23,7 +17,7 @@ import java.util.Map;
  * @version V0.0.1
  * @date 2020/8/6 14:28
  **/
-public class QueryParam {
+public class QueryParam extends OperParam<QueryParam> {
     /**
      * 视图ID   视图模式条件
      */
@@ -33,18 +27,12 @@ public class QueryParam {
      * 视图展现的方式    视图模式条件
      */
     private Integer displayType;
-    /**
-     * 复杂条件  表条件
-     */
-    private List<Criteria> lstCriteria;
+
     /**
      * 插件扩展条件,前后端配合使用
      */
     private Map<String, Object> plugFilter;
-    /**
-     * 表信息   表条件
-     */
-    private TableInfo[] table;
+
     /**
      * 分页信息  综合条件
      */
@@ -84,14 +72,6 @@ public class QueryParam {
      */
     private boolean maskDataRight = false;
 
-    public SqlExp getSqlExp() {
-        return sqlExp;
-    }
-
-    public QueryParam setSqlExp(SqlExp sqlExp) {
-        this.sqlExp = sqlExp;
-        return this;
-    }
 
     public Long getViewId() {
         return viewId;
@@ -130,56 +110,6 @@ public class QueryParam {
         return this;
     }
 
-    public List<Criteria> getLstCriteria() {
-        return lstCriteria;
-    }
-
-    public QueryParam setLstCriteria(List<Criteria> lstCriteria) {
-        this.lstCriteria = lstCriteria;
-        return this;
-    }
-
-    public TableInfo[] getTable() {
-        return table;
-    }
-
-    public QueryParam setTable(TableInfo[] table) {
-        this.table = table;
-        return this;
-    }
-
-    public QueryParam appendTable(TableInfo tableInfo) {
-        if (this.table == null) {
-            this.table = new TableInfo[]{tableInfo};
-        } else {
-            TableInfo[] tables = new TableInfo[this.table.length + 1];
-            System.arraycopy(this.table, 0, tables, 0, this.table.length);
-            tables[this.table.length] = tableInfo;
-            this.table = tables;
-
-        }
-        return this;
-    }
-
-    /**
-     * 设置DTO代替表名
-     *
-     * @param lstClass
-     */
-    public QueryParam setTableDtos(Long schemaId, String version, Class... lstClass) {
-        this.table = new TableInfo[lstClass.length];
-        String tableName;
-        int index = 0;
-        for (Class clazz : lstClass) {
-            tableName = CommonUtils.getTableName(clazz);
-            if (CommonUtils.isEmpty(tableName)) {
-                throw new InvalidException("指定的类没有@Table注解");
-
-            }
-            table[index++] = SchemaHolder.findTableByTableName(tableName, schemaId, version);
-        }
-        return this;
-    }
 
     /**
      * 设置查询表和返回类型,他们都是一个DTO类
@@ -190,19 +120,7 @@ public class QueryParam {
      * @return
      */
     public QueryParam setTableDtoAndResultType(Long schemaId, String version, Class clazz) {
-        this.table = new TableInfo[1];
-        String tableName;
-        int index = 0;
-
-        tableName = CommonUtils.getTableName(clazz);
-        if (CommonUtils.isEmpty(tableName)) {
-            throw new InvalidException("指定的类没有@Table注解");
-        }
-        TableInfo tableInfo = SchemaHolder.findTableByTableName(tableName, schemaId, version);
-        if (tableInfo == null) {
-            throw new NotExistException("没有查询到指定表的定义信息:" + tableName + "[" + schemaId + "]");
-        }
-        table[0] = tableInfo;
+        setTableDtos(schemaId, version, clazz);
         this.resultClass = clazz;
         return this;
     }
@@ -249,34 +167,6 @@ public class QueryParam {
         return this;
     }
 
-    /**
-     * 增加过滤条件
-     * TODO  这里的条件需要支持字段的表示方式 ,比如EQUALSTO第一个参数可以用字段信息
-     *
-     * @return
-     */
-    public Criteria appendCriteria() {
-        if (lstCriteria == null) {
-            lstCriteria = new ArrayList<>();
-        }
-        Criteria criteria = new Criteria();
-        lstCriteria.add(criteria);
-        return criteria;
-    }
-
-    /**
-     * 增加过滤条件
-     *
-     * @param criteria
-     */
-    public QueryParam addCriteria(Criteria criteria) {
-        if (lstCriteria == null) {
-            lstCriteria = new ArrayList<>();
-        }
-        lstCriteria.add(criteria);
-        return this;
-    }
-
 
     public List<Field> getFields() {
         if (fields == null) {
@@ -298,43 +188,6 @@ public class QueryParam {
     public QueryParam setResultClass(Class resultClass) {
         this.resultClass = resultClass;
         return this;
-    }
-
-
-    public Map<String, Object> getMapControlParam() {
-        return mapControlParam;
-    }
-
-    public QueryParam setMapControlParam(Map<String, Object> mapControlParam) {
-        this.mapControlParam = mapControlParam;
-        return this;
-    }
-
-    /**
-     * 增加一个控制参数
-     *
-     * @param key
-     * @param value
-     */
-    public QueryParam addControlParam(String key, Object value) {
-        if (this.mapControlParam == null) {
-            this.mapControlParam = new HashMap<>();
-        }
-        this.mapControlParam.put(key, value);
-        return this;
-    }
-
-    /**
-     * 取得一个控制参数
-     *
-     * @param key
-     * @return
-     */
-    public Object getControlParam(String key) {
-        if (this.mapControlParam == null) {
-            return null;
-        }
-        return this.mapControlParam.get(key);
     }
 
 

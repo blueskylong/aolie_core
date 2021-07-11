@@ -27,9 +27,8 @@ import java.util.*;
 
 /**
  * @author xxl
- *
- * @date 2020/8/11 13:00
  * @version V0.0.1
+ * @date 2020/8/11 13:00
  **/
 @Configuration
 public class MybatisDbOperatorConfig implements BeanPostProcessor, BeanDefinitionRegistryPostProcessor {
@@ -61,8 +60,11 @@ public class MybatisDbOperatorConfig implements BeanPostProcessor, BeanDefinitio
             InputStream in = MybatisDbOperatorConfig.class.getClassLoader().getResourceAsStream("aolie.properties");
             // 使用properties对象加载输入流
             properties.load(in);
-
             Map<String, Object> map = convertToMap(properties);
+            Map<String, String> allParams = CommonUtils.getAllParams();
+            if (!allParams.isEmpty()) {
+                map.putAll(allParams);
+            }
             DataOperatorDto dto = CommonUtils.populateBean(DataOperatorDto.class, map);
             setDefaultDsInfo(dto);
             return dto;
@@ -158,8 +160,6 @@ public class MybatisDbOperatorConfig implements BeanPostProcessor, BeanDefinitio
      */
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-        //这里开始注册
-        System.out.println("这里开始注册");
 
     }
 

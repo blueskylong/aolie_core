@@ -139,7 +139,7 @@ public interface UserService {
      * @param versionCode 版本号
      * @return 返回权限的明细ID
      */
-    Map<Long, Set<Long>> findUserDirectAllRights(Long userId, String versionCode,Long roleId);
+    Map<Long, Set<Long>> findUserDirectAllRights(Long userId, String versionCode, Long roleId);
 
     /**
      * 查询传递的权限明细
@@ -162,12 +162,34 @@ public interface UserService {
 
     /**
      * 根据用户名或编辑,查询用户列表
+     *
      * @param name
      * @return
      */
     List<UserDto> findUserByCodeOrName(String name);
 
+    /**
+     * 重置用户密码
+     *
+     * @param userId
+     * @return
+     */
+    HandleResult resetUserPassword(Long userId);
 
+    /**
+     * 启用账号
+     *
+     * @param userId
+     * @return
+     */
+    HandleResult enableUser(Long userId);
 
+    /**
+     * 禁用用户账号
+     *
+     * @param userId
+     * @return
+     */
+    HandleResult disableUser(Long userId);
 
 }

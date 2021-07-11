@@ -24,7 +24,7 @@ public class DtoGenerator {
     }
 
     public static void main(String[] args) {
-        DTOHelper dto = new DTOHelper("com.ranranx.aolie.application.right.dto", "aolie_s_role");
+        DTOHelper dto = new DTOHelper("com.ranranx.aolie.core.plugs.dto", "aolie_s_plugs");
 
         try {
             dto.createDto();

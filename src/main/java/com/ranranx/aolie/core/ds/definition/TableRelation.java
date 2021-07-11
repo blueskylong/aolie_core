@@ -7,6 +7,7 @@ import java.beans.Transient;
 import java.util.ArrayList;
 import java.util.List;
 
+
 /**
  * @author xxl
  * 用来描述二表中的相等字段信息, 其中左右表/字段在没有主表的情况下没有其它含义,只是区分.

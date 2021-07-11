@@ -16,9 +16,8 @@ import java.util.Map;
 
 /**
  * @author xxl
- *
- * @date 2020/12/23 0023 14:22
  * @version V0.0.1
+ * @date 2020/12/23 0023 14:22
  **/
 @Component("menuButtonTableRefFilter")
 public class MenuButtonTableRefFilter implements IReferenceDataFilter {
@@ -62,7 +61,7 @@ public class MenuButtonTableRefFilter implements IReferenceDataFilter {
             return null;
         }
         Criteria criteria = new Criteria();
-        criteria.andIn(null,"table_id", pageRefTables);
+        criteria.andIn(null, "table_id", pageRefTables);
         return criteria;
     }
 

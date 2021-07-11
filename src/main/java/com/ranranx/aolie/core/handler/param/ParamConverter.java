@@ -29,7 +29,7 @@ public class ParamConverter {
             paramDefinition.setSqlExp(param.getSqlExp());
             return paramDefinition;
         }
-        TableInfo[] table = param.getTable();
+        TableInfo[] table = param.getTables();
         List<String> lstTableName = new ArrayList<>();
 
         Long tableId[] = new Long[table.length];
@@ -38,7 +38,7 @@ public class ParamConverter {
             tableId[i] = table[i].getTableDto().getTableId();
         }
         paramDefinition.setTableNames(lstTableName);
-        paramDefinition.setLstCriteria(param.getLstCriteria());
+        paramDefinition.setLstCriteria(param.getCriterias());
         paramDefinition.setLstOrder(param.getLstOrder());
         paramDefinition.setFields(param.getFields());
         paramDefinition.setPage(param.getPage());

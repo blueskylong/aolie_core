@@ -19,9 +19,9 @@ public class TreeNode implements Node, Cloneable, Serializable {
 
     Object value;
 
-    int level = 0;
+    Object customObj;
 
-    int nodeHeight = 0;
+    int level = 0;
 
     /**
      * 子树集合
@@ -48,16 +48,11 @@ public class TreeNode implements Node, Cloneable, Serializable {
     private String text;
 
     TreeNode(Object id, String text, Object sortValue, Object value, Object attributes) {
-        this(id, text, sortValue, value, 0, attributes);
-    }
-
-    TreeNode(Object id, String text, Object sortValue, Object value, int nodeHeight, Object attributes) {
         this.value = value;
         this.attributes = attributes;
         this.id = id;
         this.sortValue = sortValue;
         this.text = text;
-        this.nodeHeight = nodeHeight;
     }
 
     TreeNode(Map<String, Object> attributes) {
@@ -72,6 +67,16 @@ public class TreeNode implements Node, Cloneable, Serializable {
         ((TreeNode) node).parent = this;
         adjustChildLevel((TreeNode) node);
         children.add(node);
+    }
+
+    @Override
+    public void append(Node[] nodes) {
+        if (nodes == null || nodes.length < 1) {
+            return;
+        }
+        for (Node node : nodes) {
+            append(node);
+        }
     }
 
     @Override
@@ -250,9 +255,6 @@ public class TreeNode implements Node, Cloneable, Serializable {
         return false;
     }
 
-    public void setNodeHeight(int nodeHeight) {
-        this.nodeHeight = nodeHeight;
-    }
 
     @Override
     public int getNodeHeight() {
@@ -273,6 +275,62 @@ public class TreeNode implements Node, Cloneable, Serializable {
     @Override
     public Object getUserObject() {
         return attributes;
+    }
+
+    @Override
+    public List<Node> getLeafNodes() {
+        List<Node> lstNode = new ArrayList<>();
+        if (this.getChildrenCount() == 0) {
+            lstNode.add(this);
+        } else {
+            for (Node node : children) {
+                getSubLeafNode(node, lstNode);
+            }
+        }
+        return lstNode;
+    }
+
+    /**
+     * 查询指定ID的子节点或孙子节点
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public Node findNode(Object id) {
+        if (id == null) {
+            return null;
+        }
+        Node[][] nodes = toArray();
+        for (int i = 0; i < nodes.length; i++) {
+            for (int j = 0; j < nodes[i].length; j++) {
+                if (nodes[i][j].getIdentifier() != null && nodes[i][j].getIdentifier().equals(id)) {
+                    return nodes[i][j];
+                }
+            }
+        }
+        return null;
+    }
+
+
+    private void getSubLeafNode(Node node, List<Node> lstLeafNode) {
+        if (node.getChildrenCount() == 0) {
+            lstLeafNode.add(node);
+        } else {
+            for (Node child : node.getChildren()) {
+                getSubLeafNode(child, lstLeafNode);
+            }
+        }
+    }
+
+    @Override
+    public Object getCustomObject() {
+        return customObj;
+    }
+
+    @Override
+    public void setCustomObject(Object obj) {
+        this.customObj = obj;
     }
 
     /**
@@ -326,4 +384,24 @@ public class TreeNode implements Node, Cloneable, Serializable {
         return o.toString();
     }
 
+    @Override
+    public Node[] getChildren() {
+        if (children == null || children.isEmpty()) {
+            return new Node[0];
+        }
+        Node[] nodes = new Node[children.size()];
+        for (int i = 0; i < nodes.length; i++) {
+            nodes[i] = children.get(i);
+
+        }
+        return nodes;
+    }
+
+    @Override
+    public boolean clearChildren() {
+        if (children != null) {
+            children.clear();
+        }
+        return true;
+    }
 }

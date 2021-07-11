@@ -46,7 +46,6 @@ public abstract class AbstractTransElement implements TransElement {
 
     @Override
     public String transToCn(String curElement, TransCenter transcenter) {
-        System.out.println(this.getName() + "  matched!");
         String[] eles = curElement.split(" " + elementInner + " ");
 
         if (eles.length != 2) {
@@ -60,7 +59,6 @@ public abstract class AbstractTransElement implements TransElement {
     @Override
     public String transToInner(String curElement, Schema schema
             , TransCenter transcenter) {
-        System.out.println(this.getName() + "  matched!");
         String[] eles = curElement.split(" " + elementCN + " ");
 
         if (eles.length != 2) {

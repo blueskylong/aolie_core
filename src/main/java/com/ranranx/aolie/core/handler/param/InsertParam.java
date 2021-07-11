@@ -4,10 +4,9 @@ import com.ranranx.aolie.core.common.CommonUtils;
 import com.ranranx.aolie.core.common.SessionUtils;
 import com.ranranx.aolie.core.datameta.datamodel.SchemaHolder;
 import com.ranranx.aolie.core.datameta.datamodel.TableInfo;
-import com.ranranx.aolie.core.ds.definition.SqlExp;
+import com.ranranx.aolie.core.exceptions.InvalidParamException;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,41 +15,14 @@ import java.util.Map;
  * @version V0.0.1
  * @date 2020/8/8 14:00
  **/
-public class InsertParam {
+public class InsertParam extends OperParam<InsertParam> {
 
-    /**
-     * 表信息
-     */
-    private TableInfo table;
 
     /**
      * 更新的列信息
      */
     private List<Map<String, Object>> lstRows;
-    /**
-     * 直接语句.暂时提供在复杂语句下使用.
-     */
-    private SqlExp sqlExp;
-    /**
-     * 增加控制信息,让拦截器使用
-     */
-    private Map<String, Object> mapControlParam;
 
-    public SqlExp getSqlExp() {
-        return sqlExp;
-    }
-
-    public void setSqlExp(SqlExp sqlExp) {
-        this.sqlExp = sqlExp;
-    }
-
-    public TableInfo getTable() {
-        return table;
-    }
-
-    public void setTable(TableInfo table) {
-        this.table = table;
-    }
 
     public List<Map<String, Object>> getLstRows() {
         return lstRows;
@@ -61,11 +33,21 @@ public class InsertParam {
     }
 
     public void setObjects(List<?> lstObj, long schemaId) {
-        if (table == null && lstObj != null && !lstObj.isEmpty()) {
+        if (this.getTable() == null && lstObj != null && !lstObj.isEmpty()) {
             String tableName = CommonUtils.getTableName(lstObj.get(0).getClass());
             if (!CommonUtils.isEmpty(tableName)) {
-                this.table = SchemaHolder.findTableByTableName(tableName,
-                        schemaId, SessionUtils.getLoginVersion());
+                if (schemaId <= 0) {
+                    List<TableInfo> tables = SchemaHolder.findTablesByTableName(tableName, SessionUtils.getLoginVersion());
+                    //如果有多个则报错
+                    if (tables != null && tables.size() > 1) {
+                        throw new InvalidParamException("查询到多个表对象");
+                    }
+                    if (tables != null) {
+                        this.setTable(tables.get(0));
+                    }
+                }
+                this.setTable(SchemaHolder.findTableByTableName(tableName,
+                        schemaId, SessionUtils.getLoginVersion()));
             }
         }
         this.lstRows = CommonUtils.toMapAndConvertToUnderLine(lstObj);
@@ -81,48 +63,4 @@ public class InsertParam {
         setObjects(Arrays.asList(dto), schemaId);
     }
 
-    /**
-     * 设置插入表的类,表从类的注解中取得
-     *
-     * @param schemaId
-     * @param clazz
-     */
-    public void setTableDto(Long schemaId, Class clazz) {
-        this.table = SchemaHolder.findTableByTableName(CommonUtils.getTableName(clazz),
-                schemaId, SessionUtils.getLoginVersion());
-    }
-
-    public Map<String, Object> getMapControlParam() {
-        return mapControlParam;
-    }
-
-    public void setMapControlParam(Map<String, Object> mapControlParam) {
-        this.mapControlParam = mapControlParam;
-    }
-
-    /**
-     * 增加一个控制参数
-     *
-     * @param key
-     * @param value
-     */
-    public void addControlParam(String key, Object value) {
-        if (this.mapControlParam == null) {
-            this.mapControlParam = new HashMap<>();
-        }
-        this.mapControlParam.put(key, value);
-    }
-
-    /**
-     * 取得一个控制参数
-     *
-     * @param key
-     * @return
-     */
-    public Object getControlParam(String key) {
-        if (this.mapControlParam == null) {
-            return null;
-        }
-        return this.mapControlParam.get(key);
-    }
 }

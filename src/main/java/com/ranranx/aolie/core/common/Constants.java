@@ -203,9 +203,9 @@ public class Constants {
         /*用户密码*/
         public static final String PASSWORD = "password";
         /**
-         * 虚拟列后缀
+         * 虚拟列前缀
          */
-        public static final String V_COL_AFFIX = "__VCOL";
+        public static final String PLUG_FILTER_PREFIX = "PLUG_COLUMN_";
     }
 
     public static class UserState {
@@ -216,6 +216,8 @@ public class Constants {
         public static final int credentialsExpired = -4;
 
     }
+
+    public static final String DEFAULT_PASSWORD = "000000";
 
     /**
      * 前后端协商的固定字段
@@ -312,6 +314,24 @@ public class Constants {
     }
 
     /**
+     * 插件状态
+     */
+    public static class PlugStatus {
+        /**
+         * 新的，还没有安装
+         */
+        public static int NEW = 1;
+        /**
+         * 已过期
+         */
+        public static int OLD = 2;
+        /**
+         * 已安装（正常使用状态）
+         */
+        public static int INSTALLED = 3;
+    }
+
+    /**
      * 用户类别
      */
     public static class UserType {
@@ -337,4 +357,5 @@ public class Constants {
      * 时间格式
      */
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+
 }

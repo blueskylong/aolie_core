@@ -11,8 +11,8 @@ import com.ranranx.aolie.core.exceptions.InvalidException;
 import com.ranranx.aolie.core.handler.HandleResult;
 import com.ranranx.aolie.core.handler.HandlerFactory;
 import com.ranranx.aolie.core.handler.param.InsertParam;
+import com.ranranx.aolie.core.handler.param.OperParam;
 import com.ranranx.aolie.core.handler.param.QueryParam;
-import com.ranranx.aolie.core.handler.param.UpdateParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +45,7 @@ public class ValidatorInterceptor implements IOperInterceptor {
      * @throws InvalidException
      */
     @Override
-    public HandleResult beforeOper(Object param, String handleType,
+    public HandleResult beforeOper(OperParam param, String handleType,
                                    Map<String, Object> globalParamData) throws InvalidException {
         return null;
     }
@@ -60,20 +60,20 @@ public class ValidatorInterceptor implements IOperInterceptor {
      * @return
      */
     @Override
-    public HandleResult afterOper(Object param, String handleType, Map<String, Object> globalParamData, HandleResult result) {
+    public HandleResult afterOper(OperParam param, String handleType, Map<String, Object> globalParamData, HandleResult result) {
         if (!result.isSuccess()) {
             return null;
         }
         if (Constants.HandleType.TYPE_UPDATE.equals(handleType)) {
             logger.info("表单验证--->保存后验证");
-            String err = validateUpdate((UpdateParam) param, globalParamData);
+            String err = validateUpdate(param, globalParamData);
             if (CommonUtils.isNotEmpty(err)) {
                 return HandleResult.failure(err);
             }
 
         } else if (Constants.HandleType.TYPE_INSERT.equals(handleType) && param instanceof InsertParam) {
             //如果是插入,直接验证提供的数据
-            String err = validateInsert((InsertParam) param, result);
+            String err = validateInsert(param, result);
             if (CommonUtils.isNotEmpty(err)) {
                 return HandleResult.failure(err);
             }
@@ -87,7 +87,7 @@ public class ValidatorInterceptor implements IOperInterceptor {
      * @param handleResult 执行插入和公式计算后的结果
      * @return
      */
-    private String validateInsert(InsertParam insertParam, HandleResult handleResult) {
+    private String validateInsert(OperParam insertParam, HandleResult handleResult) {
         List<Map<String, Object>> lstData = findInsertRows(insertParam, handleResult);
         ValidatorCenter validatorCenter = insertParam.getTable().getValidatorCenter(this.lstValidator);
         return validateData(lstData, validatorCenter);
@@ -99,7 +99,7 @@ public class ValidatorInterceptor implements IOperInterceptor {
      * @param handleResult
      * @return
      */
-    private List<Map<String, Object>> findInsertRows(InsertParam param, HandleResult handleResult) {
+    private List<Map<String, Object>> findInsertRows(OperParam param, HandleResult handleResult) {
         //根据约定,插入成功后,传回的是插入数据的ID数据
         List<Object> lstId = (List<Object>) ((Map<String, Object>) handleResult.getLstData().get(0))
                 .get(Constants.ConstFieldName.CHANGE_KEYS_FEILD);
@@ -126,7 +126,7 @@ public class ValidatorInterceptor implements IOperInterceptor {
      * @param globalParamData
      * @return
      */
-    private List<Map<String, Object>> findUpdateRows(UpdateParam param, Map<String, Object> globalParamData) {
+    private List<Map<String, Object>> findUpdateRows(OperParam param, Map<String, Object> globalParamData) {
         List<Object> lstKey = (List<Object>) globalParamData.get(GetRowIdInterceptor.PARAM_IDS);
         return queryByIds(lstKey, param.getTable());
     }
@@ -136,7 +136,7 @@ public class ValidatorInterceptor implements IOperInterceptor {
             return null;
         }
         QueryParam queryParam = new QueryParam();
-        queryParam.setTable(new TableInfo[]{tableInfo});
+        queryParam.setTable(tableInfo);
         queryParam.appendCriteria().andIn(null, tableInfo.getKeyField(), lstKey);
         HandleResult result = handlerFactory.handleQuery(queryParam);
         if (result.isSuccess() && result.getLstData() != null) {
@@ -152,7 +152,7 @@ public class ValidatorInterceptor implements IOperInterceptor {
      * @param globalParamData
      * @return
      */
-    private String validateUpdate(UpdateParam param, Map<String, Object> globalParamData) {
+    private String validateUpdate(OperParam param, Map<String, Object> globalParamData) {
 
         List<Map<String, Object>> lstData = findUpdateRows(param, globalParamData);
 

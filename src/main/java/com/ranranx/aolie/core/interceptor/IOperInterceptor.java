@@ -3,15 +3,16 @@ package com.ranranx.aolie.core.interceptor;
 import com.ranranx.aolie.core.common.Ordered;
 import com.ranranx.aolie.core.exceptions.InvalidException;
 import com.ranranx.aolie.core.handler.HandleResult;
+import com.ranranx.aolie.core.handler.param.OperParam;
 import com.ranranx.aolie.core.interfaces.IHandleFilter;
 
 import java.util.Map;
 
 /**
  * @author xxl
- *  处理拦截器, 拦截器可以直接返回结果, 如果返回结果, 则不再向下处理, 直接返回
- * @date 2020/8/10 10:17
+ * 处理拦截器, 拦截器可以直接返回结果, 如果返回结果, 则不再向下处理, 直接返回
  * @version V0.0.1
+ * @date 2020/8/10 10:17
  **/
 public interface IOperInterceptor extends Ordered, IHandleFilter {
     /**
@@ -34,7 +35,7 @@ public interface IOperInterceptor extends Ordered, IHandleFilter {
      * @return
      * @throws InvalidException
      */
-    default HandleResult beforeOper(Object param, String handleType, Map<String, Object> globalParamData) throws InvalidException {
+    default HandleResult beforeOper(OperParam param, String handleType, Map<String, Object> globalParamData) throws InvalidException {
         return null;
     }
 
@@ -47,7 +48,7 @@ public interface IOperInterceptor extends Ordered, IHandleFilter {
      * @param result
      * @return
      */
-    default HandleResult afterOper(Object param, String handleType, Map<String, Object> globalParamData,
+    default HandleResult afterOper(OperParam param, String handleType, Map<String, Object> globalParamData,
                                    HandleResult result) {
         return null;
     }
@@ -61,7 +62,7 @@ public interface IOperInterceptor extends Ordered, IHandleFilter {
      * @param handleResult
      * @return
      */
-    default HandleResult beforeReturn(Object param, String handleType, Map<String, Object> globalParamData,
+    default HandleResult beforeReturn(OperParam param, String handleType, Map<String, Object> globalParamData,
                                       HandleResult handleResult) {
         return null;
     }

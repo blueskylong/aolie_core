@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author xxl
@@ -33,6 +34,8 @@ public class SessionUtils {
 
     private static String defaultVersion;
 
+    private static AtomicInteger onlineUserCount = new AtomicInteger(0);
+
     public static String getLoginVersion() {
         if (getLoginUser() == null) {
             return null;
@@ -43,6 +46,9 @@ public class SessionUtils {
     public static LoginUser getLoginUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Object myUser = (auth != null) ? auth.getPrincipal() : null;
+        if (myUser instanceof String) {
+            return null;
+        }
         return (LoginUser) myUser;
     }
 
@@ -222,6 +228,19 @@ public class SessionUtils {
     public static void setMapRightStruct(Map<String, RightNode> mapRightStruct) {
         SessionUtils.mapRightStruct = mapRightStruct;
     }
+
+    public static int getOnlineUserNum() {
+        return onlineUserCount.get();
+    }
+
+    public static int incrementSessionNum() {
+        return onlineUserCount.incrementAndGet();
+    }
+
+    public static int decrementSessionNum() {
+        return onlineUserCount.decrementAndGet();
+    }
+
 
     public static String getDefaultVersion() {
         return defaultVersion;

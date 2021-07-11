@@ -1,8 +1,6 @@
 package com.ranranx.aolie.core.handler;
 
 import com.ranranx.aolie.core.common.Constants;
-import com.ranranx.aolie.core.common.SessionUtils;
-import com.ranranx.aolie.core.datameta.datamodel.SchemaHolder;
 import com.ranranx.aolie.core.ds.dataoperator.DataOperatorFactory;
 import com.ranranx.aolie.core.ds.definition.DeleteParamDefinition;
 import com.ranranx.aolie.core.exceptions.InvalidParamException;
@@ -21,6 +19,7 @@ import org.springframework.stereotype.Component;
 public class DeleteHandler<T extends DeleteParam> extends BaseHandler<T> {
     @Autowired
     private DataOperatorFactory factory;
+
     /**
      * 默认可以处理的类型
      *
@@ -36,6 +35,9 @@ public class DeleteHandler<T extends DeleteParam> extends BaseHandler<T> {
     protected HandleResult handle(DeleteParam deleteParam) {
         HandleResult result = new HandleResult();
         try {
+            if (deleteParam.getSqlExp() != null) {
+                return HandleResult.success(factory.getDefaultDataOperator().executeDirect(deleteParam.getSqlExp().getExecuteMap()));
+            }
             DeleteParamDefinition deleteParamDefinition = new DeleteParamDefinition();
             BeanUtils.copyProperties(deleteParam, deleteParamDefinition);
             deleteParamDefinition.setTableName(deleteParam.getTable().getTableDto().getTableName());
@@ -57,10 +59,8 @@ public class DeleteHandler<T extends DeleteParam> extends BaseHandler<T> {
     protected T checkAndMakeParam(Object mapParam) {
         DeleteParam param = super.checkAndMakeParam(mapParam);
         if (param.getTable() == null) {
-            if (param.getTableId() <= 0) {
-                throw new InvalidParamException("没有指定删除的表信息");
-            }
-            param.setTable(SchemaHolder.getTable(param.getTableId(), SessionUtils.getLoginVersion()));
+            throw new InvalidParamException("没有指定删除的表信息");
+
         }
         if (param.getCriteria().isEmpty()
                 && (param.getIds() == null || param.getIds().isEmpty())) {

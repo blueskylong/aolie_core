@@ -35,7 +35,7 @@ import java.util.Map;
 @Component
 public class JQParameter implements RequestParamHandler {
     /*插件条件*/
-    public static final String PLUG_FILTER_PREFIX = "PLUG_COLUMN_";
+
     public static final String SEARCH = "_search";
     public static final String FILTERS = "filters";
     /*扩展条件*/
@@ -124,17 +124,16 @@ public class JQParameter implements RequestParamHandler {
 
         String extFilter = getParamValue(EXT_FILTER, mapParam);
         if (extFilter != null) {
-            System.out.println("---->" + getParamValue(EXT_FILTER, mapParam));
             parseExtCriteria(extFilter, queryParam.appendCriteria(), needConvert);
         }
         queryParam.setFields(blockViewer.getSelectFields());
-        queryParam.setTable(blockViewer.getViewTables());
+        queryParam.setTables(blockViewer.getViewTables());
         //TODO 这里要增加表关系
         FieldOrder order = parseOrder(mapParam, blockViewer, needConvert);
         if (order != null) {
             queryParam.addOrder(order);
         } else {
-            if (queryParam.getTable().length == 1) {
+            if (queryParam.getTables().length == 1) {
                 queryParam.addOrders(blockViewer.getDefaultOrder());
             }
         }
@@ -166,18 +165,17 @@ public class JQParameter implements RequestParamHandler {
         }
         String extFilter = getParamValue(EXT_FILTER, mapParam);
         if (extFilter != null) {
-            System.out.println("---->" + getParamValue(EXT_FILTER, mapParam));
             parseExtCriteria(extFilter, queryParam.appendCriteria(), false);
         }
 
-        queryParam.setTable(new TableInfo[]{SchemaHolder.getTable(dsId, versionCode)});
+        queryParam.setTables(new TableInfo[]{SchemaHolder.getTable(dsId, versionCode)});
         //TODO 这里要增加表关系
         FieldOrder order = parseDsOrder(mapParam, dsId, versionCode);
         if (order != null) {
             queryParam.addOrder(order);
         } else {
-            if (queryParam.getTable().length == 1) {
-                queryParam.addOrders(queryParam.getTable()[0].getDefaultOrder());
+            if (queryParam.getTables().length == 1) {
+                queryParam.addOrders(queryParam.getTables()[0].getDefaultOrder());
             }
         }
         queryParam.setPage(parsePage(mapParam));
@@ -185,7 +183,7 @@ public class JQParameter implements RequestParamHandler {
     }
 
     private static String getPostData(HttpServletRequest request) {
-        StringBuffer data = new StringBuffer();
+        StringBuilder data = new StringBuilder();
         String line = null;
         BufferedReader reader = null;
         try {
@@ -275,8 +273,8 @@ public class JQParameter implements RequestParamHandler {
                 String op = CommonUtils.getStringField(mapRule, "op");
                 String value = CommonUtils.getStringField(mapRule, "data");
                 //如果要插件条件,这里就不处理
-                if (field.startsWith(PLUG_FILTER_PREFIX)) {
-                    mapPlugFilter.put(field.substring(PLUG_FILTER_PREFIX.length()), value);
+                if (field.startsWith(Constants.FixColumnName.PLUG_FILTER_PREFIX)) {
+                    mapPlugFilter.put(field.substring(Constants.FixColumnName.PLUG_FILTER_PREFIX.length()), value);
                     continue;
                 }
                 if (convertToUnderLine) {

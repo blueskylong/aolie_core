@@ -1,4 +1,4 @@
-package com.ranranx.aolie.application.right;
+package com.ranranx.aolie.core.interceptor;
 
 import com.ranranx.aolie.application.menu.dto.MenuButtonDto;
 import com.ranranx.aolie.application.user.service.UserService;
@@ -10,10 +10,7 @@ import com.ranranx.aolie.core.common.SessionUtils;
 import com.ranranx.aolie.core.datameta.datamodel.TableInfo;
 import com.ranranx.aolie.core.exceptions.InvalidException;
 import com.ranranx.aolie.core.handler.HandleResult;
-import com.ranranx.aolie.core.handler.param.DeleteParam;
-import com.ranranx.aolie.core.handler.param.InsertParam;
-import com.ranranx.aolie.core.handler.param.UpdateParam;
-import com.ranranx.aolie.core.interceptor.IOperInterceptor;
+import com.ranranx.aolie.core.handler.param.OperParam;
 import com.ranranx.aolie.core.interfaces.ICacheRefTableChanged;
 import com.ranranx.aolie.core.runtime.LoginUser;
 import org.slf4j.Logger;
@@ -55,7 +52,7 @@ public class OperatorRightInterceptor implements IOperInterceptor, ICacheRefTabl
     private Map<String, Set<Long>> mapOperatorToBtn = null;
     /**
      * 表对就所有操作
-     * 当根据上一数据集无法判断是否有权限里,则使用此数据集辅助判断.这里的判断规则是,如果此数据表没有指定相关的操作按钮(删除,修改),而有保存按钮,
+     * 当根据上一数据集无法判断是否有权限时,则使用此数据集辅助判断.这里的判断规则是,如果此数据表没有指定相关的操作按钮(删除,修改),而有保存按钮,
      * 则默认用户有相关的操作权限.例:权限设置功能里没有删除按钮,有保存按钮,则允许用户删除数据,也没有增加按钮,也是允许用户增加操作的.
      * 保存分为几种,一种是保存一行和多行,处理相同,还有一种是保存级次,如果没有修改按钮,则只允许更新,而不可以删除和增加
      */
@@ -74,7 +71,7 @@ public class OperatorRightInterceptor implements IOperInterceptor, ICacheRefTabl
     }
 
     @Override
-    public HandleResult beforeOper(Object param, String handleType,
+    public HandleResult beforeOper(OperParam param, String handleType,
                                    Map<String, Object> globalParamData) throws InvalidException {
         //判断此用户有没有授予此权限
         LoginUser loginUser = SessionUtils.getLoginUser();
@@ -102,10 +99,11 @@ public class OperatorRightInterceptor implements IOperInterceptor, ICacheRefTabl
             //如果系统没有定义此表的此操作,则要检查是不是存在保存按钮,
             String tableKey = keys[0];
             if (!mapTableToOperator.containsKey(tableKey)) {
-                //如果没有定义任何操作的,是不不允许直接操作//TODO 这里可以做成一个开关参数
-                logger.error("未定义操作的表进行了操作,userId:" + loginUser.getUserId()
+                //如果没有定义任何操作的,允许直接操作//TODO 这里可以做成一个开关参数
+                logger.info("未定义操作的表进行了操作,userId:" + loginUser.getUserId()
                         + ",操作类型" + handleType + ",操作键:" + tableKey);
-                return HandleResult.failure("此表不可以操作");
+//                return HandleResult.failure("此表不可以操作");
+                return null;
             } else {
                 //如果此表定义了保存(多行保存)操作,并且此用户有此权限,则为合法操作
                 Set<Long> lstTableAllOperator = mapTableToOperator.get(tableKey);
@@ -181,23 +179,17 @@ public class OperatorRightInterceptor implements IOperInterceptor, ICacheRefTabl
      * @param handleType
      * @return
      */
-    private String[] getOperatorRightKey(Object param, String handleType) {
-        TableInfo tableInfo = null;
+    private String[] getOperatorRightKey(OperParam param, String handleType) {
+        TableInfo tableInfo = param.getTable();
         Integer operType = null;
         //更新分二个,所以特殊处理
         if (Constants.HandleType.TYPE_UPDATE.equalsIgnoreCase(handleType)) {
-            UpdateParam updateParam = (UpdateParam) param;
-            tableInfo = updateParam.getTable();
             //多行编辑已改成了单行编辑,所以这里只需要处理单行编辑
             operType = Constants.TableOperType.edit;
         } else if (Constants.HandleType.TYPE_INSERT.equalsIgnoreCase(handleType)) {
             //插入
-            InsertParam insertParam = (InsertParam) param;
-            tableInfo = insertParam.getTable();
             operType = Constants.TableOperType.add;
         } else {
-            DeleteParam deleteParam = (DeleteParam) param;
-            tableInfo = deleteParam.getTable();
             operType = Constants.TableOperType.delete;
         }
         return new String[]{SessionUtils.getLoginVersion() + "_" + tableInfo.getTableDto().getTableId(),

@@ -185,4 +185,37 @@ public class UserController {
         return result;
     }
 
+    /**
+     * 重置用户密码
+     *
+     * @param userId
+     * @return
+     */
+    @PutMapping("/resetUserPassword/{userId}")
+    public HandleResult resetUserPassword(@PathVariable Long userId) {
+        return service.resetUserPassword(userId);
+    }
+
+    /**
+     * 启用账号
+     *
+     * @param userId
+     * @return
+     */
+    @PutMapping("/enableUser/{userId}")
+    public HandleResult enableUser(@PathVariable Long userId) {
+        return service.enableUser(userId);
+    }
+
+    /**
+     * 禁用用户账号
+     *
+     * @param userId
+     * @return
+     */
+    @PutMapping("/disableUser/{userId}")
+    public HandleResult disableUser(@PathVariable Long userId) {
+        return service.disableUser(userId);
+    }
+
 }

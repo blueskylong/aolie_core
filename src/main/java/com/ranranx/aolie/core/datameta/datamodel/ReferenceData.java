@@ -1,12 +1,13 @@
 package com.ranranx.aolie.core.datameta.datamodel;
 
+import java.io.Serializable;
+
 /**
  * @author xxl
- *
- * @date 2020/9/4 15:21
  * @version V0.0.1
+ * @date 2020/9/4 15:21
  **/
-public class ReferenceData {
+public class ReferenceData implements Serializable {
     private String id;
     private String name;
     private String parentId;

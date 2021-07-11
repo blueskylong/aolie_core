@@ -4,9 +4,9 @@ import javax.persistence.Table;
 
 /**
  * @author xxl
- *  列信息
- * @date 2020/8/4 16:33
+ * 列信息
  * @version V0.0.1
+ * @date 2020/8/4 16:33
  **/
 @Table(name = "aolie_dm_column")
 public class ColumnDto extends SchemaBaseDto {
@@ -29,7 +29,6 @@ public class ColumnDto extends SchemaBaseDto {
     private Double minValue;
     private Short isKey;
     private String refFilter;
-
 
     public String getFieldName() {
         return fieldName;

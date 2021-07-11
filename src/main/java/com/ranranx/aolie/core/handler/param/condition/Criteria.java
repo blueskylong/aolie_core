@@ -30,6 +30,7 @@ import com.ranranx.aolie.core.handler.param.condition.express.*;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.SystemMetaObject;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +41,7 @@ import java.util.Map;
  * @version V0.0.1
  * @date 2020/8/14 15:38
  **/
-public class Criteria implements ICondition {
+public class Criteria implements ICondition, Serializable {
 
     protected List<ICondition> lstCondition = new ArrayList<>();
     //值是否不能为空

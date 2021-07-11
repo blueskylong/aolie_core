@@ -34,7 +34,6 @@ public class SchemaTableRefFilter implements IReferenceDataFilter {
     private PageService pageService;
 
     public SchemaTableRefFilter() {
-        System.out.println("err");
     }
 
 

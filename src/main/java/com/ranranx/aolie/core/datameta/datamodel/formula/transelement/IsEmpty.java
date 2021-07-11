@@ -33,7 +33,7 @@ public class IsEmpty extends AbstractTransElement {
 
     @Override
     public String transToCn(String curElement, TransCenter transcenter) {
-        System.out.println(this.getName() + "  matched!");
+
         String[] eles = curElement.trim().split(" " + this.elementCN + " ");
 
         if (eles.length != 1) {
@@ -44,7 +44,7 @@ public class IsEmpty extends AbstractTransElement {
 
     @Override
     public String transToInner(String curElement, Schema schema, TransCenter transcenter) {
-        System.out.println(this.getName() + "  matched!");
+
         String[] eles = curElement.trim().split(" " + this.elementCN + " ");
 
         if (eles.length != 1) {

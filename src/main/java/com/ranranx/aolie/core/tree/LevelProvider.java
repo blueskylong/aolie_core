@@ -10,14 +10,14 @@ import com.ranranx.aolie.core.exceptions.InvalidException;
  *
  */
 public class LevelProvider {
-    public static final String DEFAULT_RULE = "3|6|9|12|15|18|21";
+
 
     /**
      * @param args
      */
     public static void main(String[] args) {
         LevelProvider aProvider = new LevelProvider(SysCodeRule
-                .createClient(new int[]{2, 6, 7, 9}), "");
+                .create(new int[]{2, 6, 7, 9}), "");
         try {
             System.out.println(aProvider.getNextCode());
             System.out.println(aProvider.getNextCode());
@@ -52,28 +52,17 @@ public class LevelProvider {
     }
 
     public LevelProvider(String startCode) {
-        String rule = DEFAULT_RULE;
-        String[] levels = rule.split("[\\|]");
-        int[] iLevel = new int[levels.length];
-        for (int i = 0; i < levels.length; i++) {
-            iLevel[i] = Integer.parseInt(levels[i]);
-        }
         this.rule = SysCodeRule
-                .createClient(iLevel);
+                .createDefault();
         this.sCurrentCode = startCode;
     }
 
-    public LevelProvider(String rule, String startCode) {
+    public LevelProvider(int[] rule, String startCode) {
         if (CommonUtils.isEmpty(rule)) {
-            rule = DEFAULT_RULE;
+            this.rule = SysCodeRule.createDefault();
+        } else {
+            this.rule = SysCodeRule.create(rule);
         }
-        String[] levels = rule.split("|");
-        int[] iLevel = new int[levels.length];
-        for (int i = 0; i < levels.length; i++) {
-            iLevel[i] = Integer.parseInt(levels[i]);
-        }
-        this.rule = SysCodeRule
-                .createClient(iLevel);
         this.sCurrentCode = startCode;
 
     }

@@ -43,7 +43,8 @@ public class RightServiceImpl implements RightService {
         QueryParam param = new QueryParam();
         param.setTableDtos(Constants.DEFAULT_SYS_SCHEMA, SessionUtils.getLoginVersion(), Role.class);
         if (!CommonUtils.isEmpty(roleName)) {
-            param.appendCriteria().andInclude(param.getTable()[0].getTableDto().getTableName(), "role_name", roleName);
+            param.appendCriteria().andInclude(param.getTable().getTableDto()
+                    .getTableName(), "role_name", roleName);
             param.addOrder(new FieldOrder(Role.class, "role_name", false, 1));
         }
         param.setResultClass(Role.class);

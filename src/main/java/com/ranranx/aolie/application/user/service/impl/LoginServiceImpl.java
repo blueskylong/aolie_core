@@ -1,5 +1,7 @@
 package com.ranranx.aolie.application.user.service.impl;
 
+import com.ranranx.aolie.application.menu.dto.MenuButtonDto;
+import com.ranranx.aolie.application.menu.service.MenuService;
 import com.ranranx.aolie.application.right.RightNode;
 import com.ranranx.aolie.application.right.dto.Role;
 import com.ranranx.aolie.application.right.service.RightService;
@@ -9,22 +11,20 @@ import com.ranranx.aolie.application.user.service.UserService;
 import com.ranranx.aolie.core.common.CommonUtils;
 import com.ranranx.aolie.core.common.Constants;
 import com.ranranx.aolie.core.common.SessionUtils;
-import com.ranranx.aolie.core.exceptions.IllegalOperatorException;
 import com.ranranx.aolie.core.handler.HandleResult;
 import com.ranranx.aolie.core.handler.HandlerFactory;
 import com.ranranx.aolie.core.handler.param.QueryParam;
+import com.ranranx.aolie.core.interfaces.ICacheRefTableChanged;
 import com.ranranx.aolie.core.runtime.LoginUser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author xxl
@@ -34,7 +34,7 @@ import java.util.Set;
 //
 @Service
 //@ConditionalOnMissingBean(LoginService.class)
-public class LoginServiceImpl implements ILoginService {
+public class LoginServiceImpl implements ILoginService, ICacheRefTableChanged, CommandLineRunner {
     @Autowired
     private HandlerFactory factory;
 
@@ -42,6 +42,11 @@ public class LoginServiceImpl implements ILoginService {
     private UserService userService;
     @Autowired
     private RightService rightService;
+
+    @Autowired
+    private MenuService menuService;
+
+    private Map<String, String> mapBtnRights;
 
     @Override
     public UserDetails loadUserByUserNameAndVersion(String username, String version) throws UsernameNotFoundException {
@@ -68,12 +73,19 @@ public class LoginServiceImpl implements ILoginService {
         return data.get(0);
     }
 
+    /**
+     * 设置选择的角色
+     *
+     * @param roleId
+     */
+    @Override
     public void setSelectRole(Long roleId) {
         //检查当前用户是不是存在这个角色
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null) {
-            throw new IllegalOperatorException("当前用户没有登录");
+            return;
         }
+        SessionUtils.getLoginUser().setRoleId(roleId);
 
     }
 
@@ -89,8 +101,13 @@ public class LoginServiceImpl implements ILoginService {
             RightNode rightNodeRoot = SessionUtils.getMapRightStruct().get(user.getVersionCode());
             //查询所有权限相关信息,生成Map
             Map<Long, Set<Long>> mapRights = populateNodeStruct(rightNodeRoot, user, roleId);
+            //收集自定义权限
+            user.setCustomRights(findUserCustomRight(mapBtnRights,
+                    mapRights.get(Constants.DefaultRsIds.menuButton), user.getVersionCode()));
+
             user.setMapRights(mapRights);
-            if(roleId==null){
+            setSelectRole(roleId);
+            if (roleId == null) {
                 return null;
             }
             return rightService.findRoleById(roleId, user.getVersionCode());
@@ -99,6 +116,21 @@ public class LoginServiceImpl implements ILoginService {
         }
         return null;
 
+    }
+
+    /**
+     * 取得用户自定义权限
+     */
+
+    private Set<String> findUserCustomRight(Map<String, String> mapBtnRights, Set<Long> lstBtns, String version) {
+        Set<String> result = new HashSet<>();
+        if (lstBtns == null || lstBtns.isEmpty() || mapBtnRights == null || mapBtnRights.isEmpty()) {
+            return result;
+        }
+        lstBtns.forEach(btnId -> {
+            result.add(mapBtnRights.get(version + "_" + btnId));
+        });
+        return result;
     }
 
     /**
@@ -133,7 +165,8 @@ public class LoginServiceImpl implements ILoginService {
 
 
     /**
-     * 处理下级的权限传递
+     * 处理下级的权限传递;
+     * 此函数顺便查询出按钮自定义权限信息
      *
      * @param fromNode
      * @param toNode
@@ -160,6 +193,15 @@ public class LoginServiceImpl implements ILoginService {
     }
 
 
+    /**
+     * 查询TO节点的权限数据ID
+     *
+     * @param fromNode
+     * @param toNode
+     * @param lstFormIds
+     * @param user
+     * @return
+     */
     private Set<Long> findRight(RightNode fromNode, RightNode toNode, Set<Long> lstFormIds, LoginUser user) {
         //如果是根节点,则不再查询,因前面已统一查询用户的直接权限
         if (fromNode.getLstParent().isEmpty()) {
@@ -171,5 +213,18 @@ public class LoginServiceImpl implements ILoginService {
         }
     }
 
+    @Override
+    public List<String> getCareTables() {
+        return Arrays.asList(CommonUtils.getTableName(MenuButtonDto.class));
+    }
 
+    @Override
+    public void refresh(String tableName) {
+        this.mapBtnRights = menuService.findCustomPermission();
+    }
+
+    @Override
+    public void run(String... args) throws Exception {
+        this.refresh(null);
+    }
 }
