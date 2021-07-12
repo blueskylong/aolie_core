@@ -172,8 +172,8 @@ public class ValidatorInterceptor implements IOperInterceptor {
      */
     @Override
     public boolean isCanHandle(String type, Object objExtinfo) {
-        return type == Constants.HandleType.TYPE_UPDATE
-                || type == Constants.HandleType.TYPE_INSERT;
+        return Constants.HandleType.TYPE_UPDATE.equals(type)
+                || Constants.HandleType.TYPE_INSERT.equals(type);
     }
 
     @Override

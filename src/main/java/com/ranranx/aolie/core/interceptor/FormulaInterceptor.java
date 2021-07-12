@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Stack;
 
 /**
- * 公式计算, 因为会有跨表的公式,所以需要在保存后验证
+ * 公式计算, 因为会有跨表的公式,所以需要在保存后计算
  *
  * @author xxl
  * @version V0.0.1
@@ -179,8 +179,8 @@ public class FormulaInterceptor implements IOperInterceptor {
      */
     @Override
     public boolean isCanHandle(String type, Object objExtinfo) {
-        return type == Constants.HandleType.TYPE_UPDATE
-                || type == Constants.HandleType.TYPE_INSERT;
+        return Constants.HandleType.TYPE_UPDATE.equals(type)
+                || Constants.HandleType.TYPE_INSERT.equals(type);
     }
 
     @Override
