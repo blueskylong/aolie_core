@@ -15,6 +15,10 @@ import java.util.Map;
  **/
 public class UpdateParamDefinition {
     /**
+     * 需要设置的字段信息,如果启用此功能,则需要配合条件设置,如果没有指定条件,则不处理
+     */
+    private Map<String, Object> mapSetValues;
+    /**
      * 表信息
      */
     private String tableName;
@@ -52,6 +56,14 @@ public class UpdateParamDefinition {
     public UpdateParamDefinition setCriteria(Criteria criteria) {
         this.criteria = criteria;
         return this;
+    }
+
+    public Map<String, Object> getMapSetValues() {
+        return mapSetValues;
+    }
+
+    public void setMapSetValues(Map<String, Object> mapSetValues) {
+        this.mapSetValues = mapSetValues;
     }
 
     public List<Map<String, Object>> getLstRows() {

@@ -16,9 +16,8 @@ import java.util.Map;
 
 /**
  * @author xxl
- *
- * @date 2020/8/5 17:35
  * @version V0.0.1
+ * @date 2020/8/5 17:35
  **/
 public class Schema {
     public Schema() {
@@ -264,8 +263,11 @@ public class Schema {
      */
     @Transient
     public List<TableColumnRelation> getTablesRelation(Long... tableIds) {
-        if (tableIds == null || tableIds.length < 2) {
+        if (tableIds == null || tableIds.length < 1) {
             return null;
+        }
+        if (tableIds.length == 1) {
+            return getOneTableRelation(tableIds[0]);
         }
         TableColumnRelation relation;
         List<TableColumnRelation> lstResult = new ArrayList<>();
@@ -278,6 +280,28 @@ public class Schema {
             }
         }
         return lstResult;
+    }
+
+    /**
+     * 只查找一个表的相关联系
+     *
+     * @param tableId
+     * @return
+     */
+    @Transient
+    public List<TableColumnRelation> getOneTableRelation(Long tableId) {
+        List<TableColumnRelation> lstRelation = this.getLstRelation();
+        if (lstRelation == null || lstRelation.isEmpty()) {
+            return null;
+        }
+        List<TableColumnRelation> result = new ArrayList<>();
+        for (TableColumnRelation tableColumnRelation : lstRelation) {
+            if (tableColumnRelation.getTableTo().getTableDto().getTableId().equals(tableId)
+                    || tableColumnRelation.getTableFrom().getTableDto().getTableId().equals(tableId)) {
+                result.add(tableColumnRelation);
+            }
+        }
+        return result;
     }
 
     /**

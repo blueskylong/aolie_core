@@ -209,6 +209,23 @@ public abstract class OperParam<T> {
     }
 
     /**
+     * 是不是没有自定义的条件
+     *
+     * @return
+     */
+    public boolean isNoFilter() {
+        if (this.criterias == null || this.criterias.isEmpty()) {
+            return true;
+        }
+        for (Criteria criteria : this.criterias) {
+            if (!criteria.isEmpty()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * 增加过滤条件
      *
      * @param criteria

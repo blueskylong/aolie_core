@@ -160,7 +160,6 @@ public class Field {
         field.setTableName(tableName);
         return field;
     }
-
     public Field() {
     }
 

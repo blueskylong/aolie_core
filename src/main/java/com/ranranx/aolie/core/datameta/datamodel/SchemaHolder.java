@@ -499,12 +499,13 @@ public class SchemaHolder {
      * @return
      */
     public static List<TableColumnRelation> getTableRelations(String versionCode, Long... tableIds) {
-        if (tableIds == null || tableIds.length < 2) {
+        if (tableIds == null || tableIds.length < 1) {
             return null;
         }
         long schemaId = SchemaHolder.getTable(tableIds[0], versionCode).getTableDto().getSchemaId();
         return SchemaHolder.getInstance().getSchema(schemaId, versionCode).getTablesRelation(tableIds);
     }
+
 
     public static TableInfo findTableByTableName(String tableName, long schemaId, String version) {
 

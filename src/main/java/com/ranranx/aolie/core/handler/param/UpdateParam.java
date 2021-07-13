@@ -16,37 +16,33 @@ import java.util.*;
  **/
 public class UpdateParam extends OperParam<UpdateParam> {
 
-    /**
-     * 字段条件
-     */
-    private Map<String, Object> mapFilter;
 
+    /**
+     * 需要设置的字段信息,如果启用此功能,则需要配合条件设置,如果没有指定条件,则不处理
+     */
+    private Map<String, Object> mapSetValues;
     /**
      * 是否只更新有值的列
      */
     private boolean isSelective = false;
-
 
     /**
      * 更新的列信息
      */
     private List<Map<String, Object>> lstRows;
 
-
-    public Map<String, Object> getMapFilter() {
-        return mapFilter;
-    }
-
-    public void setMapFilter(Map<String, Object> mapFilter) {
-        this.mapFilter = mapFilter;
-    }
-
-
     public List<Map<String, Object>> getLstRows() {
         //这里做一下处理,不在表字段中的数据去除
         return lstRows;
     }
 
+    public Map<String, Object> getMapSetValues() {
+        return mapSetValues;
+    }
+
+    public void setMapSetValues(Map<String, Object> mapSetValues) {
+        this.mapSetValues = mapSetValues;
+    }
 
     public void setLstRows(List<Map<String, Object>> lstRows) {
         this.lstRows = lstRows;

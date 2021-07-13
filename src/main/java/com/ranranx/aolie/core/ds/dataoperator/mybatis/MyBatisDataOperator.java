@@ -183,16 +183,56 @@ public class MyBatisDataOperator implements IDataOperator {
 
     /**
      * 更新
+     * 更新分为三种形式,
+     * 1. sqlExp ,这个直接执行
+     * 2. mapSetValues 与 Criteria 配合,前者设置值,后者条件,且条件必须有
+     * 3. lstRows 根据KEY字段更新每一行.此不支持批量更新
      *
      * @param updateParamDefinition
      * @return
      */
     @Override
     public int update(UpdateParamDefinition updateParamDefinition) {
+        //第一种更新执行
         if (updateParamDefinition.getSqlExp() != null) {
             DynamicDataSource.setDataSource(dsKey);
             return mapper.update(updateParamDefinition.getSqlExp().getExecuteMap());
         }
+        //第二种批量更新
+        if (updateParamDefinition.getMapSetValues() != null && !updateParamDefinition.getMapSetValues().isEmpty()) {
+            return updateBatch(updateParamDefinition);
+        }
+        return updateByKeyField(updateParamDefinition);
+
+    }
+
+    /**
+     * 批量更新
+     *
+     * @param updateParamDefinition
+     * @return
+     */
+    private int updateBatch(UpdateParamDefinition updateParamDefinition) {
+        Criteria criteria = updateParamDefinition.getCriteria();
+        Map<String, Object> mapValue = new HashMap<>();
+        int index = 0;
+        String sqlWhere = criteria.getSqlWhere(mapValue, null, index++, false);
+        StringBuilder sbSql = new StringBuilder();
+        sbSql.append("update ").append(genSetSql(updateParamDefinition.getMapSetValues(),
+                mapValue, index, updateParamDefinition.isSelective(), new ArrayList<>()))
+                .append(" where ").append(sqlWhere);
+
+        mapValue.put(SQL_PARAM_NAME, sbSql.toString());
+        return mapper.update(mapValue);
+    }
+
+    /**
+     * 根据KEY字段 更新
+     *
+     * @param updateParamDefinition
+     * @return
+     */
+    private int updateByKeyField(UpdateParamDefinition updateParamDefinition) {
         //更新有二种情况,1是一行数据,如果带了ID字段则使用ID过滤 ,如果没有则需要指定复杂条件.
         if (updateParamDefinition.getLstRows() == null || updateParamDefinition.getLstRows().isEmpty()) {
             return -1;
@@ -208,6 +248,16 @@ public class MyBatisDataOperator implements IDataOperator {
     }
 
 
+    /**
+     * 根据ID字段去更新
+     *
+     * @param row
+     * @param criteria
+     * @param filterFields
+     * @param tableName
+     * @param isSelective
+     * @return
+     */
     private int updateRow(Map<String, Object> row, Criteria criteria,
                           String filterFields, String tableName, boolean isSelective) {
         //情况1 ,存在id值及字段,则增加ID条件

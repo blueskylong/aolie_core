@@ -3,20 +3,18 @@ package com.ranranx.aolie.core.interceptor;
 
 import com.ranranx.aolie.core.annotation.DbOperInterceptor;
 import com.ranranx.aolie.core.common.Constants;
+import com.ranranx.aolie.core.datameta.datamodel.TableInfo;
 import com.ranranx.aolie.core.ds.definition.Field;
 import com.ranranx.aolie.core.exceptions.InvalidException;
 import com.ranranx.aolie.core.handler.HandleResult;
 import com.ranranx.aolie.core.handler.HandlerFactory;
-import com.ranranx.aolie.core.handler.param.InsertParam;
-import com.ranranx.aolie.core.handler.param.OperParam;
-import com.ranranx.aolie.core.handler.param.QueryParam;
-import com.ranranx.aolie.core.handler.param.UpdateParam;
+import com.ranranx.aolie.core.handler.param.*;
+import com.ranranx.aolie.core.handler.param.condition.Criteria;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 本拦截器为辅助作用, 收集更新前ID, 供验证器使用
@@ -27,6 +25,7 @@ import java.util.Map;
  **/
 @DbOperInterceptor
 public class GetRowIdInterceptor implements IOperInterceptor {
+    private Logger logger = LoggerFactory.getLogger(GetRowIdInterceptor.class.getName());
     public static final String PARAM_IDS = "G_UPDATE_ID";
     public static final String PARAM_UPDATE_FIELDS = "G_UPDATE_FIELDS";
 
@@ -41,7 +40,8 @@ public class GetRowIdInterceptor implements IOperInterceptor {
     @Override
     public boolean isCanHandle(String type, Object objExtinfo) {
         return Constants.HandleType.TYPE_UPDATE.equals(type)
-                || Constants.HandleType.TYPE_INSERT.equals(type);
+                || Constants.HandleType.TYPE_INSERT.equals(type)
+                || Constants.HandleType.TYPE_DELETE.equals(type);
     }
 
     @Override
@@ -64,8 +64,53 @@ public class GetRowIdInterceptor implements IOperInterceptor {
             if (lstKey != null && !lstKey.isEmpty()) {
                 globalParamData.put(PARAM_IDS, lstKey);
             }
+        } else if (param instanceof DeleteParam) {
+            DeleteParam deleteParam = (DeleteParam) param;
+            //如果直接指定了ID,则
+            if (deleteParam.getIds() != null && deleteParam.getIds().isEmpty()) {
+                globalParamData.put(PARAM_IDS, deleteParam.getIds());
+            } else {
+                //如果是按照条件来删除的,则需要先查询
+                if (param.isNoFilter()) {
+                    //为了安全,没有条件的删除,不做处理,如果需要处理,则手动增加等于true的条件
+                    return null;
+                }
+                List<Criteria> lstCriteria = deleteParam.getCriterias();
+                List lstKey = findTableKeys(deleteParam.getTable(), lstCriteria);
+                globalParamData.put(PARAM_IDS, lstKey);
+            }
         }
         return null;
+    }
+
+    private List<Object> findTableKeys(TableInfo tableInfo, List<Criteria> lstFilter) {
+        QueryParam param = new QueryParam();
+        String field = tableInfo.getKeyField();
+        param.setFields(Arrays.asList(getKeyField(tableInfo)));
+        param.setTable(tableInfo);
+        param.setCriterias(lstFilter);
+        HandleResult result = handlerFactory.handleQuery(param);
+
+        if (result.isSuccess()) {
+            //收集主键
+            List<Object> lstObj = new ArrayList<>();
+            for (Map row : result.getLstData()) {
+                lstObj.add(row.get(field));
+            }
+            return lstObj;
+        } else {
+            logger.error("查询删除数据失败" + result.getErr());
+            return null;
+        }
+
+    }
+
+    private Field getKeyField(TableInfo tableInfo) {
+        String keyField = tableInfo.getKeyField();
+        Field field = new Field();
+        field.setTableName(tableInfo.getTableDto().getTableName());
+        field.setFieldName(keyField);
+        return field;
     }
 
     @Override

@@ -36,20 +36,30 @@ public class UpdateHandler<T extends UpdateParam> extends BaseHandler<T> {
 
     /**
      * 执行的地方
+     * 更新分为三种形式,
+     * 1. sqlExp ,这个直接执行
+     * 2. mapSetValues 与 Criteria 配合,前者设置值,后者条件,且条件必须有
+     * 3. lstRows 根据KEY字段更新每一行.此不支持批量更新
      *
      * @param param
      * @return
      */
     @Override
     protected HandleResult handle(UpdateParam param) {
+        //处理第一种更新情况
         if (param.getSqlExp() != null) {
-            return HandleResult.success(factory.getDefaultDataOperator().executeDirect(param.getSqlExp().getExecuteMap()));
+            //使用语句，暂时无法处理引起的连锁反应
+            return HandleResult.success(factory.getDefaultDataOperator()
+                    .executeDirect(param.getSqlExp().getExecuteMap()));
         }
+        //处理第二种更新情况
         HandleResult result = new HandleResult();
         List<Map<String, Object>> lstData = param.getLstRows();
-        if (lstData == null || lstData.isEmpty()) {
-            result.setErr("没有指定更新的数据");
-            return result;
+        if ((lstData == null || lstData.isEmpty())) {
+            if (param.getMapSetValues() == null || param.getMapSetValues().isEmpty()) {
+                result.setErr("没有指定更新的数据");
+                return result;
+            }
         }
         UpdateParamDefinition definition = new UpdateParamDefinition();
         BeanUtils.copyProperties(param, definition);
@@ -68,5 +78,6 @@ public class UpdateHandler<T extends UpdateParam> extends BaseHandler<T> {
         result.setChangeNum(count);
         return result;
     }
+
 
 }
