@@ -3,13 +3,14 @@ package com.ranranx.aolie.core.datameta.datamodel.formula.transelement;
 import com.ranranx.aolie.core.datameta.datamodel.Formula;
 import com.ranranx.aolie.core.datameta.datamodel.Schema;
 
+import java.util.List;
 import java.util.Map;
 
 /**
  * @author xxl
- *  翻译控制中心
- * @date 2020/8/13 20:10
+ * 翻译控制中心
  * @version V0.0.1
+ * @date 2020/8/13 20:10
  **/
 public interface TransCenter {
     /**
@@ -33,6 +34,7 @@ public interface TransCenter {
 
     /**
      * 翻译成值表达式,支持跨表取数
+     * 这里需要注意分组的计算，取数可以不是一行
      *
      * @param curElement
      * @param rowTableId  当前rowData的表ID
@@ -43,5 +45,5 @@ public interface TransCenter {
      * @return
      */
     String transToValue(String curElement, long rowTableId, Map<String, Object> rowData,
-                        Schema schema, TransCenter transcenter, Formula formula);
+                          Schema schema, TransCenter transcenter, Formula formula, Map<String, List<Object>> mapGroup);
 }

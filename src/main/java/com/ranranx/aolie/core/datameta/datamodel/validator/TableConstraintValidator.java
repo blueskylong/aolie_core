@@ -5,6 +5,7 @@ import com.ranranx.aolie.core.datameta.datamodel.*;
 import com.ranranx.aolie.core.datameta.datamodel.formula.FormulaParse;
 import com.ranranx.aolie.core.datameta.datamodel.formula.FormulaTools;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 //TODO 公式  ,多表约束 
@@ -27,14 +28,14 @@ public class TableConstraintValidator implements IValidator {
             //先计算条件是不是符合,再计算表达式是不是符合
             if (filter != null) {
                 String valueExp = this.formulaParse.transToValue(filter, tableInfo.getTableDto().getTableId(),
-                        row, null, this.formulaParse, null);
+                        row, null, this.formulaParse, null, new HashMap<>());
                 if (FormulaTools.calcExpresion(valueExp).equals(Boolean.FALSE)) {
                     continue;
                 }
             }
             //计算表达式
             String valueExp = this.formulaParse.transToValue(expression, tableInfo.getTableDto().getTableId(),
-                    row, null, this.formulaParse, null);
+                    row, null, this.formulaParse, null, new HashMap<>());
             if (FormulaTools.calcExpresion(valueExp).equals(Boolean.FALSE)) {
                 String errInfo = cons.getConstraintDto().getMemo();
                 if (CommonUtils.isEmpty(errInfo)) {

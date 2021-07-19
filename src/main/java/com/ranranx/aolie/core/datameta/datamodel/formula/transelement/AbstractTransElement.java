@@ -4,13 +4,14 @@ import com.ranranx.aolie.core.datameta.datamodel.DmConstants;
 import com.ranranx.aolie.core.datameta.datamodel.Formula;
 import com.ranranx.aolie.core.datameta.datamodel.Schema;
 
+import java.util.List;
 import java.util.Map;
 
 /**
  * @author xxl
- *  翻译元素通用基类
- * @date 2021/1/28 15:10
+ * 翻译元素通用基类
  * @version V0.0.1
+ * @date 2021/1/28 15:10
  **/
 public abstract class AbstractTransElement implements TransElement {
     protected String elementInner = "";
@@ -87,15 +88,15 @@ public abstract class AbstractTransElement implements TransElement {
      */
     @Override
     public String transToValue(String curElement, long rowTableId, Map<String, Object> rowData,
-                               Schema schema, TransCenter transcenter, Formula formula) {
+                               Schema schema, TransCenter transcenter, Formula formula, Map<String, List<Object>> mapGroup) {
         String[] eles = curElement.split(" " + this.elementInner + " ");
-
         if (eles.length != 2) {
             throw new Error(this.getName() + "条件不合法:需要二个元素进行比较");
         }
-        return transcenter.transToValue(eles[0], rowTableId, rowData, schema, transcenter, formula) + " "
-                + this.getValue(rowData) + " " +
-                transcenter.transToValue(eles[1], rowTableId, rowData, schema, transcenter, formula);
+        return
+                transcenter.transToValue(eles[0], rowTableId, rowData, schema, transcenter, formula, mapGroup) + " "
+                        + this.getValue(rowData) + " " +
+                        transcenter.transToValue(eles[1], rowTableId, rowData, schema, transcenter, formula, mapGroup);
     }
 
     @Override

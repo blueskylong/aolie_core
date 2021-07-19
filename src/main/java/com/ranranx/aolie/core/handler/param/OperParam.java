@@ -237,4 +237,26 @@ public abstract class OperParam<T> {
         criterias.add(criteria);
         return (T) this;
     }
+
+    /**
+     * 批量增加等于条件
+     *
+     * @param mapFilter
+     */
+    public void addMapEqualsFilter(String tableName, Map<String, Object> mapFilter, boolean isSelective) {
+        if (mapFilter == null || mapFilter.isEmpty()) {
+            return;
+        }
+        Criteria criteria = this.getCriteria();
+        mapFilter.forEach((key, value) -> {
+            if (CommonUtils.isEmpty(value)) {
+                if (isSelective) {
+                    return;
+                }
+                criteria.andIsNull(tableName, key);
+            } else {
+                criteria.andEqualTo(tableName, key, value);
+            }
+        });
+    }
 }

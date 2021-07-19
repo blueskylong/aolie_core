@@ -5,6 +5,7 @@ import com.ranranx.aolie.core.common.Constants;
 import com.ranranx.aolie.core.common.JQParameter;
 import com.ranranx.aolie.core.common.SessionUtils;
 import com.ranranx.aolie.core.datameta.datamodel.*;
+import com.ranranx.aolie.core.ds.definition.Field;
 import com.ranranx.aolie.core.exceptions.*;
 import com.ranranx.aolie.core.handler.HandleResult;
 import com.ranranx.aolie.core.handler.HandlerFactory;
@@ -417,6 +418,27 @@ public class DmDataService {
         }
         QueryParam param = queryParams.getDsQueryParam(dsId, versionCode);
         return handlerFactory.handleRequest(Constants.HandleType.TYPE_QUERY, param);
+    }
+
+    public HandleResult findTableFieldRows(Long tableId, Long fieldId, Map<String, Object> filter, String versionCode) {
+        TableInfo table = SchemaHolder.getTable(tableId, versionCode);
+        if (table == null) {
+            return HandleResult.failure("没有查询到表信息");
+        }
+        if (filter == null || filter.isEmpty()) {
+            return HandleResult.failure("没有提供查询条件");
+        }
+        QueryParam param = new QueryParam();
+        param.setTable(table);
+        if (fieldId != null && fieldId > 0) {
+            Column column = table.findColumn(fieldId);
+            Field field = new Field();
+            field.setFieldName(column.getColumnDto().getFieldName());
+            field.setTableName(table.getTableDto().getTableName());
+            param.setFields(Arrays.asList(field));
+        }
+        param.addMapEqualsFilter(table.getTableDto().getTableName(), filter, true);
+        return handlerFactory.handleQuery(param);
     }
 
 }

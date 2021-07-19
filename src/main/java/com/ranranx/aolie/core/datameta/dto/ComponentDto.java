@@ -100,6 +100,10 @@ public class ComponentDto extends SchemaBaseDto {
      * 如果树状显示,在树上的角色
      */
     private Integer treeRole;
+    /**
+     * 在列表中隐藏
+     */
+    private Integer hideInTable;
 
     public Long getComponentId() {
         return componentId;
@@ -300,5 +304,13 @@ public class ComponentDto extends SchemaBaseDto {
 
     public void setExtAttr(String extAttr) {
         this.extAttr = extAttr;
+    }
+
+    public Integer getHideInTable() {
+        return hideInTable;
+    }
+
+    public void setHideInTable(Integer hideInTable) {
+        this.hideInTable = hideInTable;
     }
 }

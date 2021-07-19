@@ -18,10 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 
 /**
  * 公式计算, 因为会有跨表的公式,所以需要在保存后计算
@@ -62,15 +59,25 @@ public class FormulaInterceptor implements IOperInterceptor {
                 (List<String>) globalParamData.get(GetRowIdInterceptor.PARAM_UPDATE_FIELDS));
 
         //取得变动的行数据,循环处理
-        List<Map<String, Object>> lstRow = findTableRows(tableDto.getTableId(),
-                ids, tableDto.getVersionCode());
+        List<Map<String, Object>> lstRow = null;
+        //如果是删除，则生成主键字段，
+        if (handleType.equals(Constants.HandleType.TYPE_DELETE)) {
+            lstRow = (List<Map<String, Object>>) globalParamData.get(GetRowIdInterceptor.PARAM_DELETE_ROWS);
+        } else {
+            lstRow = findTableRows(tableDto.getTableId(),
+                    ids, tableDto.getVersionCode());
+        }
+
+        //取得外部公式
+        Stack<Formula> lstOutFormula = findForeignTableFormulas(tableDto.getTableId(), tableDto.getVersionCode());
         //1.取得所有的关联此表的公式
-        if (lstFormula == null || lstFormula.isEmpty()) {
+        if ((lstFormula == null || lstFormula.isEmpty())
+                && (lstOutFormula == null || lstOutFormula.isEmpty())) {
             return null;
         }
         //2.计算公式
-        Long schemaId = lstFormula.get(0).getFormulaDto().getSchemaId();
-        String version = lstFormula.get(0).getFormulaDto().getVersionCode();
+        Long schemaId = tableDto.getSchemaId();
+        String version = tableDto.getVersionCode();
         FormulaCalculator formulaCalculator =
                 new FormulaCalculator(SchemaHolder.getInstance().getSchema(schemaId, version), handlerFactory);
 
@@ -78,7 +85,7 @@ public class FormulaInterceptor implements IOperInterceptor {
         Map<Long, List<Map<String, Object>>> changeValues = new HashMap<>();
         for (Map<String, Object> row : lstRow) {
             formulaCalculator.calcTableFormulas(lstFormula, tableDto.getTableId()
-                    , row, null, null, null,
+                    , row, null, null, lstOutFormula,
                     changeValues);
         }
         globalParamData.put(CHANGED_TABLE_ROWS, changeValues);
@@ -86,7 +93,7 @@ public class FormulaInterceptor implements IOperInterceptor {
     }
 
     /**
-     * 查询需要计算的公式
+     * 查询需要计算的本表内的公式
      *
      * @param tableId
      * @param version
@@ -99,6 +106,7 @@ public class FormulaInterceptor implements IOperInterceptor {
         }
         return findFieldNameFormulas(lstField, tableId, version);
     }
+
 
     /**
      * 查找指定字段的公式
@@ -157,7 +165,7 @@ public class FormulaInterceptor implements IOperInterceptor {
     }
 
     /**
-     * 按列查询表中的公式
+     * 按列查询表中被影响的公式
      *
      * @param tableId
      * @return
@@ -171,6 +179,37 @@ public class FormulaInterceptor implements IOperInterceptor {
     }
 
     /**
+     * 按列查询表外的公式
+     *
+     * @param tableId
+     * @return
+     */
+    private Stack<Formula> findForeignTableFormulas(long tableId, String version) {
+
+        TableInfo table = SchemaHolder.getTable(tableId, version);
+        Map<Long, List<Formula>> colRelationFormula =
+                SchemaHolder.getInstance().getSchema(table.getTableDto().getSchemaId(), version)
+                        .findColRelationFormula();
+        Stack<Formula> lstFormula = new Stack<>();
+        List<Formula> colFormulas;
+        for (Column column : table.getLstColumn()) {
+            colFormulas = colRelationFormula.get(column.getColumnDto().getColumnId());
+            if (colFormulas != null && !colFormulas.isEmpty()) {
+                for (Formula formula : colFormulas) {
+                    if (!lstFormula.contains(formula)) {
+                        if (table.findColumn(formula.getFormulaDto().getColumnId()) == null) {
+                            lstFormula.add(formula);
+                        }
+
+                    }
+                }
+            }
+        }
+        return lstFormula;
+    }
+
+
+    /**
      * 是否可以处理
      *
      * @param type
@@ -180,7 +219,8 @@ public class FormulaInterceptor implements IOperInterceptor {
     @Override
     public boolean isCanHandle(String type, Object objExtinfo) {
         return Constants.HandleType.TYPE_UPDATE.equals(type)
-                || Constants.HandleType.TYPE_INSERT.equals(type);
+                || Constants.HandleType.TYPE_INSERT.equals(type)
+                || Constants.HandleType.TYPE_DELETE.equals(type);
     }
 
     @Override

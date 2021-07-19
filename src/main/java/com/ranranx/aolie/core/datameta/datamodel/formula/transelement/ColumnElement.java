@@ -125,28 +125,23 @@ public class ColumnElement implements TransElement {
      */
     @Override
     public String transToValue(String curElement, long rowTableId, Map<String, Object> rowData,
-                               Schema schema, TransCenter transcenter, Formula formula) {
+                               Schema schema, TransCenter transcenter,
+                               Formula formula, Map<String, List<Object>> groupedData) {
 
-        /**
-         * 这里要注意,会有临时列,这里是查询不到的
-         * @param exp
-         */
-        String destFieldType = null;
+        String fieldType = null;
         if (formula != null) {
             //如果指定了公式,则数据的类型,应该由目标字段类型决定
             Column columnDest = SchemaHolder.getColumn(formula.getFormulaDto().getColumnId(), formula.getFormulaDto().getVersionCode());
-            destFieldType = columnDest.getColumnDto().getFieldType();
+
         }
         List<String> columnParams = FormulaTools.getColumnParams(curElement);
         if (columnParams == null || columnParams.isEmpty()) {
             return curElement;
         }
-        String fieldType = destFieldType;
         for (String param : columnParams) {
             Column column = SchemaHolder.getColumn(Long.parseLong(param), schema.getSchemaDto().getVersionCode());
-            if (destFieldType == null) {
-                fieldType = column.getColumnDto().getFieldType();
-            }
+            fieldType = column.getColumnDto().getFieldType();
+
             TableInfo tableInfo = SchemaHolder.getTable(column.getColumnDto().getTableId(),
                     column.getColumnDto().getVersionCode());
 
@@ -166,17 +161,41 @@ public class ColumnElement implements TransElement {
                 }
                 //取得关联的ID值
                 //查询数据
-                Object value = findForeignColValue(relation, column.isNumberColumn(), column,
+                List<Object> lstValue = findForeignColValue(relation, column.isNumberColumn(), column,
                         findRowRelationFieldValue(relation, rowTableId, rowData), relation.getDto().getVersionCode());
-                if (value == null) {
+                StringBuilder value = new StringBuilder();
+                //如果没有数据
+                if (lstValue == null || lstValue.size() == 1) {
                     if (isNumberFieldType(fieldType)) {
-                        value = 0;
+                        if (lstValue == null) {
+                            value.append("0");
+                        } else {
+                            value.append(lstValue.get(0));
+                        }
+
                     } else {
-                        value = "''";
+                        if (lstValue == null) {
+                            value.append("''");
+                        } else {
+                            //TODO 这里需要转义
+                            value.append("'").append(lstValue.get(0)).append("'");
+                        }
+
                     }
+                    //直接替换返回
+                    //此处类型写死，为了不让外围函数再加引号
+                    curElement = FormulaTools.replaceColumnValueStr(curElement, param,
+                            value.toString(), DmConstants.FieldType.INT);
+
+                } else {
+                    //如果是多数据,则要替换成特定参数,由分组函数处理
+                    String key = FormulaTools.getGroupParamName();
+                    groupedData.put(key, lstValue);
+                    curElement = FormulaTools.replaceColumnValueStr(curElement, param,
+                            key, fieldType);
+
                 }
-                curElement = FormulaTools.replaceColumnValueStr(curElement, param,
-                        value == null ? "" : value.toString(), fieldType);
+
             }
 
 
@@ -214,44 +233,60 @@ public class ColumnElement implements TransElement {
     /**
      * 查询外表列值
      *
-     * @param relation
+     * @param relation      表之间的关系
      * @param isNumberValue 是不是数字字段,指的是目标字段,不是查询字段
-     * @param queryColumn
-     * @param id
+     * @param queryColumn   需要查询的字段
+     * @param id            行ID
      * @param version
      * @return
      */
-    private Object findForeignColValue(TableColumnRelation relation,
-                                       boolean isNumberValue,
-                                       Column queryColumn,
-                                       Object id, String version) {
+    private List<Object> findForeignColValue(TableColumnRelation relation,
+                                             boolean isNumberValue,
+                                             Column queryColumn,
+                                             Object id, String version) {
         QueryParam queryParam = new QueryParam();
+        String fieldName = queryColumn.getColumnDto().getFieldName();
         TableInfo table = SchemaHolder.getTable(queryColumn.getColumnDto().getTableId(), version);
 //查询字段
         queryParam.setTable(table);
         Field field = new Field();
         field.setTableName(table.getTableDto().getTableName());
-        field.setFieldName(queryColumn.getColumnDto().getFieldName());
+        field.setFieldName(fieldName);
         //数字字段需要分组函数
         if (isNumberValue) {
             field.setGroupType(Constants.GroupType.SUM);
         }
         List<Field> lstField = new ArrayList<>();
         lstField.add(field);
+        //要过滤的字段
         Column columnFilter = null;
         if (relation.getTableFrom().getTableDto().getTableId().equals(table.getTableDto().getTableId())) {
             columnFilter = SchemaHolder.getColumn(relation.getDto().getFieldFrom(), version);
         } else {
             columnFilter = SchemaHolder.getColumn(relation.getDto().getFieldTo(), version);
         }
-        queryParam.appendCriteria().andEqualTo(null,columnFilter.getColumnDto().getFieldName(), id);
+        queryParam.appendCriteria().andEqualTo(null, columnFilter.getColumnDto().getFieldName(), id);
         HandleResult result = handlerFactory.handleQuery(queryParam);
         if (result.isSuccess()) {
             List<Map<String, Object>> lstData = result.getLstData();
             if (lstData == null || lstData.isEmpty()) {
                 return null;
             }
-            return lstData.get(0).get(queryColumn.getColumnDto().getFieldName());
+            List<Object> lstResult = new ArrayList<>(lstData.size());
+            //这里将数值的空变成0 ，字符的空变成"";
+            boolean isNumberField = queryColumn.isNumberColumn();
+            for (Map<String, Object> row : lstData) {
+                Object obj = row.get(fieldName);
+                if (obj == null) {
+                    if (isNumberField) {
+                        obj = 0;
+                    } else {
+                        obj = "";
+                    }
+                }
+                lstResult.add(obj);
+            }
+            return lstResult;
         } else {
             throw new UnknownException(result.getErr());
         }
@@ -271,13 +306,13 @@ public class ColumnElement implements TransElement {
         }
         //如果此字段为非数字字段,那么只支持 一对一关系和多对一关系,,
         //检查关系
-        if (!thisColumn.isNumberColumn() && !relation.getDto()
-                .getRelationType().equals(Constants.TableRelationType.TYPE_ONE_ONE)) {
-            return "非数字字段取数,必须存在一对一或多对一的表关联关系:"
-                    + schema.findTableById(rowTableId).getTableDto().getTitle()
-                    + foreignTableName + "  和  "
-                    + ",取数字段:" + thisColumn.getColumnDto().getTitle();
-        }
+//        if (!thisColumn.isNumberColumn() && !relation.getDto()
+//                .getRelationType().equals(Constants.TableRelationType.TYPE_ONE_ONE)) {
+//            return "非数字字段取数,必须存在一对一或多对一的表关联关系:"
+//                    + schema.findTableById(rowTableId).getTableDto().getTitle()
+//                    + foreignTableName + "  和  "
+//                    + ",取数字段:" + thisColumn.getColumnDto().getTitle();
+//        }
         return null;
     }
 

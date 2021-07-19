@@ -39,6 +39,7 @@ public class DmConstants {
         public static final int column = 800;//字段
         public static final int sysparam = 900;//系统参数
         public static final int constant = 1000;//常量,如"xxx"
+        public static final int group = 1100;//分组函数,如"sum() count()"
         public static final int error = 9999;//错误类型
     }
 

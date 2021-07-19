@@ -80,7 +80,7 @@ public class SysparamElement implements TransElement {
 
     @Override
     public String transToValue(String curElement, long tableId, Map<String, Object> rowData,
-                               Schema schema, TransCenter transcenter, Formula formula) {
+                               Schema schema, TransCenter transcenter, Formula formula, Map<String, List<Object>> mapGroup) {
         List<String> sysParams = FormulaTools.getSysParams(curElement);
         if (sysParams != null && sysParams.size() > 0) {
             for (String paramExp : sysParams) {

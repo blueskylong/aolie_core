@@ -4,6 +4,7 @@ import com.ranranx.aolie.core.datameta.datamodel.Formula;
 import com.ranranx.aolie.core.datameta.datamodel.Schema;
 import com.ranranx.aolie.core.datameta.datamodel.formula.transelement.TransCenter;
 import com.ranranx.aolie.core.datameta.datamodel.formula.transelement.TransElement;
+import com.ranranx.aolie.core.exceptions.InvalidConfigException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,9 +16,9 @@ import java.util.Map;
 
 /**
  * @author xxl
- *  公式或条件解析器(目前只做翻译, 和部分的方法检查) ,容器管理的实例不可使用,只是为了接收元素注入
- * @date 2020/8/13 20:10
+ * 公式或条件解析器(目前只做翻译, 和部分的方法检查) ,容器管理的实例不可使用,只是为了接收元素注入
  * @version V0.0.1
+ * @date 2020/8/13 20:10
  **/
 @Component
 public class FormulaParse implements TransCenter {
@@ -69,6 +70,7 @@ public class FormulaParse implements TransCenter {
 
     /**
      * 引构造函数,只为了接收容器的元素注入,不要手动调用
+     *
      * @param lstElement
      */
     @Autowired
@@ -151,15 +153,22 @@ public class FormulaParse implements TransCenter {
 
     @Override
     public String transToValue(String curElement, long rowTableId, Map<String, Object> rowData,
-                               Schema schema, TransCenter transcenter, Formula formula) {
+                               Schema schema, TransCenter transcenter, Formula formula, Map<String, List<Object>> mapGroup) {
         if (schema == null) {
             schema = this.schema;
         }
         for (TransElement transElement : this.getTranslator()) {
             if (transElement.isMatchInner(curElement)) {
-                return transElement.transToValue(curElement, rowTableId, rowData, schema, this, formula);
+                curElement = transElement.transToValue(curElement, rowTableId, rowData, schema, this, formula, mapGroup);
+
+                return curElement;
             }
         }
+        if (mapGroup != null && !mapGroup.isEmpty()) {
+            throw new InvalidConfigException("分组不含有分组汇总函数,取数却存在不唯一值");
+        }
+        //如果翻译后,还存在参数,则要报错
+
         return curElement;
     }
 

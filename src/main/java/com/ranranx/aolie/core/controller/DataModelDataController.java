@@ -99,4 +99,18 @@ public class DataModelDataController {
     public HandleResult findTableRows(@PathVariable Long dsId, JQParameter queryParams) {
         return dmDataService.findTableRows(dsId, queryParams);
     }
+
+    /**
+     * 查询表数据
+     *
+     * @param dsId
+     * @param fieldId
+     * @param filter
+     * @return
+     */
+    @RequestMapping("/findTableFieldRows/{dsId}/{fieldId}")
+    public HandleResult findTableFieldRows(@PathVariable Long dsId, @PathVariable Long fieldId,
+                                           @RequestBody Map<String, Object> filter) {
+        return dmDataService.findTableFieldRows(dsId, fieldId, filter, SessionUtils.getLoginVersion());
+    }
 }

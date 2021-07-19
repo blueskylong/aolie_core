@@ -481,4 +481,20 @@ public class CommonUtils {
             return null;
         }
     }
+
+    /**
+     * 转换成双精度数值
+     *
+     * @param obj
+     * @return
+     */
+    public static double toDouble(Object obj) {
+        if (obj == null) {
+            return 0;
+        }
+        if (obj instanceof Number) {
+            return ((Number) obj).doubleValue();
+        }
+        return Double.parseDouble(obj.toString());
+    }
 }

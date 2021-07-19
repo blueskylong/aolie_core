@@ -104,7 +104,7 @@ public class RelationManageOnDeleteInterceptor implements IOperInterceptor {
         //不可为空,做删除动作
         List<Object> lstTargetId = lstIds;
         if (!thisFieldIsKeyField(relation, thisTableId)) {
-            lstTargetId = findFieldValues(thisTable, targetTableColumn.getColumnDto().getColumnId(), lstIds);
+            lstTargetId = findFieldValues(thisTable, findThisTableField(relation, thisTableId), lstIds);
         }
         if (targetTableColumn.getColumnDto().getNullable() != null && targetTableColumn.getColumnDto().getNullable().equals(0)) {
             deleteRow(targetTable, targetTableColumn, lstTargetId);
@@ -174,11 +174,11 @@ public class RelationManageOnDeleteInterceptor implements IOperInterceptor {
     private boolean thisFieldIsKeyField(TableColumnRelation relation, Long thisTableId) {
         if (relation.getTableTo().getTableDto().getTableId().equals(thisTableId)) {
             Short isKey = relation.getTableTo().findColumn(relation.getDto().getFieldTo()).getColumnDto().getIsKey();
-            return isKey != null && isKey.equals(1);
+            return isKey != null && isKey.equals((short)1);
 
         } else {
             Short isKey = relation.getTableFrom().findColumn(relation.getDto().getFieldFrom()).getColumnDto().getIsKey();
-            return isKey != null && isKey.equals(1);
+            return isKey != null && isKey.equals((short)1);
         }
     }
 

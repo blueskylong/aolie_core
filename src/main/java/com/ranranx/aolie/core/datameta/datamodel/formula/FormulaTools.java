@@ -1,6 +1,7 @@
 package com.ranranx.aolie.core.datameta.datamodel.formula;
 
 import com.ranranx.aolie.core.common.CommonUtils;
+import com.ranranx.aolie.core.common.IdGenerator;
 import com.ranranx.aolie.core.datameta.datamodel.DmConstants;
 
 import javax.script.ScriptEngineManager;
@@ -11,9 +12,9 @@ import java.util.regex.Pattern;
 
 /**
  * @author xxl
- *  公式工具类
- * @date 2020/8/13 20:10
+ * 公式工具类
  * @version V0.0.1
+ * @date 2020/8/13 20:10
  **/
 public class FormulaTools {
 
@@ -24,6 +25,11 @@ public class FormulaTools {
     static Pattern paramReg_g = Pattern.compile("\\#\\{(.+?)\\}");
 
     /**
+     * 多数据参数名称前后标记
+     */
+    public static final String GROUP_PARAM_FIX = "####";
+
+    /**
      * 取得列参数,形如${1}
      *
      * @param str
@@ -32,7 +38,7 @@ public class FormulaTools {
         if (str == null) {
             return new ArrayList<>();
         }
-        return FormulaTools.getParam(str, FormulaTools.colReg_g);
+        return FormulaTools.getParam(str, FormulaTools.colReg_g, true);
     }
 
     /**
@@ -57,13 +63,15 @@ public class FormulaTools {
         return param.substring(2, param.length() - 1);
     }
 
-    public static List<String> getParam(String str, Pattern regEx) {
+    public static List<String> getParam(String str, Pattern regEx, boolean isColumn) {
         List<String> matchers = getMatchers(regEx, str);
         List<String> result = new ArrayList<>();
         if (matchers != null && !matchers.isEmpty()) {
             for (String item : matchers) {
-
-                String innerParam = getParamInnerStr(item);
+                String innerParam = item;
+                if (isColumn) {
+                    innerParam = getParamInnerStr(item);
+                }
                 if (result.indexOf(innerParam) == -1) {
                     result.add(innerParam);
                 }
@@ -71,6 +79,7 @@ public class FormulaTools {
         }
         return result;
     }
+
 
     public static List<String> getMatchers(Pattern pattern, String source) {
         Matcher matcher = pattern.matcher(source);
@@ -82,7 +91,7 @@ public class FormulaTools {
     }
 
     public static List<String> getSysParams(String str) {
-        return FormulaTools.getParam(str, FormulaTools.paramReg_g);
+        return FormulaTools.getParam(str, FormulaTools.paramReg_g, true);
     }
 
     /**
@@ -122,7 +131,15 @@ public class FormulaTools {
         } else {
             return str.replace("${" + toReplace + "}", "'" + fieldValue + "'");
         }
+    }
 
+    /**
+     * 取得多数据参数名
+     *
+     * @return
+     */
+    public static String getGroupParamName() {
+        return GROUP_PARAM_FIX + IdGenerator.getNextId(FormulaTools.class.getName()) + GROUP_PARAM_FIX;
     }
 
     /**

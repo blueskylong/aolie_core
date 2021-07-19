@@ -81,6 +81,7 @@ public class FormulaCalculator {
         if (changedValues == null) {
             changedValues = new HashMap<>();
         }
+        Map<String, List<Object>> mapGroup = new HashMap<>();
 
         //增加表变动记录,这里,目前还不能区分本表的记录有没有变化,因为如果前端计算结果是正确的,
         // 这里计算出的值,与查询出来的值,应该是一致的,所以这里只要参与计算的,都记录下来,以备完全检查约束
@@ -92,8 +93,10 @@ public class FormulaCalculator {
             Formula formula = lstFormula.pop();
             //1.1 计算过滤条件是不是满足
             if (formula.getFormulaDto().getFilter() != null) {
-                if (!this.calcExpresion(this.filterParser.transToValue(formula.getFormulaDto().getFilter(),
-                        tableId, row, this.schema, null, formula), true)
+                String exps = this.filterParser.transToValue(formula.getFormulaDto().getFilter(),
+                        tableId, row, this.schema, null, formula, mapGroup);
+
+                if (!this.calcExpresion(exps, true)
                         .equals(Boolean.FALSE)) {
                     continue;
                 }
@@ -109,7 +112,7 @@ public class FormulaCalculator {
                 mapHasCalcFormula.put(formula.getFormulaDto().getFormulaId(), new Integer(times++));
             }
             //计算此公式
-            this.calcOneFormula(row, formula, tableId, mapChangedField, lstFormula, lstForeignFormula);
+            this.calcOneFormula(row, formula, tableId, mapChangedField, lstFormula, lstForeignFormula, mapGroup);
         }
         //本表公式计算结束
         //更新变化到表中
@@ -133,7 +136,7 @@ public class FormulaCalculator {
         //收集受影响的外表数据,进入递归
         Stack<Formula> formulas;
         Long foreignTableId;
-        Map<String, Object> foreignRowData;
+        List<Map<String, Object>> foreignRowData;
         while (true) {
             //如果没有外部公式,则结束计算
             if (lstForeignFormula.isEmpty()) {
@@ -141,7 +144,7 @@ public class FormulaCalculator {
             }
             formulas = pickOneTableFormula(lstForeignFormula);
             foreignTableId = getFormulaTableId(formulas.get(0));
-            foreignRowData = findForeignRow(tableId, foreignTableId,
+            foreignRowData = findForeignRows(tableId, foreignTableId,
                     row, formulas.get(0).getFormulaDto().getVersionCode());
             if (foreignRowData == null) {
                 //如果此外表的数据还不存在,则不需要计算
@@ -151,8 +154,11 @@ public class FormulaCalculator {
             }
         }
         //进入递归
-        calcTableFormulas(formulas, foreignTableId, foreignRowData, mapHasCalcFormula,
-                mapChangedField, lstForeignFormula, changedValues);
+        for (Map<String, Object> mapForeignRow : foreignRowData) {
+            calcTableFormulas(formulas, foreignTableId, mapForeignRow, mapHasCalcFormula,
+                    mapChangedField, lstForeignFormula, changedValues);
+        }
+
     }
 
     private long getFormulaTableId(Formula formula) {
@@ -162,15 +168,18 @@ public class FormulaCalculator {
     }
 
     /**
-     * 依据二表关系,查询另一个表的一行数据,如果出现多行,则为错误
+     * 依据二表关系,查询另一个表的多（一）行数据,如果出现多行,则为错误
+     * 如果是分组的函数，则外表会出现多行数据的情况，如果不是分组，则最多一行数据
+     * 如果table1是主表，table2是 从表，则允许的公式形式为：
+     * 分级的情况  table1.f1+sum(table2.f1)+3
      *
      * @param tableIdFrom 当前表ID
      * @param tableIdTo   外键表ID
      * @param mapFromRow  本表行数据
      * @return 外表行数据
      */
-    private Map<String, Object> findForeignRow(Long tableIdFrom, long tableIdTo,
-                                               Map<String, Object> mapFromRow, String version) {
+    private List<Map<String, Object>> findForeignRows(Long tableIdFrom, long tableIdTo,
+                                                      Map<String, Object> mapFromRow, String version) {
         TableInfo table = SchemaHolder.getTable(tableIdFrom, version);
         Schema schema = SchemaHolder.getInstance().getSchema(table.getTableDto().getSchemaId(), version);
         TableColumnRelation tableRelation = schema.findTableRelation(tableIdFrom, tableIdTo);
@@ -187,16 +196,16 @@ public class FormulaCalculator {
             fieldFrom = tableRelation.getDto().getFieldTo();
         }
         //根据对应关系查询外表数据
-        List<Map<String, Object>> lstRow = queryForeignRows(SchemaHolder.getColumn(fieldFrom, version),
+        return doFindForeignRows(SchemaHolder.getColumn(fieldFrom, version),
                 SchemaHolder.getColumn(fieldTo, version), mapFromRow, version);
-        if (lstRow != null && lstRow.size() != 1) {
-            throw new InvalidConfigException("外表公式数据查询,多于一个或不存在:" +
-                    "" + table.getTableDto().getTitle()
-                    + "=>" + SchemaHolder.getTable(
-                    SchemaHolder.getColumn(fieldTo, version).getColumnDto().getTableId(), version)
-                    .getTableDto().getTitle());
-        }
-        return lstRow.get(0);
+//        if (lstRow == null) {
+//            throw new InvalidConfigException("外表公式数据查询,多于一个或不存在:" +
+//                    "" + table.getTableDto().getTitle()
+//                    + "=>" + SchemaHolder.getTable(
+//                    SchemaHolder.getColumn(fieldTo, version).getColumnDto().getTableId(), version)
+//                    .getTableDto().getTitle());
+//        }
+//        return lstRow;
     }
 
     /**
@@ -241,8 +250,8 @@ public class FormulaCalculator {
     /**
      * 计算一个公式
      *
-     * @param row               行数据
-     * @param formula           公式
+     * @param row               本表行数据
+     * @param formula           本表公式
      * @param tableId           本表ID
      * @param mapChangedField   本表变化字段
      * @param lstFormula        待计算堆,如果本次计算,涉及值的变化,则要将受影响的本表公式放入栈中
@@ -253,10 +262,14 @@ public class FormulaCalculator {
                                 Long tableId,
                                 Map<String, Object> mapChangedField,
                                 Stack<Formula> lstFormula,
-                                List<Formula> lstForeignFormula) {
+                                List<Formula> lstForeignFormula, Map<String, List<Object>> mapGroup) {
         //1.2 计算公式
         String formulaStr = formulaParser.transToValue(formula.getFormulaDto().getFormula(), tableId,
-                row, this.schema, null, formula);
+                row, this.schema, null, formula, mapGroup);
+        //检查翻译结果
+        if (mapGroup != null && !mapGroup.isEmpty()) {
+            throw new InvalidConfigException("分组不含有分组汇总函数,取数却存在不唯一值");
+        }
         Object value = this.calcExpresion(formulaStr, false);
         //比较一下此值有没有变化,如果变化了,则要将此变化进一步递归下去
         Column column = SchemaHolder.getColumn(formula.getFormulaDto().getColumnId(), formula.getFormulaDto().getVersionCode());
@@ -350,8 +363,8 @@ public class FormulaCalculator {
      *
      * @return
      */
-    private List<Map<String, Object>> queryForeignRows(Column colFrom, Column colTo,
-                                                       Map<String, Object> mapFrom, String version) {
+    private List<Map<String, Object>> doFindForeignRows(Column colFrom, Column colTo,
+                                                        Map<String, Object> mapFrom, String version) {
         QueryParam queryParam = new QueryParam();
         TableInfo table = SchemaHolder.getTable(colTo.getColumnDto().getTableId(), version);
         //查询字段

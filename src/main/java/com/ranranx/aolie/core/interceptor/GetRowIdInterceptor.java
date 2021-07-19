@@ -27,6 +27,7 @@ import java.util.*;
 public class GetRowIdInterceptor implements IOperInterceptor {
     private Logger logger = LoggerFactory.getLogger(GetRowIdInterceptor.class.getName());
     public static final String PARAM_IDS = "G_UPDATE_ID";
+    public static final String PARAM_DELETE_ROWS = "G_DELETE_ROWS";
     public static final String PARAM_UPDATE_FIELDS = "G_UPDATE_FIELDS";
 
     @Autowired
@@ -67,8 +68,13 @@ public class GetRowIdInterceptor implements IOperInterceptor {
         } else if (param instanceof DeleteParam) {
             DeleteParam deleteParam = (DeleteParam) param;
             //如果直接指定了ID,则
-            if (deleteParam.getIds() != null && deleteParam.getIds().isEmpty()) {
+            if (deleteParam.getIds() != null && !deleteParam.getIds().isEmpty()) {
                 globalParamData.put(PARAM_IDS, deleteParam.getIds());
+                Criteria criteria = new Criteria();
+                criteria.andIn(deleteParam.getTable().getTableDto().getTableName(),
+                        deleteParam.getTable().getKeyField(), deleteParam.getIds());
+                List<Map<String, Object>> tableRows = findTableRows(deleteParam.getTable(), Arrays.asList(criteria),true);
+                globalParamData.put(PARAM_DELETE_ROWS, tableRows);
             } else {
                 //如果是按照条件来删除的,则需要先查询
                 if (param.isNoFilter()) {
@@ -76,32 +82,45 @@ public class GetRowIdInterceptor implements IOperInterceptor {
                     return null;
                 }
                 List<Criteria> lstCriteria = deleteParam.getCriterias();
-                List lstKey = findTableKeys(deleteParam.getTable(), lstCriteria);
+
+                List<Map<String, Object>> tableRows = findTableRows(deleteParam.getTable(), lstCriteria,true);
+                List lstKey = findTableKeys(tableRows, deleteParam.getTable());
                 globalParamData.put(PARAM_IDS, lstKey);
+                globalParamData.put(PARAM_DELETE_ROWS, tableRows);
             }
         }
         return null;
     }
 
-    private List<Object> findTableKeys(TableInfo tableInfo, List<Criteria> lstFilter) {
+    private List<Map<String, Object>> findTableRows(TableInfo tableInfo, List<Criteria> lstFilter, boolean isFullFields) {
         QueryParam param = new QueryParam();
-        String field = tableInfo.getKeyField();
-        param.setFields(Arrays.asList(getKeyField(tableInfo)));
+        if (!isFullFields) {
+            param.setFields(Arrays.asList(getKeyField(tableInfo)));
+        }
+
         param.setTable(tableInfo);
         param.setCriterias(lstFilter);
         HandleResult result = handlerFactory.handleQuery(param);
-
         if (result.isSuccess()) {
             //收集主键
-            List<Object> lstObj = new ArrayList<>();
-            for (Map row : result.getLstData()) {
-                lstObj.add(row.get(field));
-            }
-            return lstObj;
+            return result.getLstData();
         } else {
             logger.error("查询删除数据失败" + result.getErr());
             return null;
         }
+    }
+
+    private List<Object> findTableKeys(List<Map<String, Object>> tableRows, TableInfo tableInfo) {
+        String field = tableInfo.getKeyField();
+        if (tableRows != null && !tableRows.isEmpty()) {
+            //收集主键
+            List<Object> lstObj = new ArrayList<>();
+            for (Map row : tableRows) {
+                lstObj.add(row.get(field));
+            }
+            return lstObj;
+        }
+        return null;
 
     }
 

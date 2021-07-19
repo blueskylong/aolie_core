@@ -15,6 +15,7 @@ import com.ranranx.aolie.core.handler.HandlerFactory;
 import com.ranranx.aolie.core.handler.param.OperParam;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -109,14 +110,14 @@ public class ConstraintInterceptor implements IOperInterceptor {
                 //先计算条件是不是符合,再计算表达式是不是符合
                 if (filter != null) {
                     String valueExp = formulaParse.transToValue(filter, tableId,
-                            row, null, formulaParse, null);
+                            row, null, formulaParse, null, new HashMap<>());
                     if (Boolean.FALSE.equals(FormulaTools.calcExpresion(valueExp))) {
                         continue;
                     }
                 }
                 //计算表达式
                 String valueExp = formulaParse.transToValue(expression, tableId,
-                        row, null, formulaParse, null);
+                        row, null, formulaParse, null, new HashMap<>());
                 if (Boolean.FALSE.equals(FormulaTools.calcExpresion(valueExp))) {
                     String errInfo = cons.getConstraintDto().getMemo();
                     if (CommonUtils.isEmpty(errInfo)) {

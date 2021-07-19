@@ -6,6 +6,7 @@ import com.ranranx.aolie.core.datameta.datamodel.DmConstants;
 import com.ranranx.aolie.core.datameta.datamodel.Formula;
 import com.ranranx.aolie.core.datameta.datamodel.Schema;
 
+import java.util.List;
 import java.util.Map;
 
 @FormulaElementTranslator
@@ -67,7 +68,7 @@ public class ConstParam implements TransElement {
 
     @Override
     public String transToValue(String curElement, long rowTableId, Map<String, Object> rowData,
-                               Schema schema, TransCenter transcenter, Formula formula) {
+                               Schema schema, TransCenter transcenter, Formula formula, Map<String, List<Object>> mapGroup) {
         return this.transToInner(curElement, schema, transcenter);
     }
 
