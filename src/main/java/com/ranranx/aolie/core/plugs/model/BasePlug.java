@@ -48,7 +48,7 @@ public abstract class BasePlug implements IPlus {
                 this.dto.setStatus(Constants.PlugStatus.INSTALLED);
             }
         }
-        dto.setNewVersion(getNewVersion());
+        this.dto.setNewVersion(getNewVersion());
 
         return this.dto;
     }
