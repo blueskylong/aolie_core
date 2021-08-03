@@ -85,6 +85,20 @@ public class HandleResult {
     }
 
     /**
+     * 创建默认的成功返回值
+     *
+     * @param result
+     * @return
+     */
+    public static HandleResult success(Object result) {
+        HandleResult handleResult = new HandleResult();
+        handleResult.setSuccess(true);
+        handleResult.setChangeNum(1);
+        handleResult.setData(result);
+        return handleResult;
+    }
+
+    /**
      * 创建失败结果
      *
      * @param err
@@ -146,6 +160,7 @@ public class HandleResult {
         }
         return ((List) this.data).get(0);
     }
+
 
 
 }

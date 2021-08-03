@@ -5,6 +5,7 @@ import com.ranranx.aolie.core.common.CommonUtils;
 import com.ranranx.aolie.core.common.SessionUtils;
 import com.ranranx.aolie.core.datameta.datamodel.SchemaHolder;
 import com.ranranx.aolie.core.datameta.datamodel.TableInfo;
+import com.ranranx.aolie.core.ds.definition.FieldOrder;
 import com.ranranx.aolie.core.handler.HandleResult;
 import com.ranranx.aolie.core.handler.HandlerFactory;
 import com.ranranx.aolie.core.handler.param.DeleteParam;
@@ -16,7 +17,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.OrderBy;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author xxl
@@ -25,8 +31,11 @@ import java.util.List;
  **/
 @Service("CommonBaseService")
 public class BaseDbService implements IBaseDbService {
+    protected static Map<String, List<FieldOrder>> mapOrders = new HashMap<>();
     @Autowired
     protected HandlerFactory factory;
+
+
     /**
      * 如果可以指定方案,则需要先指定方案,否则可能因为表的多重定义(一张表在多个方案中用到)不可以操作
      */
@@ -38,7 +47,7 @@ public class BaseDbService implements IBaseDbService {
         if (dto == null) {
             return 0;
         }
-        if (schemaId < 1) {
+        if (schemaId == null || schemaId < 1) {
             schemaId = this.schemaId;
         }
         InsertParam param = new InsertParam();
@@ -52,7 +61,7 @@ public class BaseDbService implements IBaseDbService {
         if (dto == null) {
             return 0;
         }
-        if (schemaId < 1) {
+        if (schemaId == null || schemaId < 1) {
             schemaId = this.schemaId;
         }
         DeleteParam param = new DeleteParam();
@@ -72,7 +81,7 @@ public class BaseDbService implements IBaseDbService {
         if (dto == null) {
             return 0;
         }
-        if (schemaId < 1) {
+        if (schemaId == null || schemaId < 1) {
             schemaId = this.schemaId;
         }
 
@@ -87,7 +96,7 @@ public class BaseDbService implements IBaseDbService {
         if (dto == null) {
             return null;
         }
-        if (schemaId < 1) {
+        if (schemaId == null || schemaId < 1) {
             schemaId = this.schemaId;
         }
         QueryParam param = new QueryParam();
@@ -106,12 +115,14 @@ public class BaseDbService implements IBaseDbService {
         if (dto == null) {
             return null;
         }
-        if (schemaId < 1) {
+        if (schemaId == null || schemaId < 1) {
             schemaId = this.schemaId;
         }
         QueryParam param = new QueryParam();
-
         param.setFilterObjectAndTableAndResultType(schemaId, getVersionCode(dto), dto);
+        //查询排序
+        param.setLstOrder(getFieldOrder(dto.getClass()));
+
         HandleResult lstResult = factory.handleQuery(param);
         if (lstResult.isSuccess()) {
             return (List<T>) lstResult.getData();
@@ -136,7 +147,7 @@ public class BaseDbService implements IBaseDbService {
         if (lstDto == null || lstDto.isEmpty()) {
             return 0;
         }
-        if (schemaId < 1) {
+        if (schemaId == null || schemaId < 1) {
             schemaId = this.schemaId;
         }
         UpdateParam param = UpdateParam.genUpdateByObjects(schemaId, getVersionCode(lstDto.get(0)), lstDto, isSelective);
@@ -145,5 +156,35 @@ public class BaseDbService implements IBaseDbService {
             return result.getChangeNum();
         }
         return 0;
+    }
+
+    public static List<FieldOrder> getFieldOrder(Class<?> clazz) {
+        String tableName = CommonUtils.getTableName(clazz);
+        if (CommonUtils.isEmpty(tableName)) {
+            return null;
+        }
+        if (mapOrders.get(tableName) != null) {
+            return mapOrders.get(tableName);
+        }
+        List<FieldOrder> result = new ArrayList<>();
+        mapOrders.put(tableName, result);
+        int index = 0;
+        Field[] fields = clazz.getDeclaredFields();
+        if (fields == null || fields.length == 0) {
+            return null;
+        }
+        for (Field field : fields) {
+            OrderBy orderBy = field.getAnnotation(OrderBy.class);
+            if (orderBy != null) {
+                FieldOrder order = new FieldOrder();
+                order.setTableName(tableName);
+                order.setField(CommonUtils.convertToUnderline(field.getName()));
+                order.setOrder(index++);
+                String value = orderBy.value();
+                order.setAsc(CommonUtils.isEmpty(value) || "ASC".equalsIgnoreCase(value));
+                result.add(order);
+            }
+        }
+        return result;
     }
 }
