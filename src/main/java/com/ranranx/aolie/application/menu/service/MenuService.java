@@ -13,6 +13,7 @@ import com.ranranx.aolie.core.exceptions.NotExistException;
 import com.ranranx.aolie.core.handler.HandleResult;
 import com.ranranx.aolie.core.handler.HandlerFactory;
 import com.ranranx.aolie.core.handler.param.QueryParam;
+import com.ranranx.aolie.core.handler.param.condition.Criteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -75,8 +76,11 @@ public class MenuService {
      */
     public List<MenuDto> findUserMenu() {
         QueryParam definition = new QueryParam();
-        definition.setTableDtos(Constants.DEFAULT_SYS_SCHEMA, SessionUtils.getLoginVersion(), MenuDto.class);
-        definition.setResultClass(MenuDto.class);
+        MenuDto dto = new MenuDto();
+        dto.setEnabled((short) 1);
+        definition.setFilterObjectAndTableAndResultType(Constants.DEFAULT_SYS_SCHEMA, SessionUtils.getLoginVersion(), dto);
+        definition.getCriteria().and(new Criteria().orEqualTo(null, "hide_menubar", 0).orIsNull(null, "hide_menubar"));
+
         return (List<MenuDto>) handlerFactory.handleQuery(definition).getData();
     }
 

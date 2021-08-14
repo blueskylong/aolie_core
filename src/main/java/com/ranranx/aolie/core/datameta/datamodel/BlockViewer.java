@@ -10,6 +10,7 @@ import com.ranranx.aolie.core.ds.definition.Field;
 import com.ranranx.aolie.core.ds.definition.FieldOrder;
 
 import java.beans.Transient;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +19,7 @@ import java.util.List;
  * @version V0.0.1
  * @date 2020/8/5 17:35
  **/
-public class BlockViewer {
+public class BlockViewer  implements Serializable {
     private BlockViewDto blockViewDto;
     /**
      * 字段显示信息列表

@@ -24,6 +24,7 @@ public class MenuDto extends BaseDto implements java.io.Serializable {
     private Integer defaultState;
     private String funcName;
     private String memo;
+    private Short hideMenubar;
 
     public void setMenuId(Long menuId) {
         this.menuId = menuId;
@@ -103,5 +104,13 @@ public class MenuDto extends BaseDto implements java.io.Serializable {
 
     public void setMemo(String memo) {
         this.memo = memo;
+    }
+
+    public Short getHideMenubar() {
+        return hideMenubar;
+    }
+
+    public void setHideMenubar(Short hideMenubar) {
+        this.hideMenubar = hideMenubar;
     }
 }

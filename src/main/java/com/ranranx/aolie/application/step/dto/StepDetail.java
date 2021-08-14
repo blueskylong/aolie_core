@@ -24,6 +24,7 @@ public class StepDetail extends BaseDto implements java.io.Serializable {
     private String customStep;
 
     private String params;
+    private Long menuId;
 
     public void setStepId(Long stepId) {
         this.stepId = stepId;
@@ -89,4 +90,11 @@ public class StepDetail extends BaseDto implements java.io.Serializable {
         return this.params;
     }
 
+    public Long getMenuId() {
+        return menuId;
+    }
+
+    public void setMenuId(Long menuId) {
+        this.menuId = menuId;
+    }
 }

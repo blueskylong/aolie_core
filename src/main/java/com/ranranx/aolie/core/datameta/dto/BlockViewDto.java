@@ -43,6 +43,8 @@ public class BlockViewDto extends SchemaBaseDto {
 
     private Integer layoutType;
 
+    private Long fixId;
+
     public Long getBlockViewId() {
         return blockViewId;
     }
@@ -138,5 +140,13 @@ public class BlockViewDto extends SchemaBaseDto {
 
     public void setLayoutType(Integer layoutType) {
         this.layoutType = layoutType;
+    }
+
+    public Long getFixId() {
+        return fixId;
+    }
+
+    public void setFixId(Long fixId) {
+        this.fixId = fixId;
     }
 }

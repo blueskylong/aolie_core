@@ -2,13 +2,15 @@ package com.ranranx.aolie.core.datameta.datamodel;
 
 import com.ranranx.aolie.core.datameta.dto.ComponentDto;
 
+import java.io.Serializable;
+
 /**
  * @author xxl
  *  字段显示信息
  * @date 2020/8/5 17:34
  * @version V0.0.1
  **/
-public class Component {
+public class Component implements Serializable {
     public Component() {
     }
 

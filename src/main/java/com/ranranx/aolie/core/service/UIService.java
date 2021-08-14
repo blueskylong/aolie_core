@@ -11,6 +11,7 @@ import com.ranranx.aolie.core.datameta.dto.TableDto;
 import com.ranranx.aolie.core.ds.dataoperator.DataOperatorFactory;
 import com.ranranx.aolie.core.ds.definition.*;
 import com.ranranx.aolie.core.exceptions.NotExistException;
+import com.ranranx.aolie.core.fixrow.service.FixRowService;
 import com.ranranx.aolie.core.tree.LevelProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -34,6 +35,9 @@ public class UIService {
     private static final String KEY_VIEWER_REMOVE = "'VIEWER_'+#p0.blockViewDto.blockViewId+'_'+#p0.blockViewDto.versionCode";
     @Autowired
     private DataOperatorFactory factory;
+
+    @Autowired
+    private FixRowService fixRowService;
 
 
     /**
@@ -109,7 +113,18 @@ public class UIService {
         if (viewerDto == null) {
             return null;
         }
-        return new BlockViewer(viewerDto, findViewerComponents(blockViewId, version));
+        //这里还要判断外挂情况，包含
+        List<Component> lstComponent = findViewerComponents(blockViewId, version);
+        if (lstComponent == null) {
+            lstComponent = new ArrayList<>();
+        }
+        if (viewerDto.getFixId() != null) {
+            BlockViewer viewer = fixRowService.findFixRowComponents(viewerDto.getFixId(), version);
+            if (viewer != null) {
+                lstComponent.addAll(viewer.getLstComponent());
+            }
+        }
+        return new BlockViewer(viewerDto, lstComponent);
     }
 
     @Cacheable(value = GROUP_NAME,
