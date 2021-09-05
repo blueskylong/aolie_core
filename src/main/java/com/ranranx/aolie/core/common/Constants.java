@@ -354,6 +354,30 @@ public class Constants {
     }
 
     /**
+     * 字段展示类型
+     */
+    public static class ComponentType {
+        public static final String text = "1";//文本框
+        public static final String button = "5";//按钮
+        public static final String password = "10";//密码框
+        public static final String hidden = "15";//隐藏域
+        public static final String file = "20";//文件
+        public static final String checkbox = "22";//勾选框
+        public static final String radio = "26";//单选框
+        public static final String textarea = "34";//多行文本框
+        public static final String select = "39";//选择框
+        public static final String label = "45";//标签
+        public static final String panel = "50";//容器
+        public static final String time = "55";//时间
+        public static final String email = "60";//email
+        public static final String color = "65";//颜色选择
+        public static final String date = "70";//日期选择
+        public static final String number = "75";//整数
+        public static final String filter = "78";//条件编辑器
+        public static final String formula = "80";//公式编辑器
+    }
+
+    /**
      * 时间格式
      */
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");

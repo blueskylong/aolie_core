@@ -100,7 +100,7 @@ public class UpdateParam extends OperParam<UpdateParam> {
     }
 
     /**
-     * 更新指定DTO对象来生成更新语句
+     * 更新指定DTO对象来生成更新语句,此根据ID字段更新
      *
      * @param schemaId
      * @param version
@@ -121,6 +121,34 @@ public class UpdateParam extends OperParam<UpdateParam> {
         param.setLstRows(Arrays.asList(CommonUtils.toMap(obj, true)));
         return param;
     }
+
+    /**
+     * 更新指定DTO对象来生成更新语句,此根据ID字段更新
+     *
+     * @param schemaId
+     * @param version
+     * @param obj
+     * @param isSelective
+     * @return
+     */
+    public static UpdateParam genUpdateParamByFilter(long schemaId, String version, Object obj, boolean isSelective) {
+        String tableName = CommonUtils.getTableName(obj.getClass());
+        UpdateParam param = new UpdateParam();
+        param.setSelective(isSelective);
+        if (CommonUtils.isNotEmpty(tableName)) {
+            TableInfo tableInfo = SchemaHolder.findTableByTableName(tableName, schemaId, version);
+            if (tableInfo != null) {
+                param.setTable(tableInfo);
+            }
+        }
+        Map<String, Object> mapSetValues = CommonUtils.toMap(obj, true);
+        if (isSelective) {
+            mapSetValues = CommonUtils.removeEmptyValues(mapSetValues);
+        }
+        param.setMapSetValues(mapSetValues);
+        return param;
+    }
+
 
     /**
      * 更新指定DTO对象组来生成更新语句,只允许一张表,不可以混合

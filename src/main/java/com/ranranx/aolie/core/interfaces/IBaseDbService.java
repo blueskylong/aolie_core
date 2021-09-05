@@ -1,8 +1,10 @@
 package com.ranranx.aolie.core.interfaces;
 
 import com.ranranx.aolie.core.common.BaseDto;
+import com.ranranx.aolie.core.datameta.datamodel.TableInfo;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 数据基础操作
@@ -21,6 +23,26 @@ public interface IBaseDbService {
      * @return
      */
     <T extends BaseDto> int insert(T dto, Long schemaId);
+
+
+    /**
+     * 批量插入
+     *
+     * @param dto
+     * @param schemaId
+     * @param <T>
+     * @return
+     */
+    <T extends BaseDto> int insertBatch(List<T> dto, Long schemaId);
+
+    /**
+     * 批量插入
+     *
+     * @param lstData
+     * @param tableInfo
+     * @return
+     */
+    int insertBatch(List<Map<String, Object>> lstData, TableInfo tableInfo);
 
     /**
      * 根据条件删除，只限等于条件，条件不可以为空
@@ -57,6 +79,14 @@ public interface IBaseDbService {
      * @return
      */
     <T extends BaseDto> List<T> queryList(T dto, Long schemaId);
+
+    /**
+     * 查询多条信息
+     *
+     * @param dto
+     * @return
+     */
+    <T extends BaseDto> List<Map<String, Object>> queryMapList(T dto, Long schemaId);
 
     /**
      * 根据ID更新

@@ -250,6 +250,7 @@ public class SchemaHolder {
         setSchemaConstraint(schema);
         setSchemaFormula(schema);
         setSchemaRelation(schema);
+        setFixInfo(schema);
         mapSchema.put(CommonUtils.makeKey(dto.getSchemaId().toString(),
                 dto.getVersionCode()), schema);
     }
@@ -452,6 +453,10 @@ public class SchemaHolder {
         }
     }
 
+
+    private void setFixInfo(Schema schema){
+
+    }
     /**
      * 将引用分类组装
      *
@@ -564,6 +569,27 @@ public class SchemaHolder {
             return null;
         }
         return schema.findTableByName(tableName);
+    }
+
+    /**
+     * 根据DTO类查询表定义
+     *
+     * @param id
+     * @param version
+     * @return
+     */
+    public static TableInfo findTableById(Long id, String version) {
+        Iterator<Schema> it = mapSchema.values().iterator();
+        TableInfo tableInfo = null;
+        while (it.hasNext()) {
+            tableInfo = it.next().findTableById(id);
+            if (tableInfo == null || !tableInfo.getTableDto().getVersionCode().equals(version)) {
+                continue;
+            }
+            return tableInfo;
+
+        }
+        return null;
     }
 
 

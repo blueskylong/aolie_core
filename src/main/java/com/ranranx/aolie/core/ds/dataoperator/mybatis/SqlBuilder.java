@@ -2,6 +2,7 @@ package com.ranranx.aolie.core.ds.dataoperator.mybatis;
 
 import com.ranranx.aolie.core.common.CommonUtils;
 import com.ranranx.aolie.core.common.Constants;
+import com.ranranx.aolie.core.common.IdGenerator;
 import com.ranranx.aolie.core.common.SqlTools;
 import com.ranranx.aolie.core.ds.definition.*;
 import com.ranranx.aolie.core.handler.param.condition.Criteria;
@@ -46,11 +47,21 @@ public class SqlBuilder {
             String> mapTableAlias, List<String> tableNames,
                                      Map<String, Object> mapValues) {
         List<String> hasAddedTable = new ArrayList<>();
+        //外部已引用的表
+        List<String> outTableName = new ArrayList<>();
+        //将不再查询外部的表,只做关联
+        mapTableAlias.keySet().forEach(tableName -> {
+            if (tableNames.indexOf(tableName) == -1) {
+                hasAddedTable.add(tableName);
+                outTableName.add(tableName);
+            }
+        });
+
         StringBuilder sb = new StringBuilder();
         if (lstRelation != null && !lstRelation.isEmpty()) {
             for (TableRelation relation : lstRelation) {
                 sb.append(addTable(relation, mapTableAlias, lstRelation,
-                        relation == lstRelation.get(0), hasAddedTable, mapValues));
+                        relation == lstRelation.get(0), hasAddedTable, mapValues, outTableName));
             }
         }
         //如果还存在没有关联的表,则直接加到后面
@@ -104,7 +115,9 @@ public class SqlBuilder {
                                         Map<String, Object> mapValue) {
         StringBuilder sb = new StringBuilder();
         String aliasLeft = tableAlias.get(relation.getTableLeft());
-        String aliasRight = tableAlias.get(relation.getTableRight());
+
+        String aliasRight = genAlias();
+        tableAlias.put(relation.getTableRight(), aliasRight);
         sb.append(" " + relation.getJoinType() + " ").append(relation.getTableRight())
                 .append(SqlTools.roundSpace(aliasRight));
         hadAddedTables.add(relation.getTableRight());
@@ -141,10 +154,10 @@ public class SqlBuilder {
         }
         //增加剩下的表是左表,则关系要反转
         StringBuilder sb = new StringBuilder();
-        String aliasLeft = tableAlias.get(relation.getTableLeft());
-        String aliasRight = tableAlias.get(relation.getTableRight());
+        String aliasLeft = getTableAlign(tableAlias, relation.getTableLeft());
+        String aliasRight = getTableAlign(tableAlias, relation.getTableRight());
         sb.append(" " + relation.getReverseJoinType() + " ").append(relation.getTableLeft())
-                .append(SqlTools.roundSpace(tableAlias.get(aliasLeft)));
+                .append(SqlTools.roundSpace(aliasLeft));
         hadAddedTables.add(relation.getTableLeft());
         //添加关联
         if (relation.getFieldLeft() != null && relation.getFieldLeft().length > 0) {
@@ -164,6 +177,20 @@ public class SqlBuilder {
         return sb.toString();
     }
 
+
+    private static String getTableAlign(Map<String, String> mapAlign, String tableName) {
+        String alias = mapAlign.get(tableName);
+        if (CommonUtils.isEmpty(alias)) {
+            alias = genAlias();
+            mapAlign.put(tableName, alias);
+        }
+        return alias;
+    }
+
+    private static String genAlias() {
+        return "T_" + IdGenerator.getNextId("alias");
+    }
+
     /**
      * 添加主表
      *
@@ -175,7 +202,8 @@ public class SqlBuilder {
      * @return
      */
     private static String addTable(TableRelation relation, Map<String, String> tableAlias, List<TableRelation> lstRelation,
-                                   boolean isFirstTable, List<String> hadAddedTables, Map<String, Object> mapValues) {
+                                   boolean isFirstTable, List<String> hadAddedTables,
+                                   Map<String, Object> mapValues, List<String> outTableNames) {
         if (isAllDone(relation, hadAddedTables)) {
             return "";
         }
@@ -183,6 +211,46 @@ public class SqlBuilder {
         StringBuilder sb = new StringBuilder();
         //如果是第一个
         if (isFirstTable) {
+            //如果有一个已经生成过了,则不生join,只生成关联条件
+            if (outTableNames.indexOf(relation.getTableLeft()) != -1) {
+                //如果外部使用左表,则直接加右边
+                String rightAlias = getTableAlign(tableAlias, relation.getTableRight());
+                String leftAlias = getTableAlign(tableAlias, relation.getTableLeft());
+                sb.append(relation.getTableRight()).append(SqlTools.roundSpace(rightAlias)).append(" where ");
+                for (int i = 0; i < relation.getFieldLeft().length; i++) {
+                    sb.append(leftAlias).append(".").append(relation.getFieldLeft()[i]).append("=").append(rightAlias)
+                            .append(".").append(relation.getFieldRight()[i]).append(" and ");
+                }
+                sb.delete(sb.length() - 4, sb.length());
+
+                hadAddedTables.add(relation.getTableRight());
+                if (relation.hasWhere()) {
+                    String where = SqlBuilder.getWhere(tableAlias, relation.getLstCriteria(), mapValues, 100);
+                    if (CommonUtils.isNotEmpty(where.trim())) {
+                        sb.append(" and ").append(where);
+                    }
+                }
+                return sb.toString();
+            } else if (outTableNames.indexOf(relation.getTableRight()) != -1) {
+                String leftAlias = getTableAlign(tableAlias,relation.getTableLeft());
+                String rightAlias = getTableAlign(tableAlias,relation.getTableRight());
+                sb.append(relation.getTableLeft()).append(SqlTools.roundSpace(leftAlias)).append(" where ");
+                for (int i = 0; i < relation.getFieldLeft().length; i++) {
+                    sb.append(leftAlias).append(".").append(relation.getFieldLeft()[i]).append("=").append(rightAlias)
+                            .append(".").append(relation.getFieldRight()[i]).append(" and ");
+                }
+                sb.delete(sb.length() - 4, sb.length());
+                tableAlias.put(relation.getTableLeft(), leftAlias);
+                hadAddedTables.add(relation.getTableLeft());
+                if (relation.hasWhere()) {
+                    String where = SqlBuilder.getWhere(tableAlias, relation.getLstCriteria(), mapValues, 100);
+                    if (CommonUtils.isNotEmpty(where.trim())) {
+                        sb.append(" and ").append(where);
+                    }
+                }
+                return sb.toString();
+            }
+            tableAlias.put(relation.getTableLeft(), genAlias());
             sb.append(relation.getTableLeft()).append(SqlTools.roundSpace(tableAlias.get(relation.getTableLeft())));
             hadAddedTables.add(relation.getTableLeft());
             sb.append(addRightTable(relation, tableAlias, hadAddedTables, mapValues));
@@ -195,7 +263,7 @@ public class SqlBuilder {
                 //去了本身
                 relationTables.remove(relation);
                 for (TableRelation superRelation : relationTables) {
-                    sb.append(addTable(superRelation, tableAlias, lstRelation, false, hadAddedTables, mapValues));
+                    sb.append(addTable(superRelation, tableAlias, lstRelation, false, hadAddedTables, mapValues, outTableNames));
                 }
             }
             //再次判断,是不是表都已经存在
@@ -208,8 +276,8 @@ public class SqlBuilder {
                 sb.append(addRemainTable(relation, true, tableAlias, hadAddedTables, mapValues));
             } else if (hadAddedTables.indexOf(relation.getTableRight()) == -1 &&
                     hadAddedTables.indexOf(relation.getTableLeft()) != -1) {
-                //如果左表没有增加,则增加右表
-                sb.append(addRemainTable(relation, true, tableAlias, hadAddedTables, mapValues));
+                //如果右表没有增加,则增加右表
+                sb.append(addRemainTable(relation, false, tableAlias, hadAddedTables, mapValues));
             } else {
                 //如果二张表都没有增加
                 //先增加左表
@@ -374,7 +442,7 @@ public class SqlBuilder {
         StringBuilder sql = new StringBuilder();
         sql.append("select ").append(sField).append(" from ").append(sTable);
         if (CommonUtils.isNotEmpty(sWhere)) {
-            sql.append(" where ").append(sWhere);
+            sql.append(sTable.indexOf(" where ") == -1 ? " where " : " and ").append(sWhere);
         }
         sql.append(sGroup);
         sql.append(" ").append(sOrder);

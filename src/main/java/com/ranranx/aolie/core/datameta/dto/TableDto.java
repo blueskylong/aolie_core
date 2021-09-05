@@ -1,12 +1,14 @@
 package com.ranranx.aolie.core.datameta.dto;
 
+import org.springframework.core.annotation.Order;
+
 import javax.persistence.Table;
 
 /**
  * @author xxl
- *  表信息
- * @date 2020/8/4 16:33
+ * 表信息
  * @version V0.0.1
+ * @date 2020/8/4 16:33
  **/
 @Table(name = "AOLIE_DM_TABLE")
 public class TableDto extends SchemaBaseDto {
@@ -18,6 +20,7 @@ public class TableDto extends SchemaBaseDto {
     /**
      * 表英文名
      */
+    @Order
     private String tableName;
     /**
      * 表中文名
@@ -54,7 +57,10 @@ public class TableDto extends SchemaBaseDto {
      * 默认编辑视图ID
      */
     private Long blockViewId;
-
+    /**
+     * 固定行设置
+     */
+    private Short isFixrow;
 
 
     public String getTableName() {
@@ -136,6 +142,14 @@ public class TableDto extends SchemaBaseDto {
 
     public void setBlockViewId(Long blockViewId) {
         this.blockViewId = blockViewId;
+    }
+
+    public Short getIsFixrow() {
+        return isFixrow;
+    }
+
+    public void setIsFixrow(Short isFixrow) {
+        this.isFixrow = isFixrow;
     }
 }
 

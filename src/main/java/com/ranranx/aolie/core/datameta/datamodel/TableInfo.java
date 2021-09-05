@@ -342,22 +342,10 @@ public class TableInfo {
             return null;
         }
         List<FieldOrder> lstOrder = new ArrayList<>();
-        for (Column column : this.lstColumn) {
-            if (Constants.FixColumnName.XH.equals(column.getColumnDto().getFieldName())) {
-                FieldOrder order = new FieldOrder();
-                order.setAsc(true);
-                order.setField(Constants.FixColumnName.XH);
-                order.setTableName(this.getTableDto().getTableName());
-                lstOrder.add(order);
-                break;
-            }
-            if (Constants.FixColumnName.LVL_CODE.equals(column.getColumnDto().getFieldName())) {
-                FieldOrder order = new FieldOrder();
-                order.setAsc(true);
-                order.setField(Constants.FixColumnName.LVL_CODE);
-                order.setTableName(this.getTableDto().getTableName());
-                lstOrder.add(order);
-                break;
+        for (Column col : this.lstColumn) {
+            if (col.getColumnDto().getFieldName().equals(Constants.FixColumnName.LVL_CODE)
+                    || col.getColumnDto().getFieldName().equals(Constants.FixColumnName.XH)) {
+                lstOrder.add(new FieldOrder(this.getTableDto().getTableName(), col.getColumnDto().getFieldName(), true, 0));
             }
         }
         return lstOrder;
@@ -439,6 +427,21 @@ public class TableInfo {
             map.put(col.getColumnDto().getFieldName(), col);
         }
         return map;
+    }
+
+    @Transient
+    public FieldOrder getOrder() {
+        if (this.lstColumn == null || this.lstColumn.isEmpty()) {
+            return null;
+        }
+        for (Column col : this.lstColumn) {
+            if (col.getColumnDto().getFieldName().equals(Constants.FixColumnName.LVL_CODE)
+                    || col.getColumnDto().getFieldName().equals(Constants.FixColumnName.XH)) {
+                return new FieldOrder(this.getTableDto().getTableName(), col.getColumnDto().getFieldName(), true, 0);
+            }
+        }
+        return null;
+
     }
 
 }

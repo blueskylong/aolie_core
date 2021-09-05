@@ -15,13 +15,13 @@ public class DeleteParam extends OperParam<DeleteParam> {
     /**
      * 要删除的ID
      */
-    private List<Object> ids;
+    private List<?> ids;
 
-    public List<Object> getIds() {
+    public List<?> getIds() {
         return ids;
     }
 
-    public void setIds(List<Object> ids) {
+    public void setIds(List<?> ids) {
         this.ids = ids;
     }
 

@@ -113,4 +113,20 @@ public class DataModelDataController {
                                            @RequestBody Map<String, Object> filter) {
         return dmDataService.findTableFieldRows(dsId, fieldId, filter, SessionUtils.getLoginVersion());
     }
+
+    @PostMapping("/saveSlaveRows/{dsId}/{masterDsId}/{masterKey}")
+    public HandleResult saveSlaveRows(@RequestBody List<Map<String, Object>> rows,
+                                      @PathVariable Long dsId,
+                                      @PathVariable Long masterDsId,
+                                      @PathVariable Long masterKey) {
+        return dmDataService.saveSlaveRows(rows, dsId, masterDsId, masterKey);
+    }
+
+    @GetMapping("/findSlaveRows/{dsId}/{masterDsId}/{masterKey}")
+    public HandleResult findSlaveRows(@PathVariable Long dsId,
+                                      @PathVariable Long masterDsId,
+                                      @PathVariable Long masterKey) {
+        return dmDataService.findSlaveRows(dsId, masterDsId, masterKey, SessionUtils.getLoginVersion());
+    }
+
 }

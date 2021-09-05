@@ -21,6 +21,8 @@ public abstract class BaseCondition implements ICondition {
     static final String PLACEHOLDER_FIELD_NAME = "__FIELD__";
     static final String PLACEHOLDER_FIRST_VALUE = "__VALUE1__";
     static final String PLACEHOLDER_SECOND_VALUE = "__VALUE2__";
+
+
     /**
      * 表名
      */
@@ -43,6 +45,7 @@ public abstract class BaseCondition implements ICondition {
      */
     protected String groupType;
 
+
     public BaseCondition(String tableName, String fieldName, Object value1, Object value2) {
         this.tableName = tableName;
         this.fieldName = fieldName;
@@ -54,6 +57,15 @@ public abstract class BaseCondition implements ICondition {
         }
 
     }
+
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
+    }
+
+    public String getTableName() {
+        return tableName;
+    }
+
 
     public BaseCondition setIsOr(boolean isOr) {
         this.andOr = isOr ? OR : AND;
@@ -171,5 +183,29 @@ public abstract class BaseCondition implements ICondition {
         }
         return null;
 
+    }
+
+    /**
+     * 是不是指定字段的过滤条件
+     *
+     * @param condition
+     * @return
+     */
+    public boolean isHasFieldFilter(BaseCondition condition) {
+        return condition.andOr.equals(this.andOr) && this.fieldName.equals(condition.fieldName)
+                && this.getOperExpress().equals(condition.getOperExpress());
+    }
+
+
+    public String getFieldName() {
+        return fieldName;
+    }
+
+    public Object getValue1() {
+        return value1;
+    }
+
+    public Object getValue2() {
+        return value2;
     }
 }

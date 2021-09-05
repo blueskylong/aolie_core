@@ -12,6 +12,8 @@ import com.ranranx.aolie.core.ds.dataoperator.DataOperatorFactory;
 import com.ranranx.aolie.core.ds.definition.*;
 import com.ranranx.aolie.core.exceptions.InvalidParamException;
 import com.ranranx.aolie.core.exceptions.NotExistException;
+import com.ranranx.aolie.core.fixrow.dto.FixMain;
+import com.ranranx.aolie.core.fixrow.service.FixRowService;
 import com.ranranx.aolie.core.handler.param.condition.Criteria;
 import com.ranranx.aolie.core.interfaces.IReferenceDataFilter;
 import com.ranranx.aolie.core.tools.ApplicationService;
@@ -42,6 +44,7 @@ public class DataModelService {
 
     public static final String KEY_REFERENCE_DATA_PREFIX = "'REFERENCE_DATA_'";
     public static final String GROUP_NAME = "SCHEMA_VERSION";
+    public static final String GROUP_TABLEINFO = "TABLE_INFO";
     private static final String KEY_SCHEMA_DTO = "SchemaDto";
     private static final String KEY_TABLE_DTO = "'TableDto_'+#p0+'_'+#p1";
     private static final String KEY_COLUMN_DTO = "'ColumnDto_'+#p0+'_'+#p1";
@@ -59,6 +62,9 @@ public class DataModelService {
     private CacheManager cacheManager;
     @Autowired
     private UIService uiService;
+
+    @Autowired
+    private FixRowService fixRowService;
 
     @Caching(evict = {@CacheEvict(value = GROUP_NAME, key = KEY_TABLE_DTO),
             @CacheEvict(value = GROUP_NAME, key = KEY_COLUMN_DTO),
@@ -427,7 +433,31 @@ public class DataModelService {
         //更新新增加的ID
         updateIds(schema);
         saveData(schema);
+        updateFixRow(schema.getSchemaDto().getSchemaId(), schema.getSchemaDto().getVersionCode());
+
         return "";
+    }
+
+    private void updateFixRow(Long schemaId, String version) {
+        fixRowService.syncFixSet(schemaId, version);
+    }
+
+    /**
+     * 查询所有固定行设置
+     *
+     * @param version
+     * @return
+     */
+    public Map<Long, Long> findAllFixMainRelation(String version) {
+        List<FixMain> lstMain = fixRowService.findFixMain(version).getData();
+        Map<Long, Long> result = new HashMap<>();
+        if (lstMain == null || lstMain.isEmpty()) {
+            return result;
+        }
+        for (FixMain fixMain : lstMain) {
+            result.put(fixMain.getTableId(), fixMain.getFixId());
+        }
+        return result;
     }
 
     private boolean isManager() {

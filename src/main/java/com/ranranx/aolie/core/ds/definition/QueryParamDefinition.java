@@ -159,7 +159,24 @@ public class QueryParamDefinition {
 
 
     public List<Criteria> getLstCriteria() {
+        //这里需要整理一下,对没有表名的设置表名,只针对单表查询
+        if (this.tableNames != null && this.tableNames.size() == 1) {
+            return setTableNames(this.tableNames.get(0));
+        }
         return lstCriteria;
+    }
+
+    private List<Criteria> setTableNames(String tableName) {
+        if (this.lstCriteria == null || this.lstCriteria.isEmpty()) {
+            return this.lstCriteria;
+        }
+        for (Criteria criteria : this.lstCriteria) {
+            if (criteria.isEmpty()) {
+                continue;
+            }
+            criteria.setTableName(tableName);
+        }
+        return this.lstCriteria;
     }
 
     public QueryParamDefinition setLstCriteria(List<Criteria> lstCriteria) {

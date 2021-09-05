@@ -4,18 +4,17 @@ package com.ranranx.aolie.core.tree;
 import com.ranranx.aolie.core.common.CommonUtils;
 
 import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 
-public class TreeNode implements Node, Cloneable, Serializable {
+public class TreeNode<T> implements Node<T>, Cloneable, Serializable {
 
     /**
      * serialVersionUID
      */
     private static final long serialVersionUID = 1943970746276746542L;
 
-    Object attributes;
+    T attributes;
 
     Object value;
 
@@ -47,7 +46,7 @@ public class TreeNode implements Node, Cloneable, Serializable {
 
     private String text;
 
-    TreeNode(Object id, String text, Object sortValue, Object value, Object attributes) {
+    TreeNode(Object id, String text, Object sortValue, Object value, T attributes) {
         this.value = value;
         this.attributes = attributes;
         this.id = id;
@@ -55,7 +54,7 @@ public class TreeNode implements Node, Cloneable, Serializable {
         this.text = text;
     }
 
-    TreeNode(Map<String, Object> attributes) {
+    TreeNode(T attributes) {
         this(null, null, null, null, attributes);
     }
 
@@ -269,17 +268,17 @@ public class TreeNode implements Node, Cloneable, Serializable {
 
     @Override
     public String getAttribute(String name) {
-        return nonNullStr(getObjectValue(attributes, name));
+        return nonNullStr(CommonUtils.getObjectValue(attributes, name));
     }
 
     @Override
-    public Object getUserObject() {
+    public T getUserObject() {
         return attributes;
     }
 
     @Override
-    public List<Node> getLeafNodes() {
-        List<Node> lstNode = new ArrayList<>();
+    public List<Node<T>> getLeafNodes() {
+        List<Node<T>> lstNode = new ArrayList<>();
         if (this.getChildrenCount() == 0) {
             lstNode.add(this);
         } else {
@@ -313,7 +312,7 @@ public class TreeNode implements Node, Cloneable, Serializable {
     }
 
 
-    private void getSubLeafNode(Node node, List<Node> lstLeafNode) {
+    private void getSubLeafNode(Node node, List<Node<T>> lstLeafNode) {
         if (node.getChildrenCount() == 0) {
             lstLeafNode.add(node);
         } else {
@@ -333,31 +332,6 @@ public class TreeNode implements Node, Cloneable, Serializable {
         this.customObj = obj;
     }
 
-    /**
-     * 取得一对象的值
-     */
-    public static Object getObjectValue(Object obj, String method) {
-        if (obj == null) {
-            return null;
-        }
-        if (obj instanceof Map) {
-            return ((Map) obj).get(method);
-        }
-        try {
-            return obj.getClass().getMethod(method).invoke(obj);
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        } catch (SecurityException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 
     /**
      * 由一个对象返回非空的字符串

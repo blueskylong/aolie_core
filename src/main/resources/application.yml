@@ -15,3 +15,14 @@ pagehelper:
   offset-as-page-num: false
 aolie:
   uploadpath: "g:/affix_location"
+server:
+  port: 8082
+spring:
+  jackson:
+    # 全局设置@JsonFormat的格式pattern
+    date-format: yyyy-MM-dd
+    # 当地时区
+    locale: zh
+    # 设置全局时区
+    time-zone: GMT+8
+

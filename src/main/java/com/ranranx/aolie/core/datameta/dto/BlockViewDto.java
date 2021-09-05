@@ -43,7 +43,7 @@ public class BlockViewDto extends SchemaBaseDto {
 
     private Integer layoutType;
 
-    private Long fixId;
+    private Short appendFixrow;
 
     public Long getBlockViewId() {
         return blockViewId;
@@ -142,11 +142,11 @@ public class BlockViewDto extends SchemaBaseDto {
         this.layoutType = layoutType;
     }
 
-    public Long getFixId() {
-        return fixId;
+    public Short getAppendFixrow() {
+        return appendFixrow;
     }
 
-    public void setFixId(Long fixId) {
-        this.fixId = fixId;
+    public void setAppendFixrow(Short appendFixrow) {
+        this.appendFixrow = appendFixrow;
     }
 }

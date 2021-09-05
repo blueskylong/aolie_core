@@ -110,8 +110,8 @@ public class HandleResult {
         return result;
     }
 
-    public Object getData() {
-        return data;
+    public <T> T getData() {
+        return (T) data;
     }
 
     @Transient
@@ -160,7 +160,6 @@ public class HandleResult {
         }
         return ((List) this.data).get(0);
     }
-
 
 
 }

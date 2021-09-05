@@ -1,5 +1,6 @@
 package com.ranranx.aolie.core.datameta.dto;
 
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 
 /**
@@ -17,6 +18,7 @@ public class ColumnDto extends SchemaBaseDto {
     private Long columnId;
     private String fieldName;
     private Byte nullable;
+    @OrderBy
     private Short fieldIndex;
     private String title;
     private String defaultValue;
@@ -29,6 +31,9 @@ public class ColumnDto extends SchemaBaseDto {
     private Double minValue;
     private Short isKey;
     private String refFilter;
+    private Short contentFix;
+    private Short fixGroup;
+    private Short fixRollUp;
 
     public String getFieldName() {
         return fieldName;
@@ -158,5 +163,29 @@ public class ColumnDto extends SchemaBaseDto {
 
     public void setRefFilter(String refFilter) {
         this.refFilter = refFilter;
+    }
+
+    public Short getContentFix() {
+        return contentFix;
+    }
+
+    public void setContentFix(Short contentFix) {
+        this.contentFix = contentFix;
+    }
+
+    public Short getFixGroup() {
+        return fixGroup;
+    }
+
+    public void setFixGroup(Short fixGroup) {
+        this.fixGroup = fixGroup;
+    }
+
+    public Short getFixRollUp() {
+        return fixRollUp;
+    }
+
+    public void setFixRollUp(Short fixRollUp) {
+        this.fixRollUp = fixRollUp;
     }
 }

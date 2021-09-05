@@ -57,7 +57,7 @@ public class GetRowIdInterceptor implements IOperInterceptor {
                 lstKey = findKey(updateParam);
             }
             //将更新的字段入到全局参数里
-            List<String> updateFields = findUpdateFields(updateParam.getLstRows());
+            List<String> updateFields = findUpdateFields(updateParam.getLstRows(), ((UpdateParam) param).isSelective());
             if (updateFields != null) {
                 globalParamData.put(PARAM_UPDATE_FIELDS, updateFields);
             }
@@ -73,7 +73,7 @@ public class GetRowIdInterceptor implements IOperInterceptor {
                 Criteria criteria = new Criteria();
                 criteria.andIn(deleteParam.getTable().getTableDto().getTableName(),
                         deleteParam.getTable().getKeyField(), deleteParam.getIds());
-                List<Map<String, Object>> tableRows = findTableRows(deleteParam.getTable(), Arrays.asList(criteria),true);
+                List<Map<String, Object>> tableRows = findTableRows(deleteParam.getTable(), Arrays.asList(criteria), true);
                 globalParamData.put(PARAM_DELETE_ROWS, tableRows);
             } else {
                 //如果是按照条件来删除的,则需要先查询
@@ -83,7 +83,7 @@ public class GetRowIdInterceptor implements IOperInterceptor {
                 }
                 List<Criteria> lstCriteria = deleteParam.getCriterias();
 
-                List<Map<String, Object>> tableRows = findTableRows(deleteParam.getTable(), lstCriteria,true);
+                List<Map<String, Object>> tableRows = findTableRows(deleteParam.getTable(), lstCriteria, true);
                 List lstKey = findTableKeys(tableRows, deleteParam.getTable());
                 globalParamData.put(PARAM_IDS, lstKey);
                 globalParamData.put(PARAM_DELETE_ROWS, tableRows);
@@ -159,17 +159,20 @@ public class GetRowIdInterceptor implements IOperInterceptor {
      * @param rows
      * @return
      */
-    List<String> findUpdateFields(List<Map<String, Object>> rows) {
+    List<String> findUpdateFields(List<Map<String, Object>> rows, boolean isSelective) {
         if (rows == null || rows.isEmpty()) {
             return null;
         }
         List<String> result = new ArrayList<>();
         for (Map<String, Object> row : rows) {
-            Iterator<String> iterator = row.keySet().iterator();
+            Iterator<Map.Entry<String, Object>> iterator = row.entrySet().iterator();
             while (iterator.hasNext()) {
-                String fieldName = iterator.next();
-                if (result.indexOf(fieldName) == -1) {
-                    result.add(fieldName);
+                Map.Entry<String, Object> entry = iterator.next();
+                if (isSelective && entry.getValue() == null) {
+                    continue;
+                }
+                if (result.indexOf(entry.getKey()) == -1) {
+                    result.add(entry.getKey());
                 }
             }
         }

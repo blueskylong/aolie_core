@@ -6,7 +6,10 @@ import com.ranranx.aolie.core.common.JQParameter;
 import com.ranranx.aolie.core.common.SessionUtils;
 import com.ranranx.aolie.core.datameta.datamodel.*;
 import com.ranranx.aolie.core.ds.definition.Field;
+import com.ranranx.aolie.core.ds.definition.FieldOrder;
 import com.ranranx.aolie.core.exceptions.*;
+import com.ranranx.aolie.core.fixrow.dto.FixMain;
+import com.ranranx.aolie.core.fixrow.service.FixRowService;
 import com.ranranx.aolie.core.handler.HandleResult;
 import com.ranranx.aolie.core.handler.HandlerFactory;
 import com.ranranx.aolie.core.handler.param.DeleteParam;
@@ -14,6 +17,8 @@ import com.ranranx.aolie.core.handler.param.InsertParam;
 import com.ranranx.aolie.core.handler.param.QueryParam;
 import com.ranranx.aolie.core.handler.param.UpdateParam;
 import com.ranranx.aolie.core.handler.param.condition.Criteria;
+import com.ranranx.aolie.core.handler.param.condition.ICondition;
+import com.ranranx.aolie.core.handler.param.condition.express.Equals;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +38,11 @@ public class DmDataService {
     @Autowired
     private HandlerFactory handlerFactory;
 
+    @Autowired
+    private FixRowService rowService;
+
     /**
+     * Z
      * 查询分模块的分页数据
      *
      * @param blockId
@@ -44,8 +53,138 @@ public class DmDataService {
     public HandleResult findBlockDataForPage(Long blockId, JQParameter queryParams) throws Exception {
         QueryParam queryParam = queryParams.getQueryParam();
         queryParam.setViewId(blockId);
-        return handlerFactory.handleRequest(Constants.HandleType.TYPE_QUERY, queryParam);
+        if (isQueryFixData(queryParam)) {
+            //增加排序
+            queryParam.addOrder(new FieldOrder(queryParam.getTable().getTableDto().getTableName(),
+                    Constants.FixColumnName.LVL_CODE, true, 1));
+        }
+        HandleResult result = handlerFactory.handleRequest(Constants.HandleType.TYPE_QUERY, queryParam);
+        if (result.getLstData() == null || result == null || result.getLstData().isEmpty()) {
+            //如果没有查询到数据，则进一步检查是不是固定行表\
+            return initFixBlockData(queryParam);
+        }
+        makeControlInfoIfNeed(queryParam, result.getLstData());
+        return result;
     }
+
+    private HandleResult initFixBlockData(QueryParam queryParam) {
+        //检查是不是固定行表
+        if (queryParam.getTables().length != 1) {
+            //简化处理，只处理一张表的情况
+            return HandleResult.success(0);
+        }
+        if (!CommonUtils.isTrue(queryParam.getTables()[0].getTableDto().getIsFixrow())) {
+            //如果不是固定表，则不处理
+            return HandleResult.success(0);
+        }
+        //检查是不是有固定列条件
+        Criteria criteriaFix = genFixColFilter(queryParam.getTable().getLstColumn());
+        if (criteriaFix.isEmpty() || hasFixColFilter(queryParam)) {
+
+            //如果需要的条件都有,则要检查并添加行
+            Map<String, Object> mapValue = new HashMap<>();
+            if (!criteriaFix.isEmpty()) {
+                mapValue = findFieldFilter(findFixGroupCol(queryParam.getTable().getLstColumn()), queryParam.getCriterias());
+            }
+
+            if (rowService.checkNeedFixBlock(mapValue, queryParam.getTable())) {
+                return rowService.copyFixTableRow(mapValue, queryParam.getTable(), queryParam);
+
+            }
+            return HandleResult.success(0);
+        }
+        return HandleResult.success(0);
+
+    }
+
+    private Map<String, Object> findFieldFilter(List<Column> lstFixGroupCol, List<Criteria> lstCriteria) {
+        Map<String, Object> mapResult = new HashMap<>();
+        List<String> lstField = new ArrayList<>();
+        for (Column col : lstFixGroupCol) {
+            lstField.add(col.getColumnDto().getFieldName());
+        }
+        for (Criteria criteria : lstCriteria) {
+            if (criteria.isEmpty()) {
+                continue;
+            }
+            for (ICondition condition : criteria.getLstCondition()) {
+                if (!(condition instanceof Equals)) {
+                    continue;
+                }
+                String fieldName = ((Equals) condition).getFieldName();
+                if (lstField.indexOf(fieldName) != -1) {
+                    mapResult.put(fieldName, ((Equals) condition).getValue1());
+                }
+            }
+
+        }
+        if (lstField.size() != mapResult.size()) {
+            throw new InvalidParamException("未完全指定固定行表分组数据");
+        }
+        return mapResult;
+    }
+
+
+    /**
+     * 检查查询条件是否已满足固定列查询条件
+     *
+     * @param param
+     * @return
+     */
+    private boolean hasFixColFilter(QueryParam param) {
+
+        // 生成固定列条件
+        Criteria criteriaFixFilter = genFixColFilter(param.getTable().getLstColumn());
+        if (criteriaFixFilter.isEmpty()) {
+            //如果没有固定列设置，则查询返回真，库里只有一份数据
+            return true;
+        }
+        //检查是不是每个固定分组列,都有条件
+        List<Criteria> criterias = param.getCriterias();
+        if (criterias == null || criterias.isEmpty()) {
+            return false;
+        }
+        for (Criteria criteria : criterias) {
+            if (criteria.hasCriteria(criteriaFixFilter)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 检查并生成固定分组信息
+     *
+     * @param lstCol
+     * @return
+     */
+    private Criteria genFixColFilter(List<Column> lstCol) {
+        List<Column> fixGroupCol = findFixGroupCol(lstCol);
+        Criteria criteria = new Criteria();
+        for (Column col : fixGroupCol) {
+            criteria.andEqualTo(null, col.getColumnDto().getFieldName(), "xx");
+
+        }
+        return criteria;
+
+    }
+
+    /**
+     * 取得 所有分组字段
+     *
+     * @param lstCol
+     * @return
+     */
+    private List<Column> findFixGroupCol(List<Column> lstCol) {
+        List<Column> lstResult = new ArrayList<>();
+        for (Column col : lstCol) {
+            if (CommonUtils.isTrue(col.getColumnDto().getFixGroup())) {
+                lstResult.add(col);
+            }
+        }
+        return lstResult;
+    }
+
 
     /**
      * 查询不分页的模块数据
@@ -58,10 +197,35 @@ public class DmDataService {
     public List<Map<String, Object>> findBlockDataNoPage(Long blockId, JQParameter queryParams) throws Exception {
         QueryParam queryParam = queryParams.getQueryParam();
         queryParam.setViewId(blockId);
-        HandleResult handleResult = handlerFactory.handleRequest(Constants.HandleType.TYPE_QUERY, queryParam);
-        return (List<Map<String, Object>>) handleResult.getData();
+        if (isQueryFixData(queryParam)) {
+            //增加排序
+            queryParam.addOrder(new FieldOrder(queryParam.getTable().getTableDto().getTableName(),
+                    Constants.FixColumnName.LVL_CODE, true, 1));
+        }
+        HandleResult result = handlerFactory.handleRequest(Constants.HandleType.TYPE_QUERY, queryParam);
+        if (result == null || result.getLstData() == null || result.getLstData().isEmpty()) {
+            //如果没有查询到数据，则进一步检查是不是固定行表\
+            return initFixBlockData(queryParam).getLstData();
+        }
+        makeControlInfoIfNeed(queryParam, result.getLstData());
+        return result.getLstData();
     }
 
+    private void makeControlInfoIfNeed(QueryParam queryParam, List<Map<String, Object>> lstData) {
+        if (queryParam.getTable() != null && queryParam.getTables().length == 1
+                && CommonUtils.isTrue(queryParam.getTable().getTableDto().getIsFixrow())) {
+            FixMain main = rowService.findFixMainByTable(queryParam.getTable().getTableDto().getTableId(),
+                    queryParam.getTable().getTableDto().getVersionCode());
+            if (main != null) {
+                rowService.makeFullControlInfo(lstData, main.getFixId(), main.getVersionCode());
+            }
+        }
+    }
+
+    private boolean isQueryFixData(QueryParam queryParam) {
+        return queryParam.getTable() != null && queryParam.getTables().length == 1
+                && CommonUtils.isTrue(queryParam.getTable().getTableDto().getIsFixrow());
+    }
 
     /**
      * 保存从表行,这样前端可以不传入删除的行,通过关联关系删除相应的行
@@ -72,7 +236,9 @@ public class DmDataService {
      * @param masterKey
      * @return
      */
-    public HandleResult saveSlaveRows(List<Map<String, Object>> rows, Long dsId, Long masterDsId, Long masterKey) {
+    @Transactional(readOnly = false)
+    public HandleResult saveSlaveRows(List<Map<String, Object>> rows, Long dsId, Long masterDsId, Long
+            masterKey) {
         if (masterKey == null) {
             return HandleResult.failure("没有指定主表主键");
         }
@@ -100,6 +266,79 @@ public class DmDataService {
         return saveRows(rows, dsId);
     }
 
+    /**
+     * 保存指定范围内的数据,内涉及一张表,会生成增删更新的分别操作.
+     *
+     * @param rows
+     * @param dsId
+     * @param mapFilter
+     * @param version
+     * @return
+     */
+    public HandleResult saveRangeRows(List<Map<String, Object>> rows, Long dsId, Map<String, Object> mapFilter, String version) {
+        if (mapFilter == null || mapFilter.isEmpty()) {
+            return HandleResult.failure("没有增加范围条件");
+        }
+        TableInfo table = SchemaHolder.getTable(dsId, version);
+        List<Long> existIds = findRowIds(rows, dsId, table.getKeyField(), version);
+
+        // 查询从表中需要删除的主键
+        DeleteParam param = new DeleteParam();
+        param.setTable(table);
+        Criteria criteria = param.addMapEqualsFilter(table.getTableDto().getTableName(), mapFilter, true);
+        if (existIds != null && !existIds.isEmpty()) {
+            criteria.andNotIn(table.getTableDto().getTableName(), table.getKeyField(), existIds);
+        }
+        handlerFactory.handleDelete(param);
+        //设置外主健字段值
+        updateRangeField(rows, mapFilter);
+        //执行其它保存
+        return saveRows(rows, dsId);
+
+    }
+
+    private void updateRangeField(List<Map<String, Object>> lstRow, Map<String, Object> mapRange) {
+        if (lstRow == null || lstRow.isEmpty()) {
+            return;
+        }
+        for (Map<String, Object> map : lstRow) {
+            map.putAll(mapRange);
+        }
+    }
+
+    /**
+     * 保存从表行,这样前端可以不传入删除的行,通过关联关系删除相应的行
+     *
+     * @param rows
+     * @param clazz
+     * @param masterKey
+     * @return
+     */
+    @Transactional(readOnly = false)
+    public <T> HandleResult saveSlaveRowsByObject(List<T> rows, Class<T> clazz, Class classMaster, Long
+            masterKey, Long schemaId) {
+
+        if (masterKey == null) {
+            return HandleResult.failure("没有指定主表主键");
+        }
+        String version = SessionUtils.getLoginVersion();
+        String tableName = CommonUtils.getTableName(clazz);
+        if (CommonUtils.isEmpty(tableName)) {
+            throw new InvalidParamException("指定的类，没有表注解");
+        }
+        String tableM = CommonUtils.getTableName(classMaster);
+
+        TableInfo tableMaster = SchemaHolder.findTableByTableName(tableM, schemaId, version);
+
+        TableInfo tableDetail = SchemaHolder.findTableByDto(clazz, tableMaster.getTableDto().getSchemaId(), version);
+        List<Map<String, Object>> lstData = null;
+        if (rows != null && !rows.isEmpty()) {
+            lstData = CommonUtils.toMapAndConvertToUnderLine(rows);
+        }
+
+        return saveSlaveRows(lstData, tableDetail.getTableDto().getTableId(), tableMaster.getTableDto().getTableId(), masterKey);
+    }
+
     private void updateOutKeyField(List<Map<String, Object>> rows, String outKeyField, Long outKeyValue) {
         if (rows == null || rows.isEmpty()) {
             return;
@@ -115,6 +354,27 @@ public class DmDataService {
         } else {
             return tableRelation.getTableTo().findColumn(tableRelation.getDto().getFieldTo()).getColumnDto().getFieldName();
         }
+    }
+
+    public HandleResult findSlaveRows(Long dsId, Long masterDsId, Long masterKey, String versionCode) {
+        QueryParam param = new QueryParam();
+        TableInfo table = SchemaHolder.findTableById(dsId, versionCode);
+        param.setTable(table);
+        List<TableColumnRelation> lstRelation = SchemaHolder.getTableRelations(versionCode, dsId, masterDsId);
+        if (lstRelation == null || lstRelation.size() != 1) {
+            throw new InvalidConfigException("表关系不是一个");
+        }
+        Column column = null;
+        if (dsId.equals(lstRelation.get(0).getTableFrom().getTableDto().getTableId())) {
+            column = table.findColumn(lstRelation.get(0).getDto().getFieldFrom());
+        } else {
+            column = table.findColumn(lstRelation.get(0).getDto().getFieldTo());
+        }
+        param.appendCriteria().andEqualTo(table.getTableDto().getTableName(), column.getColumnDto().getFieldName(), masterKey);
+        param.setLstOrder(table.getDefaultOrder());
+        return handlerFactory.handleQuery(param);
+
+
     }
 
     /**
@@ -356,7 +616,8 @@ public class DmDataService {
      * @param versionCode
      * @return
      */
-    private List<Map<String, Object>> genRowDataForUpdate(Map<Long, String> mapIdToCode, BlockViewer viewerInfo, String versionCode) {
+    private List<Map<String, Object>> genRowDataForUpdate(Map<Long, String> mapIdToCode, BlockViewer
+            viewerInfo, String versionCode) {
 
 
         TreeInfo treeInfo = viewerInfo.getTreeInfo();
@@ -420,7 +681,8 @@ public class DmDataService {
         return handlerFactory.handleRequest(Constants.HandleType.TYPE_QUERY, param);
     }
 
-    public HandleResult findTableFieldRows(Long tableId, Long fieldId, Map<String, Object> filter, String versionCode) {
+    public HandleResult findTableFieldRows(Long tableId, Long fieldId, Map<String, Object> filter, String
+            versionCode) {
         TableInfo table = SchemaHolder.getTable(tableId, versionCode);
         if (table == null) {
             return HandleResult.failure("没有查询到表信息");

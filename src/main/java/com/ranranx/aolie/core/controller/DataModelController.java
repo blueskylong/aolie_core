@@ -105,6 +105,16 @@ public class DataModelController {
     }
 
     /**
+     * 取得表和固定行的对应关系
+     *
+     * @return
+     */
+    @GetMapping("/findAllFixMain")
+    public Map<Long, Long> findAllFixMain() {
+        return service.findAllFixMainRelation(SessionUtils.getLoginVersion());
+    }
+
+    /**
      * 增加方案
      *
      * @return
@@ -165,6 +175,5 @@ public class DataModelController {
         service.saveReference(lstDto);
         return HandleResult.success(1);
     }
-
 
 }

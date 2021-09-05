@@ -4,7 +4,6 @@ package com.ranranx.aolie.core.tree;
 
 import com.ranranx.aolie.core.common.CommonUtils;
 
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -29,15 +28,15 @@ public class TreeNodeHelper {
         return inst == null ? inst = new TreeNodeHelper() : inst;
     }
 
-    public Node generateByCode(List<?> ds, String idName, String codeField, String textName,
-                               SysCodeRule codeRule) throws Exception {
-        Map<String, Node> nodeCache = createNodesByCode(ds, idName, codeField, textName);
+    public <T> Node<T> generateByCode(List<T> ds, String idName, String codeField, String textName,
+                                      SysCodeRule codeRule) {
+        Map<String, Node<T>> nodeCache = createNodesByCode(ds, idName, codeField, textName);
         return parseTreeByCode(ds, nodeCache, codeField, codeRule);
     }
 
-    public Node generateById(List<?> ds, String idName, String textName,
-                             String parentIdName, String sortField) throws Exception {
-        Map<String, Node> nodeCache = createNodesById(ds, idName, textName, sortField);
+    public <T> Node<T> generateById(List<T> ds, String idName, String textName,
+                                    String parentIdName, String sortField) throws Exception {
+        Map<String, Node<T>> nodeCache = createNodesById(ds, idName, textName, sortField);
         return parseTreeById(ds, nodeCache, idName, parentIdName);
     }
 
@@ -68,61 +67,57 @@ public class TreeNodeHelper {
 //        return parseTreeByCode(ds, nodeCache, codeField, codeRule)[0];
 //    }
 
-    private Map<String, Node> createNodesByCode(List<?> ds, String idName, String codeField, String textName) {
-        Map<String, Node> nodeCache = new HashMap<String, Node>();
+    private <T> Map<String, Node<T>> createNodesByCode(List<T> ds, String idName, String codeField, String textName) {
+        Map<String, Node<T>> nodeCache = new HashMap<String, Node<T>>();
         int iCount = ds.size();
         for (int i = 0; i < iCount; i++) {
-            Object mapRow = ds.get(i);
-            if (!(mapRow instanceof Map)) {
-                mapRow = CommonUtils.toMap(mapRow, false);
-            }
-            String id = nonNullStr(getAStringField(mapRow, idName));
+            T nodeData = ds.get(i);
+
+            String id = nonNullStr(CommonUtils.getObjectValue(nodeData, idName));
 
             String sortKeyValue = id;
 
-            Object obj = getAStringField(mapRow, codeField);
+            Object obj = CommonUtils.getObjectValue(nodeData, codeField);
             if (!isNullStr(obj)) {
                 sortKeyValue = obj.toString();
             }
 
             String text = null;
             if (textName != null) {
-                Object obj1 = getAStringField(mapRow, textName);
+                Object obj1 = CommonUtils.getObjectValue(nodeData, textName);
                 if (!isNullStr(obj1)) {
                     text = obj1.toString();
                 }
             }
 
-            Node node = TreeFactory.createTreeNode(id, text, sortKeyValue, ds.get(i), mapRow);
+            Node<T> node = TreeFactory.createTreeNode(id, text, sortKeyValue, ds.get(i), nodeData);
             nodeCache.put(sortKeyValue, node);
         }
         return nodeCache;
     }
 
-    private Map<String, Node> createNodesById(List<?> ds, String idName, String textName, String sortKey) {
-        Map<String, Node> nodeCache = new HashMap<String, Node>();
+    private <T> Map<String, Node<T>> createNodesById(List<T> ds, String idName, String textName, String sortKey) {
+        Map<String, Node<T>> nodeCache = new HashMap<String, Node<T>>();
         int iCount = ds.size();
         for (int i = 0; i < iCount; i++) {
-            Object mapRow = ds.get(i);
-            if (!(mapRow instanceof Map)) {
-                mapRow = CommonUtils.toMap(mapRow, false);
-            }
-            String id = nonNullStr(getAStringField(mapRow, idName));
+            T nodeData = ds.get(i);
+
+            String id = nonNullStr(CommonUtils.getObjectValue(nodeData, idName));
             String sortKeyValue = id;
-            Object obj = getAStringField(mapRow, sortKey);
+            Object obj = CommonUtils.getObjectValue(nodeData, sortKey);
             if (!isNullStr(obj)) {
                 sortKeyValue = obj.toString();
             }
 
             String text = null;
             if (textName != null) {
-                Object obj1 = getAStringField(mapRow, textName);
+                Object obj1 = CommonUtils.getObjectValue(nodeData, textName);
                 if (!isNullStr(obj1)) {
                     text = obj1.toString();
                 }
             }
 
-            Node node = TreeFactory.createTreeNode(id, text, sortKeyValue, ds.get(i), mapRow);
+            Node<T> node = TreeFactory.createTreeNode(id, text, sortKeyValue, ds.get(i), nodeData);
             nodeCache.put(id, node);
         }
         return nodeCache;
@@ -135,11 +130,11 @@ public class TreeNodeHelper {
      *                  排序关键字字段名
      * @return 返回生成树的根节点
      */
-    protected Node parseTreeByCode(List<?> ds, Map<String, Node> nodeCache, String codeField,
-                                   SysCodeRule codeRule) throws Exception {
+    protected <T> Node<T> parseTreeByCode(List<T> ds, Map<String, Node<T>> nodeCache, String codeField,
+                                          SysCodeRule codeRule) {
         Node root = treeFactory.createTreeNode(null);
 
-        for (Iterator<Node> it = nodeCache.values().iterator(); it.hasNext(); ) {
+        for (Iterator<Node<T>> it = nodeCache.values().iterator(); it.hasNext(); ) {
             Node node = it.next();
             String id = node.getAttribute(codeField);
 
@@ -164,11 +159,11 @@ public class TreeNodeHelper {
      *                  排序关键字字段名
      * @return 返回生成树的根节点
      */
-    protected Node parseTreeById(List<?> ds, Map<String, Node> nodeCache, String idField,
-                                 String parentIdName) throws Exception {
+    protected <T> Node<T> parseTreeById(List<T> ds, Map<String, Node<T>> nodeCache, String idField,
+                                        String parentIdName) throws Exception {
         Node root = treeFactory.createTreeNode(null);
 
-        for (Iterator<Node> it = nodeCache.values().iterator(); it.hasNext(); ) {
+        for (Iterator<Node<T>> it = nodeCache.values().iterator(); it.hasNext(); ) {
             Node node = it.next();
             String id = node.getAttribute(idField);
 
@@ -188,7 +183,7 @@ public class TreeNodeHelper {
         return root;
     }
 
-    protected void addChildNode(Node parent, Node newChild) {
+    protected <T> void addChildNode(Node<T> parent, Node<T> newChild) {
         for (int i = 0; i < parent.getChildrenCount(); i++) {
             Node child = parent.getChildAt(i);
             String childSortVal = nonNullStr(child.getSortByValue());
@@ -201,7 +196,7 @@ public class TreeNodeHelper {
         parent.append(newChild);
     }
 
-    protected String getParentId(String id, SysCodeRule codeRule) throws Exception {
+    protected String getParentId(String id, SysCodeRule codeRule) {
         return codeRule.previous(id);
     }
 
@@ -230,41 +225,6 @@ public class TreeNodeHelper {
         return o.toString();
     }
 
-
-    /**
-     * 取得一Map中的一字段的字符值 XXL
-     *
-     * @param aData
-     * @param sField
-     * @return
-     */
-    public static String getAStringField(Object aData, String sField) {
-        if (aData == null) {
-            return null;
-        }
-        if (aData instanceof Map) {
-            return CommonUtils.getStringField((Map) aData, sField);
-        } else if (aData instanceof List) {
-            Map map = (Map) ((List) aData).get(0);
-            return getAStringField(map, sField);
-        }
-        try {
-            Method method = aData.getClass().getMethod(sField);
-            if (method != null) {
-                return nonNullStr(aData.getClass().getMethod(sField).invoke(aData));
-            } else {
-                method = aData.getClass().getMethod("get" + sField.substring(0, 1).toLowerCase() + sField.substring(1));
-                if (method != null) {
-                    return nonNullStr(aData.getClass().getMethod(sField).invoke(aData));
-                }
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-
-    }
 
     /**
      * 判断一个空字符串（null或者""）

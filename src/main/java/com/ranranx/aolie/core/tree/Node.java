@@ -2,7 +2,7 @@ package com.ranranx.aolie.core.tree;
 
 import java.util.List;
 
-public interface Node extends Cloneable {
+public interface Node<T> extends Cloneable {
     /**
      * 标识根结点的常量 结点类型：根、枝、叶
      */
@@ -29,7 +29,7 @@ public interface Node extends Cloneable {
      *
      * @return 父结点
      */
-    Node getParent();
+    Node<T> getParent();
 
     /**
      * 取得自定义值，可以保存任意对象
@@ -76,7 +76,7 @@ public interface Node extends Cloneable {
      *
      * @param child 子结点
      */
-    void append(Node child);
+    void append(Node<T> child);
 
     /**
      * 指定下标处插入一个子结点
@@ -84,7 +84,7 @@ public interface Node extends Cloneable {
      * @param child
      * @param i
      */
-    void insert(Node child, int i);
+    void insert(Node<T> child, int i);
 
     /**
      * Clone一个结点
@@ -129,19 +129,19 @@ public interface Node extends Cloneable {
      * @param child
      * @return
      */
-    int indexOf(Node child);
+    int indexOf(Node<T> child);
 
     /**
      * 将树的所有结点按照广度优先化为二维表形式，一维下标就是结点所处的层次（相对于子树的起始根结点）
      *
      * @return
      */
-    Node[][] toArray();
+    Node<T>[][] toArray();
 
     /**
      * 删除一个下级节点
      */
-    boolean deleteSubNode(Node node);
+    boolean deleteSubNode(Node<T> node);
 
     /**
      * 清空子节点
@@ -155,14 +155,14 @@ public interface Node extends Cloneable {
      *
      * @return
      */
-    Node[] getChildren();
+    Node<T>[] getChildren();
 
     /**
      * 批量增加子节点
      *
      * @param node
      */
-    void append(Node[] node);
+    void append(Node<T>[] node);
 
     /**
      * 获取节点自身高度值
@@ -173,9 +173,9 @@ public interface Node extends Cloneable {
 
     String getAttribute(String name);
 
-    Object getUserObject();
+    T getUserObject();
 
-    List<Node> getLeafNodes();
+    List<Node<T>> getLeafNodes();
 
     /**
      * 查询指定ID的子节点或孙子节点
@@ -183,6 +183,7 @@ public interface Node extends Cloneable {
      * @param id
      * @return
      */
-    Node findNode(Object id);
+    Node<T> findNode(Object id);
+
 
 }

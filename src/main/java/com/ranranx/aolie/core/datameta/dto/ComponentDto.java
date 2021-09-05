@@ -92,7 +92,7 @@ public class ComponentDto extends SchemaBaseDto {
     private Short orderType;
 
     private String titlePosition;
-    private String titleSpan;
+    private Integer titleSpan;
 
     private Integer posTop;
     private Integer posLeft;
@@ -266,11 +266,11 @@ public class ComponentDto extends SchemaBaseDto {
         this.titlePosition = titlePosition;
     }
 
-    public String getTitleSpan() {
+    public Integer getTitleSpan() {
         return titleSpan;
     }
 
-    public void setTitleSpan(String titleSpan) {
+    public void setTitleSpan(Integer titleSpan) {
         this.titleSpan = titleSpan;
     }
 

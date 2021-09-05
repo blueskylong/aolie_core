@@ -243,9 +243,9 @@ public abstract class OperParam<T> {
      *
      * @param mapFilter
      */
-    public void addMapEqualsFilter(String tableName, Map<String, Object> mapFilter, boolean isSelective) {
+    public Criteria addMapEqualsFilter(String tableName, Map<String, Object> mapFilter, boolean isSelective) {
         if (mapFilter == null || mapFilter.isEmpty()) {
-            return;
+            return getCriteria();
         }
         Criteria criteria = this.getCriteria();
         mapFilter.forEach((key, value) -> {
@@ -258,5 +258,6 @@ public abstract class OperParam<T> {
                 criteria.andEqualTo(tableName, key, value);
             }
         });
+        return criteria;
     }
 }

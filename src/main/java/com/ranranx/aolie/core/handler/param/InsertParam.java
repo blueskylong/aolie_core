@@ -46,8 +46,12 @@ public class InsertParam extends OperParam<InsertParam> {
                         this.setTable(tables.get(0));
                     }
                 }
-                this.setTable(SchemaHolder.findTableByTableName(tableName,
-                        schemaId, SessionUtils.getLoginVersion()));
+                TableInfo tableInfo = SchemaHolder.findTableByTableName(tableName,
+                        schemaId, SessionUtils.getLoginVersion());
+                if (tableInfo != null) {
+                    this.setTable(tableInfo);
+                }
+
             }
         }
         this.lstRows = CommonUtils.toMapAndConvertToUnderLine(lstObj);

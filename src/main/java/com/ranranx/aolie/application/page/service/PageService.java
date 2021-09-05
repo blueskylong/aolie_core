@@ -3,6 +3,7 @@ package com.ranranx.aolie.application.page.service;
 import com.ranranx.aolie.application.page.dto.PageDetailDto;
 import com.ranranx.aolie.application.page.dto.PageInfo;
 import com.ranranx.aolie.application.page.dto.PageInfoDto;
+import com.ranranx.aolie.core.api.interfaces.ModelApi;
 import com.ranranx.aolie.core.common.CommonUtils;
 import com.ranranx.aolie.core.common.Constants;
 import com.ranranx.aolie.core.common.IdGenerator;
@@ -16,6 +17,8 @@ import com.ranranx.aolie.core.datameta.dto.ReferenceDto;
 import com.ranranx.aolie.core.ds.dataoperator.DataOperatorFactory;
 import com.ranranx.aolie.core.ds.definition.*;
 import com.ranranx.aolie.core.exceptions.InvalidException;
+import com.ranranx.aolie.core.handler.HandlerFactory;
+import com.ranranx.aolie.core.handler.param.UpdateParam;
 import com.ranranx.aolie.core.service.UIService;
 import com.ranranx.aolie.core.tree.LevelProvider;
 import com.ranranx.aolie.core.tree.SysCodeRule;
@@ -46,6 +49,11 @@ public class PageService {
     private DataOperatorFactory factory;
     @Autowired
     private UIService uiService;
+    @Autowired
+    private HandlerFactory handlerFactory;
+
+    @Autowired
+    private ModelApi modelApi;
 
 
     /**
@@ -207,10 +215,10 @@ public class PageService {
         List<Long> lstResult = new ArrayList();
         for (PageDetailDto dto : lstPageDetail) {
             //如果存在自定义的界面,且没有指定引用的源,则不再过滤
-            if (dto.getViewId().equals(DmConstants.DispType.CUSTOM_UI_ID) ) {
-                if( dto.getRelationDs() != null){
+            if (dto.getViewId().equals(DmConstants.DispType.CUSTOM_UI_ID)) {
+                if (dto.getRelationDs() != null) {
                     lstResult.add(dto.getRelationDs());
-                }else{
+                } else {
                     return null;
                 }
 
@@ -253,30 +261,19 @@ public class PageService {
      */
     @Transactional(readOnly = false)
     public void savePageFullInfo(PageInfo pageInfo) {
-        deletePage(pageInfo.getPageInfoDto().getPageId());
-        InsertParamDefinition insertParamDefinition = new InsertParamDefinition();
-        insertParamDefinition.setNeedConvertToUnderLine(true);
-        insertParamDefinition.setObject(pageInfo.getPageInfoDto());
-        factory.getDefaultDataOperator().insert(insertParamDefinition);
+        UpdateParam updateParam = UpdateParam.genUpdateByObject(Constants.DEFAULT_DM_SCHEMA,
+                pageInfo.getPageInfoDto().getVersionCode(), pageInfo.getPageInfoDto(), false);
+        handlerFactory.handleUpdate(updateParam);
+        //设置新增的明细信息的ＩＤ为负数
         List<PageDetailDto> lstPageDetail = pageInfo.getLstPageDetail();
-
-        if (lstPageDetail != null && lstPageDetail.size() > 0) {
-            long pageId = pageInfo.getPageInfoDto().getPageId();
-            long schemaId = pageInfo.getPageInfoDto().getSchemaId();
-            String versionCode = SessionUtils.getLoginVersion();
-            for (PageDetailDto dto : lstPageDetail) {
-                dto.setPageId(pageId);
-                dto.setSchemaId(schemaId);
-                dto.setVersionCode(versionCode);
-                if (dto.getPageDetailId() == null || dto.getPageDetailId() < 1) {
-                    dto.setPageDetailId(IdGenerator.getNextId(PageDetailDto.class.getName()));
-                }
+        long index = -1;
+        if (lstPageDetail != null && !lstPageDetail.isEmpty()) {
+            for (PageDetailDto pageDetailDto : lstPageDetail) {
+                pageDetailDto.setPageDetailId(index--);
             }
         }
-        insertParamDefinition = new InsertParamDefinition();
-        insertParamDefinition.setNeedConvertToUnderLine(true);
-        insertParamDefinition.setObjects(pageInfo.getLstPageDetail());
-        factory.getDefaultDataOperator().insert(insertParamDefinition);
+        modelApi.saveSlaveRowsByObject(pageInfo.getLstPageDetail(), PageDetailDto.class, PageInfoDto.class,
+                pageInfo.getPageInfoDto().getPageId(), Constants.DEFAULT_DM_SCHEMA);
     }
 
     /**

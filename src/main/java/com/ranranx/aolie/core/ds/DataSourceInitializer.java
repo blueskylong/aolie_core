@@ -21,9 +21,9 @@ import java.util.List;
 
 /**
  * @author xxl
- *  所有数据源初始化
- * @date 2020/8/13 20:10
+ * 所有数据源初始化
  * @version V0.0.1
+ * @date 2020/8/13 20:10
  **/
 @Configuration
 public class DataSourceInitializer implements ApplicationContextAware {
@@ -51,10 +51,12 @@ public class DataSourceInitializer implements ApplicationContextAware {
         }
         DataSourceWrapper wrapper;
         for (DataOperatorDto dto : lstDop) {
-            if (dto.getId() == 0) {
+            DataOperatorInfo dataOperatorInfo = new DataOperatorInfo(dto);
+            if ((new Short((short) 1).equals(dto.getIsDefault()))) {
+                dataOperatorFactory.regDataOperator(dataOperatorInfo.getDsKey(), dataOperatorFactory.getDefaultDataOperator());
                 continue;
             }
-            DataOperatorInfo dataOperatorInfo = new DataOperatorInfo(dto);
+
             AutowireCapableBeanFactory factory = applicationContext.getAutowireCapableBeanFactory();
             try {
                 IDataOperator operator;

@@ -33,7 +33,7 @@ public class QueryHandler<T extends QueryParam> extends BaseHandler<T> {
     private HandleResult findAllResult(QueryParam param) {
 
         //TODO 这里需要将查询分解,合并
-        List<Map<String, Object>> lstData = factory.getDataOperatorByKey(null).select(ParamConverter.convertQueryParam(param));
+        List<Map<String, Object>> lstData = factory.getDataOperatorByKey(null).select(ParamConverter.convertQueryParam(param, null));
 
         if (param.getResultClass() != null) {
             lstData = CommonUtils.convertCamelAndToObject(lstData, param.getResultClass());

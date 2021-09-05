@@ -117,14 +117,19 @@ public class UIService {
         List<Component> lstComponent = findViewerComponents(blockViewId, version);
         if (lstComponent == null) {
             lstComponent = new ArrayList<>();
-        }
-        if (viewerDto.getFixId() != null) {
-            BlockViewer viewer = fixRowService.findFixRowComponents(viewerDto.getFixId(), version);
-            if (viewer != null) {
-                lstComponent.addAll(viewer.getLstComponent());
-            }
+            return new BlockViewer(viewerDto, lstComponent);
         }
         return new BlockViewer(viewerDto, lstComponent);
+    }
+
+    /**
+     * 查询一个控件对应的数据表信息
+     *
+     * @param com
+     * @return
+     */
+    private TableInfo findViewDsInfo(Component com) {
+        return SchemaHolder.getTable(com.getColumn().getColumnDto().getTableId(), com.getComponentDto().getVersionCode());
     }
 
     @Cacheable(value = GROUP_NAME,

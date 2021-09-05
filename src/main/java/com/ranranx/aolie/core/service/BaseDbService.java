@@ -57,6 +57,32 @@ public class BaseDbService implements IBaseDbService {
 
     @Override
     @Transactional(readOnly = false)
+    public <T extends BaseDto> int insertBatch(List<T> dto, Long schemaId) {
+        if (dto == null) {
+            return 0;
+        }
+        if (schemaId == null || schemaId < 1) {
+            schemaId = this.schemaId;
+        }
+        InsertParam param = new InsertParam();
+        param.setObjects(dto, schemaId);
+        return factory.handleInsert(param).getChangeNum();
+    }
+
+    @Override
+    @Transactional(readOnly = false)
+    public int insertBatch(List<Map<String, Object>> lstData, TableInfo tableInfo) {
+        if (lstData == null) {
+            return 0;
+        }
+        InsertParam param = new InsertParam();
+        param.setTable(tableInfo);
+        param.setLstRows(lstData);
+        return factory.handleInsert(param).getChangeNum();
+    }
+
+    @Override
+    @Transactional(readOnly = false)
     public <T extends BaseDto> int delete(T dto, Long schemaId) {
         if (dto == null) {
             return 0;
@@ -126,6 +152,32 @@ public class BaseDbService implements IBaseDbService {
         HandleResult lstResult = factory.handleQuery(param);
         if (lstResult.isSuccess()) {
             return (List<T>) lstResult.getData();
+        }
+        return null;
+    }
+
+    /**
+     * 查询多条信息
+     *
+     * @param dto
+     * @return
+     */
+    @Override
+    public <T extends BaseDto> List<Map<String, Object>> queryMapList(T dto, Long schemaId) {
+        if (dto == null) {
+            return null;
+        }
+        if (schemaId == null || schemaId < 1) {
+            schemaId = this.schemaId;
+        }
+        QueryParam param = new QueryParam();
+        param.setFilterObjectAndTable(schemaId, getVersionCode(dto), dto);
+        //查询排序
+        param.setLstOrder(getFieldOrder(dto.getClass()));
+
+        HandleResult lstResult = factory.handleQuery(param);
+        if (lstResult.isSuccess()) {
+            return lstResult.getData();
         }
         return null;
     }

@@ -1,6 +1,7 @@
 package com.ranranx.aolie.core.ds.dataoperator.mybatis;
 
 import com.ranranx.aolie.core.common.CommonUtils;
+import com.ranranx.aolie.core.common.IdGenerator;
 import com.ranranx.aolie.core.common.SqlTools;
 import com.ranranx.aolie.core.datameta.datamodel.DmConstants;
 import com.ranranx.aolie.core.datameta.dto.DataOperatorDto;
@@ -22,7 +23,6 @@ import java.util.*;
 
 
 public class MyBatisDataOperator implements IDataOperator {
-
     /**
      * 数据库操作接口信息
      */
@@ -94,11 +94,14 @@ public class MyBatisDataOperator implements IDataOperator {
         Map<String, Object> mapParam = new HashMap<>();
         StringBuilder where = new StringBuilder();
 
+        Map<String, String> mapAlias = new HashMap<>();
+        String mainTableAlias = "T_" + IdGenerator.getNextId("alias");
+        mapAlias.put(tableName, mainTableAlias);
         if (queryParamDefinition.hasCriteria()) {
             List<Criteria> lstCriteria = queryParamDefinition.getCriteria();
             int index = 1;
             for (Criteria criteria : lstCriteria) {
-                String aWhere = criteria.getSqlWhere(mapParam, null, index++, false);
+                String aWhere = criteria.getSqlWhere(mapParam, mapAlias, index++, false);
                 if (!CommonUtils.isEmpty(aWhere)) {
                     where.append(criteria.getAndOr()).append("  ").append(aWhere);
                 }
@@ -119,7 +122,8 @@ public class MyBatisDataOperator implements IDataOperator {
             orderExp = " order by " + orderExp.substring(0, orderExp.length() - 1);
         }
         StringBuilder sbSql = new StringBuilder();
-        sbSql.append("select ").append(field).append(" from ").append(tableName).append(where.toString()).append(orderExp);
+        sbSql.append("select ").append(field).append(" from ").append(tableName)
+                .append(" ").append(mainTableAlias).append(" ").append(where.toString()).append(orderExp);
         mapParam.put(SQL_PARAM_NAME, sbSql.toString());
 
         return select(mapParam);
@@ -156,6 +160,7 @@ public class MyBatisDataOperator implements IDataOperator {
      */
     @Override
     public int delete(DeleteParamDefinition deleteParamDefinition) {
+        String mainTableAlias = "T_" + IdGenerator.getNextId("alias");
         if (deleteParamDefinition.getSqlExp() != null) {
             DynamicDataSource.setDataSource(dsKey);
             return mapper.delete(deleteParamDefinition.getSqlExp().getExecuteMap());
@@ -170,10 +175,12 @@ public class MyBatisDataOperator implements IDataOperator {
             sb.append(SqlTools.genInClause(deleteParamDefinition.getIdField(), deleteParamDefinition.getIds(), 1, mapParamValue));
         }
         if (deleteParamDefinition.getCriteria() != null) {
-            sb.append(deleteParamDefinition.getCriteria().getSqlWhere(mapParamValue, null,
+            Map<String, String> mapAlias = new HashMap<>();
+            mapAlias.put(deleteParamDefinition.getTableName(), mainTableAlias);
+            sb.append(deleteParamDefinition.getCriteria().getSqlWhere(mapParamValue, mapAlias,
                     2, sb.length() > 0));
         }
-        String sSql = "delete from " + deleteParamDefinition.getTableName() + " ";
+        String sSql = "delete " + mainTableAlias + " from " + deleteParamDefinition.getTableName() + " " + mainTableAlias + " ";
         if (sb.length() > 0) {
             sSql += " where " + sb.toString();
         }
@@ -216,10 +223,15 @@ public class MyBatisDataOperator implements IDataOperator {
         Criteria criteria = updateParamDefinition.getCriteria();
         Map<String, Object> mapValue = new HashMap<>();
         int index = 0;
-        String sqlWhere = criteria.getSqlWhere(mapValue, null, index++, false);
+        Map<String, String> mapAlias = new HashMap<>();
+        String mainTableAlias = "T_" + IdGenerator.getNextId("tableAlias");
+        mapAlias.put(updateParamDefinition.getTableName(), mainTableAlias);
+        String sqlWhere = criteria.getSqlWhere(mapValue, mapAlias, index++, false);
         StringBuilder sbSql = new StringBuilder();
-        sbSql.append("update ").append(genSetSql(updateParamDefinition.getMapSetValues(),
-                mapValue, index, updateParamDefinition.isSelective(), new ArrayList<>()))
+        sbSql.append("update ").append(updateParamDefinition.getTableName())
+                .append(" ").append(mainTableAlias).append(" set ")
+                .append(genSetSql(updateParamDefinition.getMapSetValues(),
+                        mapValue, index, mainTableAlias, updateParamDefinition.isSelective(), new ArrayList<>()))
                 .append(" where ").append(sqlWhere);
 
         mapValue.put(SQL_PARAM_NAME, sbSql.toString());
@@ -279,8 +291,8 @@ public class MyBatisDataOperator implements IDataOperator {
 
         }
         Map<String, Object> mapParam = new HashMap<>();
-        sb.append("update ").append(tableName).append(" set ")
-                .append(genSetSql(row, mapParam, index++, isSelective, lstFilterField));
+        sb.append("update ").append(tableName).append(" a set ")
+                .append(genSetSql(row, mapParam, index++, "a", isSelective, lstFilterField));
         if (criteria != null && !criteria.isEmpty()) {
             sb.append(" where ").append(criteria.getSqlWhere(mapParam, null, index++, false));
         }
@@ -297,7 +309,7 @@ public class MyBatisDataOperator implements IDataOperator {
      * @param isSelective
      * @return
      */
-    private String genSetSql(Map<String, Object> setValues, Map<String, Object> mapParamValues, int index,
+    private String genSetSql(Map<String, Object> setValues, Map<String, Object> mapParamValues, int index, String alias,
                              boolean isSelective, List<String> expFields) {
         Iterator<Map.Entry<String, Object>> iterator = setValues.entrySet().iterator();
         StringBuilder sb = new StringBuilder();
@@ -317,7 +329,7 @@ public class MyBatisDataOperator implements IDataOperator {
             } else if (SQL_PARAM_NAME.equals(en.getKey())) {
                 continue;
             } else {
-                sb.append(en.getKey()).append("=#{").append(key).append("},");
+                sb.append(alias).append(".").append(en.getKey()).append("=#{").append(key).append("},");
                 mapParamValues.put(key, en.getValue());
             }
         }

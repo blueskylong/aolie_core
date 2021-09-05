@@ -7,7 +7,9 @@ import com.ranranx.aolie.core.ds.definition.SqlExp;
 import com.ranranx.aolie.core.handler.param.ParamConverter;
 import com.ranranx.aolie.core.handler.param.QueryParam;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -30,7 +32,11 @@ public class Exists extends BaseCondition {
     @Override
     public String getSqlWhere(Map<String, Object> mapValue, Map<String, String> alias, int index, boolean needLogic) {
         QueryParam param = (QueryParam) value1;
-        QueryParamDefinition paramDefinition = ParamConverter.convertQueryParam(param);
+        List<String> lstTables = new ArrayList<>();
+        if (alias != null && !alias.isEmpty()) {
+            alias.keySet().forEach(tableName -> lstTables.add(tableName));
+        }
+        QueryParamDefinition paramDefinition = ParamConverter.convertQueryParam(param, lstTables);
         Field field = new Field();
         field.setFieldName("1");
         paramDefinition.setFields(Arrays.asList(field));

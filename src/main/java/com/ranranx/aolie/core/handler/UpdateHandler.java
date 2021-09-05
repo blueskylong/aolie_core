@@ -65,7 +65,7 @@ public class UpdateHandler<T extends UpdateParam> extends BaseHandler<T> {
         BeanUtils.copyProperties(param, definition);
         definition.setTableName(param.getTable().getTableDto().getTableName());
         //如果表中含有版本信息,则补全更新条件
-        if (param.getTable().findColumnByName(Constants.FixColumnName.VERSION_CODE) != null) {
+        if (param.getTable().findColumnByName(Constants.FixColumnName.VERSION_CODE) != null && lstData != null) {
             for (Map<String, Object> row : lstData) {
                 if (CommonUtils.isEmpty(row.get(Constants.FixColumnName.VERSION_CODE))) {
                     row.put(Constants.FixColumnName.VERSION_CODE, SessionUtils.getLoginVersion());

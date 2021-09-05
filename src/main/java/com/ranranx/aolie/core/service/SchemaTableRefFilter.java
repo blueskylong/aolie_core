@@ -1,7 +1,5 @@
 package com.ranranx.aolie.core.service;
 
-import com.ranranx.aolie.application.menu.service.MenuService;
-import com.ranranx.aolie.application.page.service.PageService;
 import com.ranranx.aolie.core.common.CommonUtils;
 import com.ranranx.aolie.core.common.SessionUtils;
 import com.ranranx.aolie.core.datameta.datamodel.Column;
@@ -9,7 +7,6 @@ import com.ranranx.aolie.core.datameta.datamodel.SchemaHolder;
 import com.ranranx.aolie.core.exceptions.InvalidException;
 import com.ranranx.aolie.core.handler.param.condition.Criteria;
 import com.ranranx.aolie.core.interfaces.IReferenceDataFilter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -25,17 +22,6 @@ public class SchemaTableRefFilter implements IReferenceDataFilter {
      * 菜单ID的字段
      */
     public static final String schemaIDField = "schema_id";
-
-
-    @Autowired
-    private MenuService menuService;
-
-    @Autowired
-    private PageService pageService;
-
-    public SchemaTableRefFilter() {
-    }
-
 
     @Override
     public Criteria getExtFilter(Long refId, Long colId, Map<String, Object> values) throws InvalidException {

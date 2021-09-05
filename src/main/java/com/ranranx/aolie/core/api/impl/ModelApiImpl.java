@@ -44,4 +44,33 @@ public class ModelApiImpl implements ModelApi {
     public HandleResult saveSlaveRows(List<Map<String, Object>> rows, Long dsId, Long masterDsId, Long masterKey) {
         return dmDataService.saveSlaveRows(rows, dsId, masterDsId, masterKey);
     }
+
+    /**
+     * 保存从表行,这样前端可以不传入删除的行,通过关联关系删除相应的行
+     *
+     * @param rows
+     * @param clazzRow    插件的类
+     * @param classMaster 主表类
+     * @param masterKey
+     * @return
+     */
+    @Override
+    public <T> HandleResult saveSlaveRowsByObject(List<T> rows, Class<T> clazzRow, Class classMaster, Long
+            masterKey, Long schemaId) {
+        return dmDataService.saveSlaveRowsByObject(rows, clazzRow, classMaster, masterKey, schemaId);
+    }
+
+    /**
+     * 保存指定范围内的数据,内涉及一张表,会生成增删更新的分别操作.
+     *
+     * @param rows
+     * @param dsId
+     * @param mapFilter
+     * @param version
+     * @return
+     */
+    @Override
+    public HandleResult saveRangeRows(List<Map<String, Object>> rows, Long dsId, Map<String, Object> mapFilter, String version) {
+        return dmDataService.saveRangeRows(rows, dsId, mapFilter, version);
+    }
 }

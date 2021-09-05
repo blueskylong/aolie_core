@@ -48,6 +48,7 @@ public class Criteria implements ICondition, Serializable {
     protected boolean notNull;
     //连接条件
     protected String andOr;
+    protected String tableName;
 
 
     private static Criteria alwaysFalse = new Criteria();
@@ -128,71 +129,38 @@ public class Criteria implements ICondition, Serializable {
         lstCondition.add(customCondition);
     }
 
-//    protected void addCriterion(String condition, Object value, String property) {
-//        if (value == null) {
-//            if (notNull) {
-//                throw new InvalidException("Value for " + property + " cannot be null");
-//            } else {
-//                return;
-//            }
-//        }
-//        if (property == null) {
-//            return;
-//        }
-//        lstCondition.add(new Criterion(condition, value));
-//    }
-//
-//    protected void addCriterion(String condition, Object value1, Object value2, String property) {
-//        if (value1 == null || value2 == null) {
-//            if (notNull) {
-//                throw new InvalidException("Between values for " + property + " cannot be null");
-//            } else {
-//                return;
-//            }
-//        }
-//        if (property == null) {
-//            return;
-//        }
-//        lstCondition.add(new Criterion(condition, value1, value2));
-//    }
-//
-//    protected void addOrCriterion(String condition) {
-//        if (condition == null) {
-//            throw new InvalidException("Value for condition cannot be null");
-//        }
-//        if (condition.startsWith("null")) {
-//            return;
-//        }
-//        lstCondition.add(new Criterion(condition, true));
-//    }
-//
-//    protected void addOrCriterion(String condition, Object value, String property) {
-//        if (value == null) {
-//            if (notNull) {
-//                throw new InvalidException("Value for " + property + " cannot be null");
-//            } else {
-//                return;
-//            }
-//        }
-//        if (property == null) {
-//            return;
-//        }
-//        lstCondition.add(new Criterion(condition, value, true));
-//    }
-//
-//    protected void addOrCriterion(String condition, Object value1, Object value2, String property) {
-//        if (value1 == null || value2 == null) {
-//            if (notNull) {
-//                throw new InvalidException("Between values for " + property + " cannot be null");
-//            } else {
-//                return;
-//            }
-//        }
-//        if (property == null) {
-//            return;
-//        }
-//        lstCondition.add(new Criterion(condition, value1, value2, true));
-//    }
+    /**
+     * 检查是否存在指定的条件
+     *
+     * @param criteria
+     * @return
+     */
+    public boolean hasCriteria(Criteria criteria) {
+        if (criteria == null || criteria.isEmpty()) {
+            return this.isEmpty();
+        }
+        List<ICondition> lstCondition = criteria.lstCondition;
+        for (ICondition condition : lstCondition) {
+            if (!(condition instanceof BaseCondition)) {
+                continue;
+            }
+            boolean bingo = false;
+            for (ICondition thisCondition : this.lstCondition) {
+                if (!(thisCondition instanceof BaseCondition)) {
+                    continue;
+                }
+                if (((BaseCondition) condition).isHasFieldFilter((BaseCondition) thisCondition)) {
+                    bingo = true;
+                    break;
+                }
+            }
+            if (bingo) {
+                continue;
+            }
+            return false;
+        }
+        return true;
+    }
 
     public Criteria andIsNull(String tableName, String fieldName) {
         this.lstCondition.add(new IsNull(tableName, fieldName));
@@ -579,4 +547,19 @@ public class Criteria implements ICondition, Serializable {
         return this.lstCondition == null || lstCondition.isEmpty();
     }
 
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
+        if (this.isEmpty()) {
+            return;
+        }
+        for (ICondition condition : this.lstCondition) {
+            if (condition instanceof BaseCondition) {
+                ((BaseCondition) condition).setTableName(tableName);
+            }
+        }
+    }
+
+    public List<ICondition> getLstCondition() {
+        return lstCondition;
+    }
 }

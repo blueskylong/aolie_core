@@ -64,6 +64,16 @@ public class Schema {
      */
     private Map<Long, List<Formula>> mapColumnFormula;
 
+    private Map<Long, Long> mapFixMap;
+
+    public Map<Long, Long> getMapFixMap() {
+        return mapFixMap;
+    }
+
+    public void setMapFixMap(Map<Long, Long> mapFixMap) {
+        this.mapFixMap = mapFixMap;
+    }
+
     @Transient
     public List<TableDto> getTableDtos() {
         List<TableDto> lstResult = new ArrayList<>();

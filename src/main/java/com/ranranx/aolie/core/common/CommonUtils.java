@@ -31,6 +31,7 @@ public class CommonUtils {
     private static Pattern UNDERLINE_PATTEN = Pattern.compile("_[a-z]");
     //用于存储系统级参数，包含启动参数，数据库连接可以用此处参数覆盖
     private static final Map<String, String> mapGlobalParam = new HashMap<>();
+    private static final Short TRUE_SHORT = new Short((short) 1);
 
 
     /**
@@ -198,7 +199,7 @@ public class CommonUtils {
     }
 
 
-    private static Map<String, Object> removeEmptyValues(Map<String, Object> map) {
+    public static Map<String, Object> removeEmptyValues(Map<String, Object> map) {
 
         if (map == null || map.isEmpty()) {
             return map;
@@ -470,6 +471,9 @@ public class CommonUtils {
      * @return
      */
     public static Object getObjectValue(Object obj, String field) {
+        if (obj instanceof Map) {
+            return ((Map) obj).get(field);
+        }
         String fieldName = "get" + field.substring(0, 1).toUpperCase() + field.substring(1);
         try {
             Method method = obj.getClass().getMethod(fieldName, null);
@@ -496,5 +500,12 @@ public class CommonUtils {
             return ((Number) obj).doubleValue();
         }
         return Double.parseDouble(obj.toString());
+    }
+
+    public static boolean isTrue(Short value) {
+        if (value == null) {
+            return false;
+        }
+        return TRUE_SHORT.equals(value);
     }
 }
