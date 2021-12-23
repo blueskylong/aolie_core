@@ -512,21 +512,22 @@ public class Criteria implements ICondition, Serializable {
     }
 
     @Override
-    public String getSqlWhere(Map<String, Object> mapValue, Map<String, String> alias, int index, boolean needLogic) {
+    public String getSqlWhere(Map<String, Object> mapValue, Map<String, String> alias, int[] index, boolean needLogic) {
         if (lstCondition == null || lstCondition.isEmpty()) {
             return "";
         }
         return (needLogic ? " " + getAndOr() + " " : "") + "(" + makeSubWhere(mapValue, alias, index) + ")";
     }
 
-    private String makeSubWhere(Map<String, Object> mapValue, Map<String, String> alias, int parIndex) {
+    private String makeSubWhere(Map<String, Object> mapValue, Map<String, String> alias, int[] parIndex) {
         StringBuilder sb = new StringBuilder();
         /**
          * 下级的参数编号,后移二位
          */
-        int startIndex = parIndex * 100;
+
         for (int index = 1; index <= lstCondition.size(); index++) {
-            sb.append(lstCondition.get(index - 1).getSqlWhere(mapValue, alias, startIndex + index, index != 1));
+            parIndex[0] = parIndex[0] + 1;
+            sb.append(lstCondition.get(index - 1).getSqlWhere(mapValue, alias, parIndex, index != 1));
         }
         return sb.toString();
 

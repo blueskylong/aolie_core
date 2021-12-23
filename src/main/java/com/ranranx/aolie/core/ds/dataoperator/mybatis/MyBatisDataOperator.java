@@ -2,13 +2,17 @@ package com.ranranx.aolie.core.ds.dataoperator.mybatis;
 
 import com.ranranx.aolie.core.common.CommonUtils;
 import com.ranranx.aolie.core.common.IdGenerator;
+import com.ranranx.aolie.core.common.SessionUtils;
 import com.ranranx.aolie.core.common.SqlTools;
 import com.ranranx.aolie.core.datameta.datamodel.DmConstants;
+import com.ranranx.aolie.core.datameta.datamodel.SchemaHolder;
+import com.ranranx.aolie.core.datameta.datamodel.TableInfo;
 import com.ranranx.aolie.core.datameta.dto.DataOperatorDto;
 import com.ranranx.aolie.core.ds.dataoperator.DataSourceUtils;
 import com.ranranx.aolie.core.ds.dataoperator.IDataOperator;
 import com.ranranx.aolie.core.ds.dataoperator.multids.DynamicDataSource;
 import com.ranranx.aolie.core.ds.definition.*;
+import com.ranranx.aolie.core.exceptions.InvalidConfigException;
 import com.ranranx.aolie.core.exceptions.InvalidException;
 import com.ranranx.aolie.core.handler.param.condition.Criteria;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,8 +40,14 @@ public class MyBatisDataOperator implements IDataOperator {
     @Autowired
     private MyBatisGeneralMapper mapper;
 
+    private boolean oracleDb = false;
+
     public MyBatisDataOperator() {
 
+    }
+
+    private boolean isOracle() {
+        return this.oracleDb;
     }
 
     public MyBatisDataOperator(DataOperatorDto dto) {
@@ -54,18 +64,24 @@ public class MyBatisDataOperator implements IDataOperator {
     public List<Map<String, Object>> select(QueryParamDefinition queryParamDefinition) {
         if (queryParamDefinition.getSqlExp() != null) {
             DynamicDataSource.setDataSource(dsKey);
+            if (isOracle()) {
+                return CommonUtils.keyToLowerCase(mapper.select(queryParamDefinition.getSqlExp().getExecuteMap()));
+            }
             return mapper.select(queryParamDefinition.getSqlExp().getExecuteMap());
         }
         //分析是单表查询还是多表查询
         if (isSingleTable(queryParamDefinition)) {
             return singleTableSelect(queryParamDefinition);
         }
-        return multiTableSelect(queryParamDefinition);
+        return multiTableSelect(queryParamDefinition, new int[]{0});
 
     }
 
     private List<Map<String, Object>> select(Map<String, Object> map) {
         DynamicDataSource.setDataSource(dsKey);
+        if (isOracle()) {
+            return CommonUtils.keyToLowerCase(mapper.select(map));
+        }
         return mapper.select(map);
     }
 
@@ -75,9 +91,9 @@ public class MyBatisDataOperator implements IDataOperator {
      * @param queryParamDefinition
      * @return
      */
-    private List<Map<String, Object>> multiTableSelect(QueryParamDefinition queryParamDefinition) {
+    private List<Map<String, Object>> multiTableSelect(QueryParamDefinition queryParamDefinition, int[] index) {
         DynamicDataSource.setDataSource(this.getKey());
-        return select(SqlBuilder.genSelectParams(queryParamDefinition, null).getExecuteMap());
+        return select(SqlBuilder.genSelectParams(queryParamDefinition, null, index).getExecuteMap());
     }
 
 
@@ -99,9 +115,10 @@ public class MyBatisDataOperator implements IDataOperator {
         mapAlias.put(tableName, mainTableAlias);
         if (queryParamDefinition.hasCriteria()) {
             List<Criteria> lstCriteria = queryParamDefinition.getCriteria();
-            int index = 1;
+            int[] index = new int[]{1};
             for (Criteria criteria : lstCriteria) {
-                String aWhere = criteria.getSqlWhere(mapParam, mapAlias, index++, false);
+                index[0] = index[0] + 1;
+                String aWhere = criteria.getSqlWhere(mapParam, mapAlias, index, false);
                 if (!CommonUtils.isEmpty(aWhere)) {
                     where.append(criteria.getAndOr()).append("  ").append(aWhere);
                 }
@@ -172,15 +189,19 @@ public class MyBatisDataOperator implements IDataOperator {
             if (CommonUtils.isEmpty(deleteParamDefinition.getIdField())) {
                 throw new InvalidException("没有指定主键字段");
             }
-            sb.append(SqlTools.genInClause(deleteParamDefinition.getIdField(), deleteParamDefinition.getIds(), 1, mapParamValue));
+            sb.append(SqlTools.genInClause(deleteParamDefinition.getIdField(), deleteParamDefinition.getIds(), new int[]{1}, mapParamValue));
         }
         if (deleteParamDefinition.getCriteria() != null) {
             Map<String, String> mapAlias = new HashMap<>();
             mapAlias.put(deleteParamDefinition.getTableName(), mainTableAlias);
             sb.append(deleteParamDefinition.getCriteria().getSqlWhere(mapParamValue, mapAlias,
-                    2, sb.length() > 0));
+                    new int[]{2}, sb.length() > 0));
         }
-        String sSql = "delete " + mainTableAlias + " from " + deleteParamDefinition.getTableName() + " " + mainTableAlias + " ";
+        String sSql = "delete ";
+        if (!isOracle()) {
+            sSql += mainTableAlias;
+        }
+        sSql += " from " + deleteParamDefinition.getTableName() + " " + mainTableAlias + " ";
         if (sb.length() > 0) {
             sSql += " where " + sb.toString();
         }
@@ -222,11 +243,11 @@ public class MyBatisDataOperator implements IDataOperator {
     private int updateBatch(UpdateParamDefinition updateParamDefinition) {
         Criteria criteria = updateParamDefinition.getCriteria();
         Map<String, Object> mapValue = new HashMap<>();
-        int index = 0;
+        int[] index = new int[]{0};
         Map<String, String> mapAlias = new HashMap<>();
         String mainTableAlias = "T_" + IdGenerator.getNextId("tableAlias");
         mapAlias.put(updateParamDefinition.getTableName(), mainTableAlias);
-        String sqlWhere = criteria.getSqlWhere(mapValue, mapAlias, index++, false);
+        String sqlWhere = criteria.getSqlWhere(mapValue, mapAlias, index, false);
         StringBuilder sbSql = new StringBuilder();
         sbSql.append("update ").append(updateParamDefinition.getTableName())
                 .append(" ").append(mainTableAlias).append(" set ")
@@ -274,7 +295,7 @@ public class MyBatisDataOperator implements IDataOperator {
                           String filterFields, String tableName, boolean isSelective) {
         //情况1 ,存在id值及字段,则增加ID条件
         StringBuilder sb = new StringBuilder();
-        int index = 0;
+        int[] index = new int[]{0};
         String key;
         List<String> lstFilterField = Arrays.asList(filterFields.split(","));
         if (CommonUtils.isNotEmpty(filterFields)) {
@@ -292,9 +313,9 @@ public class MyBatisDataOperator implements IDataOperator {
         }
         Map<String, Object> mapParam = new HashMap<>();
         sb.append("update ").append(tableName).append(" a set ")
-                .append(genSetSql(row, mapParam, index++, "a", isSelective, lstFilterField));
+                .append(genSetSql(row, mapParam, index, "a", isSelective, lstFilterField));
         if (criteria != null && !criteria.isEmpty()) {
-            sb.append(" where ").append(criteria.getSqlWhere(mapParam, null, index++, false));
+            sb.append(" where ").append(criteria.getSqlWhere(mapParam, null, index, false));
         }
         mapParam.put(SQL_PARAM_NAME, sb.toString());
         return mapper.update(mapParam);
@@ -309,7 +330,7 @@ public class MyBatisDataOperator implements IDataOperator {
      * @param isSelective
      * @return
      */
-    private String genSetSql(Map<String, Object> setValues, Map<String, Object> mapParamValues, int index, String alias,
+    private String genSetSql(Map<String, Object> setValues, Map<String, Object> mapParamValues, int[] index, String alias,
                              boolean isSelective, List<String> expFields) {
         Iterator<Map.Entry<String, Object>> iterator = setValues.entrySet().iterator();
         StringBuilder sb = new StringBuilder();
@@ -317,7 +338,8 @@ public class MyBatisDataOperator implements IDataOperator {
         String key;
         while (iterator.hasNext()) {
             Map.Entry<String, Object> en = iterator.next();
-            key = makeSubKey(index, subIndex++);
+            index[0] = index[0] + 1;
+            key = makeSubKey(index[0], subIndex++);
             if (expFields.indexOf(en.getKey()) > -1) {
                 continue;
             }
@@ -363,11 +385,96 @@ public class MyBatisDataOperator implements IDataOperator {
         if (lstRows == null || lstRows.isEmpty()) {
             return -1;
         }
-        int count = 0;
-        for (Map<String, Object> row : lstRows) {
-            count += insertRow(row, insertParamDefinition.getTableName());
+        return insertRowBatch(lstRows, insertParamDefinition.getTableName());
+    }
+
+    /**
+     * 这里要注意,第一个数据的列决定了下面的数据哪些列会插入,所以要保持最多的列
+     *
+     * @param lstData
+     * @param tableName
+     * @return
+     */
+    private int insertRowBatch(List<Map<String, Object>> lstData, String tableName) {
+        StringBuilder sbPre = new StringBuilder();
+        Map<String, Object> row = lstData.get(0);
+        Iterator<Map.Entry<String, Object>> iterator = row.entrySet().iterator();
+        //取得第一行，并生成前插入语句
+        int index = 1;//参数序列
+        //将参数直接拼成字符串
+        List<String> lstFieldName = new ArrayList<>();
+        List<String> lstFieldType = new ArrayList<>();
+        List<TableInfo> lstTable = SchemaHolder.findTablesByTableName(tableName, SessionUtils.getDefaultVersion());
+        if (lstTable == null || lstTable.isEmpty()) {
+            throw new InvalidConfigException("找到了重复的表设置:" + tableName);
         }
-        return count;
+        TableInfo info = lstTable.get(0);
+        String jdbcType = null;
+
+        while (iterator.hasNext()) {
+            Map.Entry<String, Object> entry = iterator.next();
+            sbPre.append(entry.getKey()).append(",");
+            lstFieldName.add(entry.getKey());
+            jdbcType = info.getColumnMybatisType(entry.getKey());
+            lstFieldType.add(CommonUtils.isEmpty(jdbcType) ? DmConstants.MyBatisColumnType.VARCHAR : jdbcType);
+        }
+        Map<String, Object> mapParam = new HashMap<>();
+        String sSql = "insert into " + tableName + "(" + sbPre.substring(0, sbPre.length() - 1)
+                + ")";
+        if (!isOracle()) {
+            sSql += "values";
+        }
+        if (isOracle()) {
+            mapParam.put(SQL_PARAM_NAME, sSql + genOracleBatch(lstData, lstFieldName, lstFieldType, mapParam));
+        } else {
+            mapParam.put(SQL_PARAM_NAME, sSql + genMySqlBatch(lstData, lstFieldName, mapParam));
+        }
+
+        return mapper.insert(mapParam);
+    }
+
+    private String genMySqlBatch(List<Map<String, Object>> lstData,
+                                 List<String> lstFieldName, Map<String, Object> mapParam) {
+        StringBuffer sbValues = new StringBuffer();
+        String paramPre = "P";
+        int index = 1;
+        String paramName;
+        for (Map<String, Object> aRow : lstData) {
+            sbValues.append("(");
+            for (String field : lstFieldName) {
+                paramName = paramPre + index++;
+                sbValues.append("#{").append(paramName).append("},");
+                //如果值为空则插入空字符串，让oracle不报错
+                mapParam.put(paramName, aRow.get(field));
+            }
+            sbValues.delete(sbValues.length() - 1, sbValues.length());
+            sbValues.append("),");
+        }
+        sbValues.delete(sbValues.length() - 1, sbValues.length());
+        return sbValues.toString();
+    }
+
+    private String genOracleBatch(List<Map<String, Object>> lstData, List<String> lstFieldName,
+                                  List<String> lstFieldType, Map<String, Object> mapParam) {
+        StringBuffer sbValues = new StringBuffer("(");
+        String paramPre = "P";
+        int index = 1;
+        String paramName;
+        String field;
+        for (Map<String, Object> aRow : lstData) {
+            sbValues.append("select ");
+            for (int i = 0; i < lstFieldName.size(); i++) {
+                field = lstFieldName.get(i);
+                paramName = paramPre + index++;
+                sbValues.append("#{").append(paramName).append(",jdbcType=").append(lstFieldType.get(i)).append("},");
+                //如果值为空则插入空字符串，让oracle不报错
+                mapParam.put(paramName, aRow.get(field));
+            }
+            sbValues.delete(sbValues.length() - 1, sbValues.length());
+            sbValues.append(" from dual union all ");
+        }
+        sbValues.delete(sbValues.length() - 10, sbValues.length()).append(")");
+        return sbValues.toString();
     }
 
     private int insertRow(Map<String, Object> row, String tableName) {
@@ -427,13 +534,24 @@ public class MyBatisDataOperator implements IDataOperator {
         this.dto = dto;
         if (this.dto == null) {
             dsKey = DataSourceUtils.getDefaultDataSourceKey();
+            this.oracleDb = false;
         } else {
             dsKey = CommonUtils.makeKey(dto.getName(), dto.getVersionCode());
+            if (dto.getUrl() == null) {
+                this.oracleDb = false;
+            } else {
+                this.oracleDb = dto.getUrl().contains("oracle");
+            }
+
         }
+
     }
 
     @Override
     public List<Map<String, Object>> selectDirect(Map<String, Object> mapParam) {
+        if (isOracle()) {
+            return CommonUtils.keyToLowerCase(mapper.select(mapParam));
+        }
         return mapper.select(mapParam);
     }
 
@@ -452,9 +570,19 @@ public class MyBatisDataOperator implements IDataOperator {
         return mapper.update(mapParam);
     }
 
+    /**
+     * 取得数据库的类型
+     *
+     * @return
+     */
+    @Override
+    public DmConstants.DbType getDbType() {
+        return isOracle() ? DmConstants.DbType.ORACLE : DmConstants.DbType.MYSQL;
+    }
 
     @Override
     public String convertColType(String colType) {
+        colType = colType.toLowerCase();
         if (mapMysqlFieldTypeRelation.containsKey(colType)) {
             return mapMysqlFieldTypeRelation.get(colType);
 
@@ -464,6 +592,7 @@ public class MyBatisDataOperator implements IDataOperator {
 
     static {
         mapMysqlFieldTypeRelation.put("varchar", DmConstants.FieldType.VARCHAR);
+        mapMysqlFieldTypeRelation.put("varchar2", DmConstants.FieldType.VARCHAR);
         mapMysqlFieldTypeRelation.put("char", DmConstants.FieldType.VARCHAR);
         mapMysqlFieldTypeRelation.put("int", DmConstants.FieldType.INT);
         mapMysqlFieldTypeRelation.put("smallint", DmConstants.FieldType.INT);
@@ -471,7 +600,9 @@ public class MyBatisDataOperator implements IDataOperator {
         mapMysqlFieldTypeRelation.put("bigint", DmConstants.FieldType.INT);
         mapMysqlFieldTypeRelation.put("decimal", DmConstants.FieldType.DECIMAL);
         mapMysqlFieldTypeRelation.put("float", DmConstants.FieldType.DECIMAL);
+        mapMysqlFieldTypeRelation.put("number", DmConstants.FieldType.DECIMAL);
         mapMysqlFieldTypeRelation.put("datetime", DmConstants.FieldType.DATETIME);
+        mapMysqlFieldTypeRelation.put("date", DmConstants.FieldType.DATETIME);
         mapMysqlFieldTypeRelation.put("text", DmConstants.FieldType.TEXT);
         mapMysqlFieldTypeRelation.put("binary", DmConstants.FieldType.BINARY);
     }

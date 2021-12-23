@@ -115,9 +115,9 @@ public abstract class BaseCondition implements ICondition {
 
     @Override
     public String getSqlWhere(Map<String, Object> mapValue, Map<String, String> alias,
-                              int index, boolean needLogic) {
-        String firstParamName = getParamName(index) + "_1";
-        String secondParamName = getParamName(index) + "_2";
+                              int[] index, boolean needLogic) {
+        String firstParamName = getParamName(index[0]) + "_1";
+        String secondParamName = getParamName(index[0]) + "_2";
         String andOrStr = (needLogic ? " " + andOr + "  " : "");
         String express = this.getOperExpress();
         if (CommonUtils.isNotEmpty(fieldName)) {

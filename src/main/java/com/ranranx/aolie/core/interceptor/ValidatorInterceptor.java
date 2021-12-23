@@ -10,13 +10,13 @@ import com.ranranx.aolie.core.datameta.datamodel.validator.ValidatorCenter;
 import com.ranranx.aolie.core.exceptions.InvalidException;
 import com.ranranx.aolie.core.handler.HandleResult;
 import com.ranranx.aolie.core.handler.HandlerFactory;
-import com.ranranx.aolie.core.handler.param.InsertParam;
 import com.ranranx.aolie.core.handler.param.OperParam;
 import com.ranranx.aolie.core.handler.param.QueryParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -64,20 +64,20 @@ public class ValidatorInterceptor implements IOperInterceptor {
         if (!result.isSuccess()) {
             return null;
         }
-        if (Constants.HandleType.TYPE_UPDATE.equals(handleType)) {
-            logger.info("表单验证--->保存后验证");
-            String err = validateUpdate(param, globalParamData);
-            if (CommonUtils.isNotEmpty(err)) {
-                return HandleResult.failure(err);
-            }
-
-        } else if (Constants.HandleType.TYPE_INSERT.equals(handleType) && param instanceof InsertParam) {
-            //如果是插入,直接验证提供的数据
-            String err = validateInsert(param, result);
-            if (CommonUtils.isNotEmpty(err)) {
-                return HandleResult.failure(err);
-            }
-        }
+//        if (Constants.HandleType.TYPE_UPDATE.equals(handleType)) {
+//            logger.info("表单验证--->保存后验证");
+//            String err = validateUpdate(param, globalParamData);
+//            if (CommonUtils.isNotEmpty(err)) {
+//                return HandleResult.failure(err);
+//            }
+//
+//        } else if (Constants.HandleType.TYPE_INSERT.equals(handleType) && param instanceof InsertParam) {
+//            //如果是插入,直接验证提供的数据
+//            String err = validateInsert(param, result);
+//            if (CommonUtils.isNotEmpty(err)) {
+//                return HandleResult.failure(err);
+//            }
+//        }
         return null;
     }
 
@@ -88,9 +88,13 @@ public class ValidatorInterceptor implements IOperInterceptor {
      * @return
      */
     private String validateInsert(OperParam insertParam, HandleResult handleResult) {
-        List<Map<String, Object>> lstData = findInsertRows(insertParam, handleResult);
+
         ValidatorCenter validatorCenter = insertParam.getTable().getValidatorCenter(this.lstValidator);
-        return validateData(lstData, validatorCenter);
+        if (validatorCenter.hasValidator()) {
+            List<Map<String, Object>> lstData = findInsertRows(insertParam, handleResult);
+            return validateData(lstData, validatorCenter);
+        }
+        return null;
     }
 
     /**
@@ -103,7 +107,9 @@ public class ValidatorInterceptor implements IOperInterceptor {
         //根据约定,插入成功后,传回的是插入数据的ID数据
         List<Object> lstId = (List<Object>) ((Map<String, Object>) handleResult.getLstData().get(0))
                 .get(Constants.ConstFieldName.CHANGE_KEYS_FEILD);
-        return queryByIds(lstId, param.getTable());
+        List<Object> lstNewIds = new ArrayList<>(lstId.size());
+        lstId.forEach(ids -> lstNewIds.add(((List<Object>) ids).get(1)));
+        return queryByIds(lstNewIds, param.getTable());
     }
 
     private String validateData(List<Map<String, Object>> lstData, ValidatorCenter validatorCenter) {

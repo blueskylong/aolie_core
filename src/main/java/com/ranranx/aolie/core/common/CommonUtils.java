@@ -142,6 +142,48 @@ public class CommonUtils {
         return lstResult;
     }
 
+    public static Map<String, Object> keyToLowerCase(Map<String, Object> orgMap) {
+        Map<String, Object> resultMap = new HashMap<>();
+        if (orgMap == null || orgMap.isEmpty()) {
+            return resultMap;
+        }
+        Set<Map.Entry<String, Object>> entrySet = orgMap.entrySet();
+        entrySet.forEach(entry -> {
+            resultMap.put(entry.getKey().toLowerCase(), entry.getValue());
+        });
+        return resultMap;
+    }
+
+    /**
+     * 键转小写
+     *
+     * @param lstData
+     * @return
+     */
+    public static List<Map<String, Object>> keyToLowerCase(List<Map<String, Object>> lstData) {
+        if (lstData == null || lstData.isEmpty()) {
+            return lstData;
+        }
+        List<Map<String, Object>> lstResult = new ArrayList<>();
+        lstData.forEach(row -> {
+            lstResult.add(keyToLowerCase(row));
+        });
+        return lstResult;
+    }
+
+    public static Map<String, Object> keyToUpperCase(Map<String, Object> orgMap) {
+        Map<String, Object> resultMap = new HashMap<>();
+        if (orgMap == null || orgMap.isEmpty()) {
+            return resultMap;
+        }
+        Set<Map.Entry<String, Object>> entrySet = orgMap.entrySet();
+        entrySet.forEach(entry -> {
+            resultMap.put(entry.getKey().toUpperCase(), entry.getValue());
+        });
+
+        return resultMap;
+    }
+
     public static List<Map<String, Object>> toMapAndConvertToUnderLine(List<?> lstObject) {
         List<Map<String, Object>> lstResult = new ArrayList<>();
         for (Object obj : lstObject) {
@@ -149,6 +191,7 @@ public class CommonUtils {
         }
         return lstResult;
     }
+
 
     public static Map<String, Object> toMap(Object obj, boolean isConvertToUnderLine) {
         return toMap(obj, isConvertToUnderLine, false);
@@ -319,7 +362,7 @@ public class CommonUtils {
         for (int i = 0; i < 1001; i++) {
             lstValue.add(i);
         }
-        String sql = SqlTools.genInClause("field1", lstValue, 1, mapResult);
+        String sql = SqlTools.genInClause("field1", lstValue, new int[]{1}, mapResult);
 
     }
 
@@ -383,13 +426,27 @@ public class CommonUtils {
             return null;
         }
         Object obj = map.get(fieldName);
-        if (obj == null) {
+        if (CommonUtils.isEmpty(obj)) {
             return null;
         }
         if (obj instanceof Long) {
             return (Long) obj;
         }
         return Long.parseLong(obj.toString());
+    }
+
+    public static Double getDoubleField(Map<String, Object> map, String fieldName) {
+        if (map == null || map.isEmpty()) {
+            return null;
+        }
+        Object obj = map.get(fieldName);
+        if (CommonUtils.isEmpty(obj)) {
+            return null;
+        }
+        if (obj instanceof Double) {
+            return (Double) obj;
+        }
+        return Double.parseDouble(obj.toString());
     }
 
     public static boolean isNumber(String str) {

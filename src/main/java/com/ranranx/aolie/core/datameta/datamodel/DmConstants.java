@@ -2,9 +2,9 @@ package com.ranranx.aolie.core.datameta.datamodel;
 
 /**
  * @author xxl
- *  和模型相关的常量
- * @date 2020/12/28 0028 10:26
+ * 和模型相关的常量
  * @version V0.0.1
+ * @date 2020/12/28 0028 10:26
  **/
 public class DmConstants {
     public static final class FieldType {
@@ -14,6 +14,15 @@ public class DmConstants {
         public static final String TEXT = "20";
         public static final String BINARY = "30";
         public static final String DECIMAL = "4";
+    }
+
+    public static final class MyBatisColumnType {
+        public static final String INT = "INTEGER";
+        public static final String VARCHAR = "VARCHAR";
+        public static final String DATETIME = "DATE";
+        public static final String TEXT = "VARCHAR";
+        public static final String BINARY = "INTEGER";
+        public static final String DECIMAL = "NUMERIC";
     }
 
     public static final class DispType {
@@ -53,6 +62,13 @@ public class DmConstants {
         public static final int userName = 9999;
         public static final int userBelong = 9998;
         public static final int userAccount = 9996;
+    }
+
+    /**
+     * 数据库类型
+     */
+    public enum DbType {
+        ORACLE, MYSQL
     }
 
 }

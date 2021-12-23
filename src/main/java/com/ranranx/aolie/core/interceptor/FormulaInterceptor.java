@@ -38,7 +38,6 @@ public class FormulaInterceptor implements IOperInterceptor {
     public HandleResult afterOper(OperParam param, String handleType,
                                   Map<String, Object> globalParamData, HandleResult result) {
 
-        logger.info("----->拦截器=>公式计算");
         if (!result.isSuccess()) {
             return null;
         }
@@ -227,4 +226,5 @@ public class FormulaInterceptor implements IOperInterceptor {
     public int getOrder() {
         return Ordered.BASE_ORDER + 30;
     }
+
 }

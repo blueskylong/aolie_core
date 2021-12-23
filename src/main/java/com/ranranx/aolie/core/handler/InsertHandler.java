@@ -10,6 +10,7 @@ import com.ranranx.aolie.core.ds.definition.InsertParamDefinition;
 import com.ranranx.aolie.core.exceptions.IllegalOperatorException;
 import com.ranranx.aolie.core.exceptions.InvalidConfigException;
 import com.ranranx.aolie.core.exceptions.InvalidParamException;
+import com.ranranx.aolie.core.exceptions.UnknownException;
 import com.ranranx.aolie.core.handler.param.InsertParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -75,25 +76,31 @@ public class InsertHandler<T extends InsertParam> extends BaseHandler<T> {
     private List<List<Long>> genKeys(InsertParam param) {
 
         //这里需要先生成数据的主键
-        List<Column> keyColumn = param.getTable().getKeyColumn();
-        String errTable = "表:[" + param.getTable().getTableDto().getTableId() + "]"
-                + param.getTable().getTableDto().getTableName() + " ";
+        try {
+            List<Column> keyColumn = param.getTable().getKeyColumn();
+            String errTable = "表:[" + param.getTable().getTableDto().getTableId() + "]"
+                    + param.getTable().getTableDto().getTableName() + " ";
 
-        if (keyColumn == null || keyColumn.size() != 1) {
-            throw new InvalidConfigException("主键字段配置不正确,需要一个且只有一个长整型字段");
+            if (keyColumn == null || keyColumn.size() != 1) {
+                throw new InvalidConfigException("主键字段配置不正确,需要一个且只有一个长整型字段");
+            }
+            //TODO_2 这里只处理了单一主键的情况,即要求每一张表有独立的单一主键,除了VERSION_CODE 字段.
+            if (keyColumn == null || keyColumn.size() != 1) {
+                throw new InvalidConfigException(errTable + " 只可以设置一个字段为主键字段");
+            }
+            String keyField = keyColumn.get(0).getColumnDto().getFieldName();
+            Long tableId = param.getTable().getTableDto().getTableId();
+            //更新表ID值
+            List<List<Long>> lstChangeId = new ArrayList();
+            for (Map<String, Object> row : param.getLstRows()) {
+                lstChangeId.add(genAndUpdateKey(row, tableId, keyField, errTable));
+            }
+            return lstChangeId;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new UnknownException(e.getMessage());
+
         }
-        //TODO_2 这里只处理了单一主键的情况,即要求每一张表有独立的单一主键,除了VERSION_CODE 字段.
-        if (keyColumn == null || keyColumn.size() != 1) {
-            throw new InvalidConfigException(errTable + " 只可以设置一个字段为主键字段");
-        }
-        String keyField = keyColumn.get(0).getColumnDto().getFieldName();
-        Long tableId = param.getTable().getTableDto().getTableId();
-        //更新表ID值
-        List<List<Long>> lstChangeId = new ArrayList();
-        for (Map<String, Object> row : param.getLstRows()) {
-            lstChangeId.add(genAndUpdateKey(row, tableId, keyField, errTable));
-        }
-        return lstChangeId;
     }
 
     /**
@@ -114,11 +121,12 @@ public class InsertHandler<T extends InsertParam> extends BaseHandler<T> {
      */
     private List<Long> genAndUpdateKey(Map<String, Object> row, Long tableId, String keyField, String errTable) {
         Object obj = row.get(keyField);
-        if (!CommonUtils.isNumber(obj.toString()) || Long.parseLong(obj.toString()) >= 0) {
-            throw new InvalidParamException(errTable + " 指定的值不符合预期,预期为一负数");
+        if (obj != null && (!CommonUtils.isNumber(obj.toString()) || Long.parseLong(obj.toString()) >= 0)) {
+            throw new InvalidParamException(errTable + " 指定的值不符合预期,预期为一负数,或为空");
         }
         long nextId = IdGenerator.getNextId("table_" + SessionUtils.getLoginVersion() + "_" + tableId);
         row.put(keyField, nextId);
-        return Arrays.asList(Long.parseLong(obj.toString()), nextId);
+
+        return Arrays.asList(obj == null ? -1 * IdGenerator.getNextId("") : Long.parseLong(obj.toString()), nextId);
     }
 }

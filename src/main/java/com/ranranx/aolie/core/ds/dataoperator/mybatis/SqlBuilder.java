@@ -134,7 +134,7 @@ public class SqlBuilder {
 
         }
         if (relation.hasWhere()) {
-            String where = SqlBuilder.getWhere(tableAlias, relation.getLstCriteria(), mapValue, 100);
+            String where = SqlBuilder.getWhere(tableAlias, relation.getLstCriteria(), mapValue, new int[]{100});
             if (CommonUtils.isNotEmpty(where.trim())) {
                 sb.append(" and ").append(where);
             }
@@ -169,7 +169,7 @@ public class SqlBuilder {
             sb.delete(sb.length() - 4, sb.length());
         }
         if (relation.hasWhere()) {
-            String where = SqlBuilder.getWhere(tableAlias, relation.getLstCriteria(), mapValues, 100);
+            String where = SqlBuilder.getWhere(tableAlias, relation.getLstCriteria(), mapValues, new int[]{100});
             if (CommonUtils.isNotEmpty(where.trim())) {
                 sb.append(" and ").append(where);
             }
@@ -225,15 +225,15 @@ public class SqlBuilder {
 
                 hadAddedTables.add(relation.getTableRight());
                 if (relation.hasWhere()) {
-                    String where = SqlBuilder.getWhere(tableAlias, relation.getLstCriteria(), mapValues, 100);
+                    String where = SqlBuilder.getWhere(tableAlias, relation.getLstCriteria(), mapValues, new int[]{100});
                     if (CommonUtils.isNotEmpty(where.trim())) {
                         sb.append(" and ").append(where);
                     }
                 }
                 return sb.toString();
             } else if (outTableNames.indexOf(relation.getTableRight()) != -1) {
-                String leftAlias = getTableAlign(tableAlias,relation.getTableLeft());
-                String rightAlias = getTableAlign(tableAlias,relation.getTableRight());
+                String leftAlias = getTableAlign(tableAlias, relation.getTableLeft());
+                String rightAlias = getTableAlign(tableAlias, relation.getTableRight());
                 sb.append(relation.getTableLeft()).append(SqlTools.roundSpace(leftAlias)).append(" where ");
                 for (int i = 0; i < relation.getFieldLeft().length; i++) {
                     sb.append(leftAlias).append(".").append(relation.getFieldLeft()[i]).append("=").append(rightAlias)
@@ -243,7 +243,7 @@ public class SqlBuilder {
                 tableAlias.put(relation.getTableLeft(), leftAlias);
                 hadAddedTables.add(relation.getTableLeft());
                 if (relation.hasWhere()) {
-                    String where = SqlBuilder.getWhere(tableAlias, relation.getLstCriteria(), mapValues, 100);
+                    String where = SqlBuilder.getWhere(tableAlias, relation.getLstCriteria(), mapValues, new int[]{100});
                     if (CommonUtils.isNotEmpty(where.trim())) {
                         sb.append(" and ").append(where);
                     }
@@ -339,20 +339,8 @@ public class SqlBuilder {
      * @param paramValues
      * @return
      */
-    public static String getWhere(Map<String, String> tableAlias, List<Criteria> lstCriteria, Map<String, Object> paramValues) {
-        return getWhere(tableAlias, lstCriteria, paramValues, 1);
-    }
-
-    /**
-     * 生成查询条件
-     *
-     * @param tableAlias
-     * @param lstCriteria
-     * @param paramValues
-     * @return
-     */
     public static String getWhere(Map<String, String> tableAlias, List<Criteria> lstCriteria,
-                                  Map<String, Object> paramValues, int index) {
+                                  Map<String, Object> paramValues, int[] index) {
         if (lstCriteria == null || lstCriteria.isEmpty()) {
             return "";
         }
@@ -365,7 +353,8 @@ public class SqlBuilder {
         }
         StringBuilder sb = new StringBuilder();
         for (Criteria criteria : lstCriteria) {
-            sb.append(criteria.getSqlWhere(paramValues, tableAlias, index++, criteria != lstCriteria.get(0)));
+            index[0] = index[0] + 1;
+            sb.append(criteria.getSqlWhere(paramValues, tableAlias, index, criteria != lstCriteria.get(0)));
         }
         return sb.toString();
     }
@@ -419,7 +408,7 @@ public class SqlBuilder {
      * @param outTableAlias        如果是子查询,则传入的外部表的别名,根据关联关系增加条件
      * @return
      */
-    public static SqlExp genSelectParams(QueryParamDefinition queryParamDefinition, Map<String, String> outTableAlias) {
+    public static SqlExp genSelectParams(QueryParamDefinition queryParamDefinition, Map<String, String> outTableAlias, int[] index) {
         Map<String, String> mapAlias = genTableAlias(queryParamDefinition.getTableNames());
         if (outTableAlias != null) {
             //为了不影响外部数据,这里要克隆数据
@@ -433,7 +422,7 @@ public class SqlBuilder {
         String sField = SqlBuilder.buildFields(queryParamDefinition.getFields(), mapAlias);
         String sTable = SqlBuilder.buildTables(queryParamDefinition.getLstRelation(),
                 mapAlias, queryParamDefinition.getTableNames(), mapParamValue);
-        String sWhere = SqlBuilder.getWhere(mapAlias, queryParamDefinition.getLstCriteria(), mapParamValue);
+        String sWhere = SqlBuilder.getWhere(mapAlias, queryParamDefinition.getLstCriteria(), mapParamValue, index);
         String sGroup = "";
         if (queryParamDefinition.isHasGroup()) {
             sGroup = SqlBuilder.genGroupBy(mapAlias, queryParamDefinition.getFields());

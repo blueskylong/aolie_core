@@ -51,7 +51,7 @@ public class CustomCondition extends BaseCondition {
 
     @Override
     public String getSqlWhere(Map<String, Object> mapValue, Map<String, String> alias,
-                              int index, boolean needLogic) {
+                              int[] index, boolean needLogic) {
 
         StringBuilder sb = new StringBuilder();
         String tableAlias = getAlias(alias);

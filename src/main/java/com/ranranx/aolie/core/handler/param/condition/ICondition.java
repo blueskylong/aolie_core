@@ -19,6 +19,6 @@ public interface ICondition {
      * @param mapAlias 过虑表的别名
      * @return
      */
-    String getSqlWhere(Map<String, Object> mapValue, Map<String, String> mapAlias, int index, boolean needLogic);
+    String getSqlWhere(Map<String, Object> mapValue, Map<String, String> mapAlias, int[] index, boolean needLogic);
 
 }

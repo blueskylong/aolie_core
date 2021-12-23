@@ -11,7 +11,7 @@ public class Constants {
     /**
      * 默认版本
      */
-//    public static final String DEFAULT_VERSION = "000000";
+    public static final String DEFAULT_VERSION = "000000";
 
     /**
      * 表间关系
@@ -202,6 +202,12 @@ public class Constants {
         public static final String ACCOUNT_CODE = "account_code";
         /*用户密码*/
         public static final String PASSWORD = "password";
+
+        public static final String CREATE_DATE ="create_date";
+        public static final String LAST_UPDATE_DATE ="last_update_date";
+        public static final String CREATE_USER ="create_user";
+        public static final String LAST_UPDATE_USER ="last_update_user";
+
         /**
          * 虚拟列前缀
          */
@@ -376,6 +382,49 @@ public class Constants {
         public static final String filter = "78";//条件编辑器
         public static final String formula = "80";//公式编辑器
     }
+
+    /**
+     * 固定行录入表固定列名
+     */
+    public static class FixRowConstFields {
+        public static final String isInclude = "is_include";
+        public static final String sumUp = "sum_up";
+        public static final String canDelete = "can_delete";
+        public static final String canInsert = "can_insert";
+        public static final String canEdit = "can_edit";
+        public static final String dataId = "data_id";
+
+        public static final String lvlCode = "lvl_code";
+        public static final String itemName = "item_name";
+        public static final String canInsertBefore = "can_insert_before";
+    }
+
+    /**
+     * 日志类型
+     */
+    public enum LoggerType {
+        INFO("消息", 1), ERROR("错误", 2);
+        // 成员变量
+        private String name;
+        private Integer index;
+
+        // 构造方法
+        private LoggerType(String name, int index) {
+            this.name = name;
+            this.index = index;
+        }
+
+        //接口方法
+        public String getName() {
+            return this.name;
+        }
+
+        public Integer getValue() {
+            return this.index;
+        }
+
+    }
+
 
     /**
      * 时间格式

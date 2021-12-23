@@ -24,7 +24,7 @@ public class DtoGenerator {
     }
 
     public static void main(String[] args) {
-        DTOHelper dto = new DTOHelper("com.ranranx.aolie.core.fixrow.dto", "aolie_s_fix");
+        DTOHelper dto = new DTOHelper("com.ranranx.aolie.core.logger.dto", "aolie_s_log");
 
         try {
             dto.createDto();

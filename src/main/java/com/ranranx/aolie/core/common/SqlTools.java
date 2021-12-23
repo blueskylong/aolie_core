@@ -1,5 +1,8 @@
 package com.ranranx.aolie.core.common;
 
+import com.ranranx.aolie.core.datameta.datamodel.DmConstants;
+
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -9,6 +12,18 @@ import java.util.Map;
  * @date 2020/8/18 14:12
  **/
 public class SqlTools {
+
+    private static Map<String, String> mapColTypeRelation;
+
+    static {
+        mapColTypeRelation = new HashMap<>();
+        mapColTypeRelation.put(DmConstants.FieldType.INT, DmConstants.MyBatisColumnType.INT);
+        mapColTypeRelation.put(DmConstants.FieldType.DECIMAL, DmConstants.MyBatisColumnType.DECIMAL);
+        mapColTypeRelation.put(DmConstants.FieldType.VARCHAR, DmConstants.MyBatisColumnType.VARCHAR);
+        mapColTypeRelation.put(DmConstants.FieldType.DATETIME, DmConstants.MyBatisColumnType.DATETIME);
+        mapColTypeRelation.put(DmConstants.FieldType.BINARY, DmConstants.MyBatisColumnType.DATETIME);
+        mapColTypeRelation.put(DmConstants.FieldType.TEXT, DmConstants.MyBatisColumnType.TEXT);
+    }
 
     /**
      * 生成in的条件语句
@@ -20,7 +35,7 @@ public class SqlTools {
      * @return
      */
     public static String genInClause(String field,
-                                     List<Object> values, int parIndex, Map<String, Object> paramValues) {
+                                     List<Object> values, int[] parIndex, Map<String, Object> paramValues) {
         if (values == null || values.isEmpty()) {
             return "";
         }
@@ -30,12 +45,13 @@ public class SqlTools {
         StringBuilder sb = new StringBuilder();
         String key = null;
         int index = 0;
-        parIndex = parIndex * 1000;
+
         for (int i = 0; i < times; i++) {
             sb.append(field).append(" in (");
             for (int j = 0; j < 500 && i * 500 + j < total; j++) {
                 index = i * 500 + j;
-                key = getParamKey(parIndex + index);
+                parIndex[0] = parIndex[0] + 1;
+                key = getParamKey(parIndex[0]);
                 sb.append("#{").append(key).append("},");
                 paramValues.put(key, values.get(index));
             }
@@ -43,6 +59,15 @@ public class SqlTools {
             sb.append(") or ");
         }
         return "(" + sb.substring(0, sb.length() - 3) + ")";
+    }
+
+    /**
+     * 取得 对应的JDBC的类型
+     * @param fieldType
+     * @return
+     */
+    public static String getMyBatisColType(String fieldType) {
+        return mapColTypeRelation.get(fieldType);
     }
 
     /**
@@ -55,7 +80,7 @@ public class SqlTools {
      * @return
      */
     public static String genNotInClause(String field,
-                                        List<Object> values, int parIndex, Map<String, Object> paramValues) {
+                                        List<Object> values, int[] parIndex, Map<String, Object> paramValues) {
         if (values == null) {
             return "";
         }
@@ -65,12 +90,13 @@ public class SqlTools {
         StringBuilder sb = new StringBuilder();
         String key = null;
         int index = 0;
-        parIndex = parIndex * 1000;
+
         for (int i = 0; i < times; i++) {
             sb.append(field).append(" not in (");
             for (int j = 0; j < 500 && i * 500 + j < total; j++) {
                 index = i * 500 + j;
-                key = getParamKey(parIndex + index);
+                parIndex[0] = parIndex[0] + 1;
+                key = getParamKey(parIndex[0]);
                 sb.append("#{").append(key).append("},");
                 paramValues.put(key, values.get(index));
             }

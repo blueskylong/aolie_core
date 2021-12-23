@@ -30,7 +30,7 @@ public class Exists extends BaseCondition {
     }
 
     @Override
-    public String getSqlWhere(Map<String, Object> mapValue, Map<String, String> alias, int index, boolean needLogic) {
+    public String getSqlWhere(Map<String, Object> mapValue, Map<String, String> alias, int[] index, boolean needLogic) {
         QueryParam param = (QueryParam) value1;
         List<String> lstTables = new ArrayList<>();
         if (alias != null && !alias.isEmpty()) {
@@ -40,7 +40,7 @@ public class Exists extends BaseCondition {
         Field field = new Field();
         field.setFieldName("1");
         paramDefinition.setFields(Arrays.asList(field));
-        SqlExp sqlExp = SqlBuilder.genSelectParams(paramDefinition, alias);
+        SqlExp sqlExp = SqlBuilder.genSelectParams(paramDefinition, alias, index);
 
         mapValue.putAll(sqlExp.getParamValues());
         String andOrStr = (needLogic ? " " + andOr + "  " : "");

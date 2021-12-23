@@ -26,12 +26,12 @@ public class NotIn extends BaseCondition {
 
     @Override
     public String getSqlWhere(Map<String, Object> mapValue, Map<String, String> alias,
-                              int index, boolean needLogic) {
+                              int[] index, boolean needLogic) {
         String andOrStr = (needLogic ? " " + andOr + "  " : "");
         return andOrStr + genInString(mapValue, alias, index);
     }
 
-    private String genInString(Map<String, Object> mapValue, Map<String, String> alias, int index) {
+    private String genInString(Map<String, Object> mapValue, Map<String, String> alias, int[] index) {
         return SqlTools.genNotInClause(getFullFieldName(alias), (java.util.List<Object>) value1, index, mapValue);
     }
 }

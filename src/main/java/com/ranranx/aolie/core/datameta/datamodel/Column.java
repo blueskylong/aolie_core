@@ -13,6 +13,7 @@ import java.util.Map;
  * @date 2020/8/5 17:34
  **/
 public class Column implements Serializable {
+
     private ColumnDto columnDto;
     private Reference reference;
 
@@ -86,5 +87,7 @@ public class Column implements Serializable {
         String fieldType = this.columnDto.getFieldType();
         return fieldType.equals(DmConstants.FieldType.DATETIME);
     }
+
+
 
 }

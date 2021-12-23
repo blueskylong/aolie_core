@@ -3,6 +3,7 @@ package com.ranranx.aolie.core.datameta.datamodel;
 import com.ranranx.aolie.core.common.CommonUtils;
 import com.ranranx.aolie.core.common.Constants;
 import com.ranranx.aolie.core.common.IdGenerator;
+import com.ranranx.aolie.core.common.SqlTools;
 import com.ranranx.aolie.core.datameta.datamodel.validator.IValidator;
 import com.ranranx.aolie.core.datameta.datamodel.validator.ValidatorCenter;
 import com.ranranx.aolie.core.datameta.dto.ColumnDto;
@@ -77,19 +78,31 @@ public class TableInfo {
         if (this.lstKeyColumn != null) {
             return this.lstKeyColumn;
         }
-        this.lstKeyColumn = new ArrayList<>();
+
         if (this.lstColumn == null || this.lstColumn.isEmpty()) {
+            this.lstKeyColumn = new ArrayList<>();
             return null;
         }
-        this.lstColumn.forEach(column -> {
-            if (column.getColumnDto().getIsKey() != null && column.getColumnDto().getIsKey() == 1) {
-                //去掉版本字段
-                if (column.getColumnDto().getFieldName().equalsIgnoreCase(Constants.FixColumnName.VERSION_CODE)) {
-                    return;
-                }
-                lstKeyColumn.add(column);
+        synchronized (TableInfo.class) {
+            if (this.lstKeyColumn != null) {
+                return this.lstKeyColumn;
             }
-        });
+
+            for (Column column : lstColumn) {
+                if (column.getColumnDto().getIsKey() != null && column.getColumnDto().getIsKey() == 1) {
+                    //去掉版本字段
+                    if (column.getColumnDto().getFieldName().equalsIgnoreCase(Constants.FixColumnName.VERSION_CODE)) {
+                        continue;
+                    }
+                    if (this.lstKeyColumn == null) {
+                        this.lstKeyColumn = new ArrayList<>();
+                    }
+                    lstKeyColumn.add(column);
+                }
+            }
+
+        }
+
         return lstKeyColumn;
     }
 
@@ -441,6 +454,16 @@ public class TableInfo {
             }
         }
         return null;
+
+    }
+
+    @Transient
+    public String getColumnMybatisType(String columnName) {
+        Column col = this.findColumnByName(columnName);
+        if (col == null) {
+            return null;
+        }
+        return SqlTools.getMyBatisColType(col.getColumnDto().getFieldType());
 
     }
 

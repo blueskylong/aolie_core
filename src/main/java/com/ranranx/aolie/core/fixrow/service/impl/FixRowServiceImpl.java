@@ -25,7 +25,10 @@ import com.ranranx.aolie.core.handler.param.QueryParam;
 import com.ranranx.aolie.core.handler.param.UpdateParam;
 import com.ranranx.aolie.core.service.BaseDbService;
 import com.ranranx.aolie.core.service.UIService;
-import com.ranranx.aolie.core.tree.*;
+import com.ranranx.aolie.core.tree.LevelProvider;
+import com.ranranx.aolie.core.tree.Node;
+import com.ranranx.aolie.core.tree.SysCodeRule;
+import com.ranranx.aolie.core.tree.TreeNodeHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -254,9 +257,9 @@ public class FixRowServiceImpl extends BaseDbService implements FixRowService {
      * @param version
      * @return
      */
-    public Node getFixDataAsTree(Long fixId, String version) {
+    public Node<FixData> getFixDataAsTree(Long fixId, String version) {
         String key = CommonUtils.makeKey(fixId.toString(), version);
-        Node node = mapFixDataAsNode.get(key);
+        Node<FixData> node = mapFixDataAsNode.get(key);
         if (node == null) {
             node = makeFixDataToNode(fixId, version);
             mapFixDataAsNode.put(key, node);
@@ -264,11 +267,15 @@ public class FixRowServiceImpl extends BaseDbService implements FixRowService {
         return node;
     }
 
+    /**
+     * 生成固定行明细设置的树状结构
+     *
+     * @param fixId
+     * @param version
+     * @return
+     */
     private Node<FixData> makeFixDataToNode(Long fixId, String version) {
-        FixData data = new FixData();
-        data.setFixId(fixId);
-        data.setVersionCode(version);
-        List<FixData> lstData = queryList(data, Constants.DEFAULT_DM_SCHEMA);
+        List<FixData> lstData = findFixDataDto(fixId, version);
         if (lstData == null || lstData.isEmpty()) {
             return null;
         }
@@ -280,6 +287,40 @@ public class FixRowServiceImpl extends BaseDbService implements FixRowService {
         }
 
     }
+
+    /**
+     * 查询固定行明细的设置
+     *
+     * @param fixId
+     * @param version
+     * @return
+     */
+    private List<FixData> findFixDataDto(Long fixId, String version) {
+        FixData data = new FixData();
+        data.setFixId(fixId);
+        data.setVersionCode(version);
+        return queryList(data, Constants.DEFAULT_DM_SCHEMA);
+
+
+    }
+
+
+    /**
+     * 生成ＩＤ到
+     *
+     * @param fixId
+     * @param version
+     * @return
+     */
+    private Map<Long, FixData> makeFixDataMap(Long fixId, String version) {
+        List<FixData> lstDto = findFixDataDto(fixId, version);
+        Map<Long, FixData> mapFixData = new HashMap<>();
+        for (FixData fixData : lstDto) {
+            mapFixData.put(fixData.getDataId(), fixData);
+        }
+        return mapFixData;
+    }
+
 
     private void addFixRelation(List<TableDto> lstTable, String version) {
         for (TableDto dto : lstTable) {
@@ -894,10 +935,6 @@ public class FixRowServiceImpl extends BaseDbService implements FixRowService {
 
     }
 
-    private void calcFormulaAndSumUp(Node<Map<String, Object>> nodeBusi, Node<FixData> nodeSet) {
-
-    }
-
     /**
      * 根据ID查询节点,
      *
@@ -1049,7 +1086,7 @@ public class FixRowServiceImpl extends BaseDbService implements FixRowService {
             return HandleResult.failure(err);
         }
         //收集数据,准备计算
-        calcFormula(lstRow);
+        calcRollupFormula(lstRow, tableBus, fixId, version);
 
         //执行保存
         return modelApi.saveRangeRows(lstRow, tableBus.getTableDto().getTableId(), mapKey, version);
@@ -1091,9 +1128,135 @@ public class FixRowServiceImpl extends BaseDbService implements FixRowService {
         return null;
     }
 
+    /**
+     * 这里只计算向上汇总的公式
+     *
+     * @param lstRow
+     * @param fixId
+     * @param version
+     * @return
+     */
+    private void calcRollupFormula(List<Map<String, Object>> lstRow, TableInfo tableInfo, Long fixId, String version) {
+        if (lstRow == null || lstRow.isEmpty()) {
+            return;
+        }
+        List<String> lstCalcField = findRollupCols(tableInfo);
+        Node<Map<String, Object>> nodeBusiData
+                = TreeNodeHelper.getInstance().generateByCode(lstRow, Constants.FixRowConstFields.lvlCode
+                , Constants.FixRowConstFields.lvlCode, Constants.FixRowConstFields.itemName,
+                SysCodeRule.createDefault());
+        //取得固定设置信息
+        Map<Long, FixData> mapFixData = makeFixDataMap(fixId, version);
+        //找到所有末级节点
+        List<Node<Map<String, Object>>> lstNeedToCalc = nodeBusiData.getLeafNodes();
+        Map<String, Object> mapAllReady = new HashMap<>();
+        while (!lstNeedToCalc.isEmpty()) {
+            lstNeedToCalc = calcParentNode(lstNeedToCalc, mapAllReady, lstCalcField, mapFixData);
+        }
+    }
 
-    private void calcFormula(List<Map<String, Object>> lstRow) {
+    private List<Node<Map<String, Object>>> calcParentNode(List<Node<Map<String, Object>>> lstLeafNode,
+                                                           Map<String, Object> mapAllReady,
+                                                           List<String> lstFieldToRollup,
+                                                           Map<Long, FixData> mapFixData) {
+        List<Node<Map<String, Object>>> lstReserveNode = new ArrayList<>();
+        //处理所有当前要处理的节点的,
+        while (!lstLeafNode.isEmpty()) {
+            //查找到此节点的上级节点
+            Node<Map<String, Object>> node = lstLeafNode.remove(0);
+            //如果没有父亲则结束了
+            Node<Map<String, Object>> nodeParent = node.getParent();
+            Map<String, Object> mapParent = nodeParent.getUserObject();
+            if (mapParent == null) {
+                continue;
+            }
+            if (mapAllReady.containsKey(CommonUtils.getStringField(mapParent, Constants.FixRowConstFields.lvlCode))) {
+                continue;
+            }
+            //检查 子节点是不是都已处理过,并试图计算
+            Node<Map<String, Object>>[] children = nodeParent.getChildren();
+            boolean isPassCheck = true;
+            //初始化值
+            Double[] lstValue = new Double[lstFieldToRollup.size()];
+            for (int i = 0; i < lstValue.length; i++) {
+                lstValue[i] = 0D;
+            }
+            for (Node<Map<String, Object>> nodeSub : children) {
+                //检查此子节点是否已处理过
+                lstLeafNode.remove(nodeSub);
+                if (!isPassCheck) {
+                    //如果这个节点的不能处理，则下面的不再做
+                    continue;
+                }
+                if (nodeSub.getChildrenCount() > 0
+                        && !mapAllReady.containsKey(
+                        CommonUtils.getStringField(nodeSub.getUserObject(), Constants.FixRowConstFields.lvlCode))) {
+                    //如果子节点没有完全处理完成，则丢到下一次处理
+                    lstReserveNode.add(nodeSub);
+                    isPassCheck = false;
+                }
+                //判断是不是其中数据
+                if (isInclude(nodeSub.getUserObject(), mapFixData)) {
+                    continue;
+                }
+                //收集数据，并加和
+                sumUp(lstFieldToRollup, nodeSub, lstValue);
+            }
+            if (isPassCheck) {
+                //更新父节点数据，并放入完成行列
+                for (int i = 0; i < lstFieldToRollup.size(); i++) {
+                    String field = lstFieldToRollup.get(i);
+                    mapParent.put(field, lstValue[i]);
+                }
+                mapAllReady.put(CommonUtils.getStringField(mapParent, Constants.FixRowConstFields.lvlCode), null);
+                //加入到下一次的待计算
+                lstReserveNode.add(nodeParent);
+            }
+        }
+        return lstReserveNode;
+    }
 
+    private void sumUp(List<String> lstFieldToRollup, Node<Map<String, Object>> nodeSub, Double[] lstValue) {
+        for (int i = 0; i < lstFieldToRollup.size(); i++) {
+            String field = lstFieldToRollup.get(i);
+            Double value = CommonUtils.getDoubleField(nodeSub.getUserObject(), field);
+            if (value == null) {
+                value = 0D;
+            }
+            lstValue[i] += value;
+        }
+    }
+
+    /**
+     * 是否其中数
+     *
+     * @param map
+     * @param mapFixData
+     * @return
+     */
+    private boolean isInclude(Map<String, Object> map, Map<Long, FixData> mapFixData) {
+        Long dataId = CommonUtils.getLongField(map, Constants.FixRowConstFields.dataId);
+        if (dataId == null) {
+            return false;
+        }
+        return CommonUtils.isTrue(mapFixData.get(dataId).getIsInclude());
+    }
+
+    /**
+     * 取得向上汇总的列
+     *
+     * @param tableInfo
+     * @return
+     */
+    private List<String> findRollupCols(TableInfo tableInfo) {
+        List<String> result = new ArrayList<>();
+        List<Column> lstColumn = tableInfo.getLstColumn();
+        for (Column column : lstColumn) {
+            if (CommonUtils.isTrue(column.getColumnDto().getFixRollUp())) {
+                result.add(column.getColumnDto().getFieldName());
+            }
+        }
+        return result;
     }
 
     /**

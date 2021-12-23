@@ -8,9 +8,9 @@ import java.util.*;
 
 /**
  * @author xxl
- *  验证中心, 每一张表, 可以共用一个实例, 线程安全
- * @date 2020/8/13 20:10
+ * 验证中心, 每一张表, 可以共用一个实例, 线程安全
  * @version V0.0.1
+ * @date 2020/8/13 20:10
  **/
 public class ValidatorCenter {
 
@@ -75,6 +75,10 @@ public class ValidatorCenter {
             }
         }
         return sb.toString();
+    }
+
+    public boolean hasValidator() {
+        return this.mapValidator != null && !this.mapValidator.isEmpty();
     }
 
     public String validateField(String fieldName, Object value, Map<String, Object> row,

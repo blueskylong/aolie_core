@@ -1,7 +1,7 @@
 package com.ranranx.aolie.core.common;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.sql.Date;
 
 /**
  * @author xxl

@@ -2,6 +2,7 @@ mybatis:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
     map-underscore-to-camel-case: on
+    jdbc-type-for-null: 'null'
   type-handlers-package: com.ranranx.aolie.core.ds.dataoperator.mybatis
 logging:
   pattern:
@@ -16,7 +17,7 @@ pagehelper:
 aolie:
   uploadpath: "g:/affix_location"
 server:
-  port: 8082
+  port: 8080
 spring:
   jackson:
     # 全局设置@JsonFormat的格式pattern

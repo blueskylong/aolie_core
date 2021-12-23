@@ -326,6 +326,13 @@ public class DataModelService {
      * @return
      */
     public List<String> findDefaultDBTablesNotInSchema(Long schemaId, String version) {
+        if (factory.getDataOperatorBySchema(schemaId, version).getDbType().equals(DmConstants.DbType.ORACLE)) {
+            return findDefaultDBTablesNotInSchemaForOracle(schemaId, version);
+        }
+        return findDefaultDBTablesNotInSchemaMySql(schemaId, version);
+    }
+
+    private List<String> findDefaultDBTablesNotInSchemaMySql(Long schemaId, String version) {
         QueryParamDefinition definition = new QueryParamDefinition();
         definition.setTableNames("information_schema.tables");
         List<Field> lstField = new ArrayList<>();
@@ -346,7 +353,6 @@ public class DataModelService {
             }
         }
 
-
         List<Map<String, Object>> lstData = factory.getDataOperatorBySchema(schemaId, version).select(definition);
         if (lstData == null || lstData.isEmpty()) {
             return new ArrayList<>();
@@ -354,6 +360,48 @@ public class DataModelService {
         List<String> lst = new ArrayList<>();
         for (Map<String, Object> map : lstData) {
             lst.add(map.get("table_name").toString());
+        }
+        return lst;
+    }
+
+    /**
+     * 查找没有被引用的表信息,这里只针对MYSql做的查询
+     *
+     * @param schemaId
+     * @param version
+     * @return
+     */
+    private List<String> findDefaultDBTablesNotInSchemaForOracle(Long schemaId, String version) {
+        QueryParamDefinition definition = new QueryParamDefinition();
+        definition.setTableNames("user_tables");
+        List<Field> lstField = new ArrayList<>();
+        Field field = new Field();
+        field.setFieldName("table_name");
+        field.setTableName("user_tables");
+        lstField.add(field);
+        definition.setFields(lstField);
+        List<String> schemaTableNames = findSchemaTableNames(schemaId, version);
+        if (!schemaTableNames.isEmpty()) {
+            for (int i = 0; i < schemaTableNames.size(); i++) {
+                schemaTableNames.set(i, schemaTableNames.get(i).toUpperCase());
+            }
+            definition.getSingleCriteria().andNotIn("user_tables", "table_name", schemaTableNames);
+        }
+        Criteria criteria = definition.getSingleCriteria();
+        if (EXCLUDE_TABLE_PREFIX != null) {
+            for (int i = 0; i < EXCLUDE_TABLE_PREFIX.length; i++) {
+                criteria.andNotStartWith("user_tables", "table_name", EXCLUDE_TABLE_PREFIX[i].toUpperCase());
+            }
+        }
+
+
+        List<Map<String, Object>> lstData = factory.getDataOperatorBySchema(schemaId, version).select(definition);
+        if (lstData == null || lstData.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<String> lst = new ArrayList<>();
+        for (Map<String, Object> map : lstData) {
+            lst.add(map.get("table_name").toString().toLowerCase());
         }
         return lst;
     }
@@ -383,6 +431,21 @@ public class DataModelService {
      */
     public List<ColumnDto> findTableFieldAsColumnDto(String tableName) {
 
+        if(factory.getDefaultDataOperator().getDbType().equals(DmConstants.DbType.ORACLE)){
+            return findTableFieldAsColumnDtoOracle(tableName);
+        }
+        return findTableFieldAsColumnDtoMySql(tableName);
+    }
+    /**
+     * 查询一张表的字段信息,并生成DTO
+     * <p>
+     * TODO 这里只提供了MySql的生成方式
+     *
+     * @param tableName
+     * @return
+     */
+    private List<ColumnDto> findTableFieldAsColumnDtoMySql(String tableName) {
+
         QueryParamDefinition definition = new QueryParamDefinition();
         definition.setTableNames("information_schema.COLUMNS");
         definition.appendCriteria().andEqualTo("information_schema.COLUMNS", "table_name", tableName)
@@ -397,6 +460,28 @@ public class DataModelService {
         }
         return lstDto;
     }
+    /**
+     * 查询一张表的字段信息,并生成DTO
+     * <p>
+     * TODO 这里只提供了MySql的生成方式
+     *
+     * @param tableName
+     * @return
+     */
+    private List<ColumnDto> findTableFieldAsColumnDtoOracle(String tableName) {
+
+        QueryParamDefinition definition = new QueryParamDefinition();
+        definition.setTableNames("cols");
+        definition.appendCriteria().andEqualTo("cols", "table_name", tableName.toUpperCase());
+        List<Map<String, Object>> lstResult = factory.getDefaultDataOperator().select(definition);
+        List<ColumnDto> lstDto = new ArrayList<>();
+        if (lstResult != null && !lstResult.isEmpty()) {
+            for (Map<String, Object> map : lstResult) {
+                lstDto.add(createColumnDtoFromOracle(map));
+            }
+        }
+        return lstDto;
+    }
 
     private ColumnDto createColumnDto(Map<String, Object> map) {
         ColumnDto dto = new ColumnDto();
@@ -406,6 +491,16 @@ public class DataModelService {
         dto.setNullable("YES".equals(CommonUtils.getStringField(map, "IS_NULLABLE")) ? new Byte((byte) 1) : new Byte((byte) 0));
         dto.setDefaultValue(CommonUtils.getStringField(map, "COLUMN_DEFAULT"));
         dto.setPrecisionNum(CommonUtils.getIntegerField(map, "NUMERIC_SCALE"));
+        dto.setTitle(dto.getFieldName());
+        return dto;
+    }
+    private ColumnDto createColumnDtoFromOracle(Map<String, Object> map) {
+        ColumnDto dto = new ColumnDto();
+        dto.setFieldName(CommonUtils.getStringField(map, "column_name").toLowerCase());
+        dto.setFieldType(factory.getDefaultDataOperator().convertColType(CommonUtils.getStringField(map, "data_type")));
+        dto.setLength(CommonUtils.getIntegerField(map, "data_length"));
+        dto.setNullable("Y".equals(CommonUtils.getStringField(map, "nullable")) ? new Byte((byte) 1) : new Byte((byte) 0));
+        dto.setPrecisionNum(CommonUtils.getIntegerField(map, "data_scale"));
         dto.setTitle(dto.getFieldName());
         return dto;
     }

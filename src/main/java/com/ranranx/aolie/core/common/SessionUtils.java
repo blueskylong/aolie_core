@@ -38,7 +38,7 @@ public class SessionUtils {
 
     public static String getLoginVersion() {
         if (getLoginUser() == null) {
-            return null;
+            return Constants.DEFAULT_VERSION;
         }
         return getLoginUser().getVersionCode();
     }

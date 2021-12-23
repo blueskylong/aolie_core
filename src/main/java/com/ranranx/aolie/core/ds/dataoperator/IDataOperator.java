@@ -1,6 +1,7 @@
 package com.ranranx.aolie.core.ds.dataoperator;
 
 import com.ranranx.aolie.core.common.CommonUtils;
+import com.ranranx.aolie.core.datameta.datamodel.DmConstants;
 import com.ranranx.aolie.core.datameta.dto.DataOperatorDto;
 import com.ranranx.aolie.core.ds.definition.DeleteParamDefinition;
 import com.ranranx.aolie.core.ds.definition.InsertParamDefinition;
@@ -15,9 +16,9 @@ import java.util.Map;
 
 /**
  * @author xxl
- *  数据源上一层接口, 屏蔽具体数据库的操作 Handler只会调用对应的DataOperator来操作数据库
- * @date 2020/8/4 13:33
+ * 数据源上一层接口, 屏蔽具体数据库的操作 Handler只会调用对应的DataOperator来操作数据库
  * @version V1.0
+ * @date 2020/8/4 13:33
  **/
 public interface IDataOperator {
     final Map<String, String> mapMysqlFieldTypeRelation = new HashMap<>();
@@ -142,8 +143,16 @@ public interface IDataOperator {
 
     /**
      * 转换数据库类型到系统
+     *
      * @param colType
      * @return
      */
     String convertColType(String colType);
+
+    /**
+     * 取得数据库的类型
+     *
+     * @return
+     */
+    DmConstants.DbType getDbType();
 }

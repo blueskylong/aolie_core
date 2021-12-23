@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 public class IdGenerator {
     private static IdWorker worker = new IdWorker(1, 1, 1);
 
-    public static long getNextId(String type) {
+    public static synchronized long getNextId(String type) {
         return IdGenerator.worker.nextId();
     }
 
